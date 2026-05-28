@@ -69,7 +69,7 @@ def _default_creds():
 
     sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
     if sa_json:
-        info = json.loads(sa_json)
+        info = json.loads(sa_json.lstrip("﻿"))  # UTF-8 BOM を除去
         return Credentials.from_service_account_info(info, scopes=SCOPES), None
 
     path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
