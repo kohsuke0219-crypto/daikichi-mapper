@@ -1,15 +1,16 @@
-"""国土数値情報 N03（行政区域）GML を GeoJSON に変換し、人口データを結合する。
+"""国土数値情報 N03（行政区域）GeoJSON と人口データを4都県分結合する。
 
-1. MLIT から東京都の N03 GML.zip をダウンロード
-2. GML をパースして市区町村ポリゴン + N03_007（行政区域コード）を抽出
-3. tokyo_population.csv の小地域データを市区町村レベルに集計
+1. MLIT から 東京(13)・神奈川(14)・埼玉(11)・千葉(12) の N03 GML.zip をダウンロード
+2. ZIP 内 GeoJSON を抽出して市区町村ポリゴンを取得
+3. 4pref_population.csv の小地域データを市区町村レベルに集計
 4. GeoJSON の properties に人口データを埋め込んで保存
 
-出力: population/tokyo_ward_population.geojson
+出力: docs/data/ward_population.geojson
 """
 import csv
 import io
 import json
+import time
 import zipfile
 from pathlib import Path
 
@@ -19,9 +20,11 @@ import requests
 # 設定
 # ---------------------------------------------------------------------------
 
-MLIT_URL = "https://nlftp.mlit.go.jp/ksj/gml/data/N03/N03-2023/N03-20230101_13_GML.zip"
-POP_CSV = Path(__file__).parent / "tokyo_population.csv"
-OUT_GEOJSON = Path(__file__).parent / "tokyo_ward_population.geojson"
+MLIT_BASE = "https://nlftp.mlit.go.jp/ksj/gml/data/N03/N03-2023/N03-20230101_{pref_code}_GML.zip"
+PREF_CODES = {"東京都": "13", "神奈川県": "14", "埼玉県": "11", "千葉県": "12"}
+
+POP_CSV   = Path(__file__).parent / "4pref_population.csv"
+OUT_GEOJSON = Path(__file__).parents[1] / "docs" / "data" / "ward_population.geojson"
 
 # ---------------------------------------------------------------------------
 # 人口データを市区町村レベルに集計
@@ -29,7 +32,7 @@ OUT_GEOJSON = Path(__file__).parent / "tokyo_ward_population.geojson"
 
 def load_ward_population(csv_path: Path) -> dict[str, dict]:
     """小地域CSVを読み込み、ward_code (5桁) に集計して返す。"""
-    ward = {}
+    ward: dict[str, dict] = {}
     with open(csv_path, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
             key = row["key_code"]
@@ -37,12 +40,8 @@ def load_ward_population(csv_path: Path) -> dict[str, dict]:
                 continue
             ward_code = key[:5]
             if ward_code not in ward:
-                ward[ward_code] = {
-                    "total_pop": 0,
-                    "women_total": 0,
-                    "women_40plus": 0,
-                }
-            ward[ward_code]["total_pop"]  += int(row["total_pop"])
+                ward[ward_code] = {"total_pop": 0, "women_total": 0, "women_40plus": 0}
+            ward[ward_code]["total_pop"]   += int(row["total_pop"])
             ward[ward_code]["women_total"] += int(row["women_total"])
             ward[ward_code]["women_40plus"] += int(row["women_40plus"])
     print(f"  人口集計: {len(ward)} 市区町村")
@@ -50,32 +49,25 @@ def load_ward_population(csv_path: Path) -> dict[str, dict]:
 
 
 # ---------------------------------------------------------------------------
-# GML をダウンロード & パース
+# MLIT GeoJSON のダウンロード & 抽出
 # ---------------------------------------------------------------------------
 
-def download_gml() -> bytes:
-    print(f"  ダウンロード: {MLIT_URL}")
-    r = requests.get(MLIT_URL, timeout=180, stream=True)
+def fetch_pref_features(pref_name: str, pref_code: str) -> list[dict]:
+    """1都県分の行政区域フィーチャーリストを返す。"""
+    url = MLIT_BASE.format(pref_code=pref_code)
+    print(f"  [{pref_name}] ダウンロード: {url}")
+    r = requests.get(url, timeout=180, stream=True)
     r.raise_for_status()
-    data = r.content
-    print(f"  取得完了: {len(data)//1024} KB")
-    return data
+    zip_bytes = r.content
+    print(f"  [{pref_name}] {len(zip_bytes)//1024} KB 取得")
 
-
-def extract_geojson_from_zip(zip_bytes: bytes) -> list[dict]:
-    """ZIP 内の GeoJSON ファイルを直接読み込んで features を返す。"""
     with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
-        names = zf.namelist()
-        print(f"  ZIP 内ファイル: {names}")
-        geojson_files = [n for n in names if n.lower().endswith(".geojson")]
+        geojson_files = [n for n in zf.namelist() if n.lower().endswith(".geojson")]
         if not geojson_files:
-            raise FileNotFoundError(f"ZIP 内に GeoJSON ファイルが見つかりません: {names}")
+            raise FileNotFoundError(f"{pref_name}: ZIP 内に GeoJSON なし ({zf.namelist()})")
         raw = zf.read(geojson_files[0])
 
-    print(f"  GeoJSON サイズ: {len(raw)//1024} KB")
     data = json.loads(raw.decode("utf-8"))
-
-    # properties を整形: N03_007 → code, N03_001 → pref, N03_004 → city
     features = []
     for f in data.get("features", []):
         p = f.get("properties", {})
@@ -89,7 +81,7 @@ def extract_geojson_from_zip(zip_bytes: bytes) -> list[dict]:
         }
         features.append(f)
 
-    print(f"  フィーチャー数: {len(features)}")
+    print(f"  [{pref_name}] {len(features)} フィーチャー")
     return features
 
 
@@ -97,12 +89,11 @@ def extract_geojson_from_zip(zip_bytes: bytes) -> list[dict]:
 # GeoJSON の組み立て & 保存
 # ---------------------------------------------------------------------------
 
-def build_and_save(features: list[dict], ward_pop: dict[str, dict]) -> None:
-    """population データを features の properties にマージして GeoJSON を保存。"""
-    # code が重複する場合（飛び地など）は最初だけ使う
+def build_and_save(all_features: list[dict], ward_pop: dict[str, dict]) -> None:
+    # code 重複排除（飛び地は最初のポリゴンだけ使用）
     seen: set[str] = set()
     deduped: list[dict] = []
-    for f in features:
+    for f in all_features:
         code = f["properties"]["code"]
         if code in seen:
             continue
@@ -114,20 +105,47 @@ def build_and_save(features: list[dict], ward_pop: dict[str, dict]) -> None:
     for f in deduped:
         code = f["properties"]["code"]
         pop = ward_pop.get(code, {})
-        f["properties"]["total_pop"] = pop.get("total_pop", 0)
+        f["properties"]["total_pop"]   = pop.get("total_pop", 0)
         f["properties"]["women_40plus"] = pop.get("women_40plus", 0)
         f["properties"]["women_total"] = pop.get("women_total", 0)
         if pop:
             matched += 1
 
-    print(f"  マージ: {matched}/{len(deduped)} 市区町村にデータが対応")
+    print(f"  マージ: {matched}/{len(deduped)} 市区町村")
 
-    geojson = {"type": "FeatureCollection", "features": deduped}
+    OUT_GEOJSON.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_GEOJSON, "w", encoding="utf-8") as f:
-        json.dump(geojson, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump({"type": "FeatureCollection", "features": deduped},
+                  f, ensure_ascii=False, separators=(",", ":"))
 
     size = OUT_GEOJSON.stat().st_size
-    print(f"  GeoJSON 保存: {OUT_GEOJSON}  ({size//1024} KB, {len(deduped)} features)")
+    print(f"  保存: {OUT_GEOJSON}  ({size//1024} KB, {len(deduped)} features)")
+
+
+# ---------------------------------------------------------------------------
+# 座標精度削減（ファイルサイズ削減）
+# ---------------------------------------------------------------------------
+
+def round_coords(obj, precision=4):
+    if isinstance(obj, list):
+        if obj and isinstance(obj[0], (int, float)):
+            return [round(v, precision) for v in obj]
+        return [round_coords(item, precision) for item in obj]
+    return obj
+
+
+def simplify_geojson() -> None:
+    with open(OUT_GEOJSON, encoding="utf-8") as f:
+        data = json.load(f)
+    before = OUT_GEOJSON.stat().st_size
+    for feat in data["features"]:
+        geom = feat.get("geometry")
+        if geom:
+            geom["coordinates"] = round_coords(geom["coordinates"])
+    with open(OUT_GEOJSON, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+    after = OUT_GEOJSON.stat().st_size
+    print(f"  簡略化: {before//1024} KB → {after//1024} KB")
 
 
 # ---------------------------------------------------------------------------
@@ -135,26 +153,24 @@ def build_and_save(features: list[dict], ward_pop: dict[str, dict]) -> None:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("=== 行政区域 GeoJSON 構築 ===")
+    print("=== 4都県 行政区域 GeoJSON 構築 ===")
 
     print("\n[1] 人口データ集計")
     ward_pop = load_ward_population(POP_CSV)
 
-    print("\n[2] MLIT N03 GML ダウンロード")
-    zip_bytes = download_gml()
+    print("\n[2] MLIT N03 GeoJSON ダウンロード")
+    all_features: list[dict] = []
+    for pref_name, pref_code in PREF_CODES.items():
+        features = fetch_pref_features(pref_name, pref_code)
+        all_features.extend(features)
+        time.sleep(1)
 
-    print("\n[3] GeoJSON 抽出")
-    features = extract_geojson_from_zip(zip_bytes)
+    print(f"\n  合計フィーチャー: {len(all_features)}")
 
-    if not features:
-        raise RuntimeError("フィーチャーが見つかりませんでした。GML 構造を確認してください")
+    print("\n[3] GeoJSON 構築 & 保存")
+    build_and_save(all_features, ward_pop)
 
-    # 先頭 3 件のプロパティを確認
-    print("\n  先頭 3 フィーチャー:")
-    for f in features[:3]:
-        print(f"    {f['properties']}")
-
-    print("\n[4] GeoJSON 構築 & 保存")
-    build_and_save(features, ward_pop)
+    print("\n[4] 座標精度削減")
+    simplify_geojson()
 
     print("\n完了。")

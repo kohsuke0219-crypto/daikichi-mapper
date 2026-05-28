@@ -160,7 +160,7 @@
 
   async function loadAll() {
     const [geoData, storeData] = await Promise.all([
-      fetch('data/tokyo_ward_population.geojson').then(r => r.json()),
+      fetch('data/ward_population.geojson').then(r => r.json()),
       fetch('data/stores.json').then(r => r.json()),
     ]);
 

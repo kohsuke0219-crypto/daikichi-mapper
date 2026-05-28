@@ -1,9 +1,6 @@
-"""令和2年国勢調査 東京都 小地域 人口データ取得スクリプト。
+"""令和2年国勢調査 小地域 人口データ取得スクリプト（東京・神奈川・埼玉・千葉）。
 
-statsDataId: 8003006792
-  = 年齢（5歳階級、4区分）別、男女別人口 東京都（searchKind=2, 令和2年国勢調査）
-
-出力: population/tokyo_population.csv
+出力: population/4pref_population.csv
   - key_code     : 地域コード（9桁以上 = 町丁字レベル）
   - area_name    : 地域名
   - total_pop    : 総人口
@@ -21,7 +18,13 @@ import requests
 APP_ID = os.environ.get("ESTAT_APP_ID", "")
 BASE = "https://api.e-stat.go.jp/rest/3.0/app/json"
 
-STATS_DATA_ID = "8003006792"  # 令和2年 東京都 小地域 年齢・男女別人口
+# 令和2年 小地域 年齢（5歳階級）・男女別人口 statsDataId
+PREF_STATS = {
+    "東京都":   "8003006792",
+    "神奈川県": "8003006761",
+    "埼玉県":   "8003006762",
+    "千葉県":   "8003006752",
+}
 
 # 取得する cat01 コード
 CAT01_CODES = [
@@ -60,7 +63,7 @@ CSV_COLUMNS = (
 )
 
 OUT_DIR = Path(__file__).parent
-OUT_PATH = OUT_DIR / "tokyo_population.csv"
+OUT_PATH = OUT_DIR / "4pref_population.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -73,14 +76,11 @@ def _get(params: dict, timeout: int = 60) -> dict:
     return r.json()
 
 
-def fetch_all_values() -> tuple[list[dict], dict[str, str]]:
-    """全レコードを取得し (values, area_name_map) を返す。
-
-    area_name_map: area_code -> area_name
-    """
+def fetch_pref(stats_data_id: str, pref_name: str) -> tuple[list[dict], dict[str, str]]:
+    """1都県分のレコードを取得し (values, area_name_map) を返す。"""
     base_params = {
         "appId": APP_ID,
-        "statsDataId": STATS_DATA_ID,
+        "statsDataId": stats_data_id,
         "cdCat01": ",".join(CAT01_CODES),
         "limit": 100000,
     }
@@ -92,7 +92,7 @@ def fetch_all_values() -> tuple[list[dict], dict[str, str]]:
 
     while True:
         params = {**base_params, "startPosition": start_position}
-        print(f"  [API] startPosition={start_position} ...", end=" ", flush=True)
+        print(f"  [API {pref_name}] startPosition={start_position} ...", end=" ", flush=True)
 
         data = _get(params)
         stat = data.get("GET_STATS_DATA", {}).get("STATISTICAL_DATA", {})
@@ -100,7 +100,6 @@ def fetch_all_values() -> tuple[list[dict], dict[str, str]]:
 
         if total is None:
             total = int(result_inf.get("TOTAL_NUMBER", 0))
-            # 地域名マップをメタから取得
             for obj in stat.get("CLASS_INF", {}).get("CLASS_OBJ", []):
                 if obj.get("@id") == "area":
                     classes = obj.get("CLASS", [])
@@ -123,8 +122,20 @@ def fetch_all_values() -> tuple[list[dict], dict[str, str]]:
         start_position = int(next_key)
         time.sleep(0.3)
 
-    print(f"  [API] 取得完了: {len(all_values)}件")
+    print(f"  [{pref_name}] 取得完了: {len(all_values)}件")
     return all_values, area_name_map
+
+
+def fetch_all_prefs() -> tuple[list[dict], dict[str, str]]:
+    """全4県分のデータを取得して統合する。"""
+    combined_values: list[dict] = []
+    combined_names: dict[str, str] = {}
+    for pref_name, stats_id in PREF_STATS.items():
+        values, names = fetch_pref(stats_id, pref_name)
+        combined_values.extend(values)
+        combined_names.update(names)
+        time.sleep(1)  # 県間のインターバル
+    return combined_values, combined_names
 
 
 # ---------------------------------------------------------------------------
@@ -199,12 +210,11 @@ if __name__ == "__main__":
     if not APP_ID:
         raise RuntimeError("環境変数 ESTAT_APP_ID が設定されていません")
 
-    print("=== 令和2年国勢調査 東京都 小地域 年齢・男女別人口 取得 ===")
-    print(f"statsDataId : {STATS_DATA_ID}")
-    print(f"cat01 codes : {CAT01_CODES}")
+    print("=== 令和2年国勢調査 4都県 小地域 年齢・男女別人口 取得 ===")
+    print(f"対象: {list(PREF_STATS.keys())}")
     print()
 
-    values, area_name_map = fetch_all_values()
+    values, area_name_map = fetch_all_prefs()
     rows = pivot(values, area_name_map)
 
     total_areas = len(rows)
