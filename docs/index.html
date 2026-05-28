@@ -99,6 +99,10 @@
   map.createPane('stores');
   map.getPane('stores').style.zIndex = 650; // デフォルトの overlayPane(400) より高い値
 
+  // SVGレンダラーを使うことで、ピンのない領域はマウスイベントが下のコロプレスへ素通りする
+  // （Canvas は全面でイベントを遮断するが、SVG は塗り部分だけ受け取る）
+  const storeRenderer = L.svg({ pane: 'stores' });
+
   const baseTile = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
@@ -211,7 +215,8 @@
       if (!s.lat || !s.lng) return;
       const col = PREF_COLORS[s.prefecture] || '#888';
       const m = L.circleMarker([s.lat, s.lng], {
-        pane: 'stores', // 常にコロプレスより前面に描画
+        pane: 'stores',         // 常にコロプレスより前面に描画
+        renderer: storeRenderer, // SVGレンダラーでイベント透過を実現
         radius: 5,
         fillColor: col,
         color: '#fff',
