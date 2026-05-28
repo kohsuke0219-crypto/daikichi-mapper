@@ -117,7 +117,7 @@ def run(
         return 0
 
     geocache: dict[str, GeocodeResult] = {}
-    spreadsheet = open_sheet(spreadsheet_id)
+    spreadsheet = open_sheet(spreadsheet_id.strip('﻿').strip())
     existing = load_existing_geocache(spreadsheet)
     geocache = {
         addr: GeocodeResult(latitude=lat, longitude=lng, status="OK")
