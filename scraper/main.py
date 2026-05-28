@@ -42,7 +42,7 @@ def run(
     """全工程を実行する。
 
     Args:
-        prefecture: 指定した都道府県のみに絞り込む（例: "東京都"）。
+        prefecture: 取得対象の都道府県。カンマ区切りで複数指定可（例: "東京都,神奈川県"）。
                     None の場合は全店舗を対象にする。
 
     Returns:
@@ -51,8 +51,12 @@ def run(
     setup_logging()
     logger = logging.getLogger("main")
 
-    # 都道府県フィルター指定時は、その都道府県が属する地区だけ取得する
-    # （東京都 → 関東のみ取得してサイトへの不要なアクセスを減らす）
+    # カンマ区切りを分割してリスト化
+    prefectures: list[str] = (
+        [p.strip() for p in prefecture.split(",") if p.strip()]
+        if prefecture else []
+    )
+
     PREF_TO_REGION: dict[str, str] = {
         "北海道": "hokkaido-tohoku",
         "青森県": "hokkaido-tohoku", "岩手県": "hokkaido-tohoku",
@@ -79,21 +83,22 @@ def run(
         "鹿児島県": "kyusyu-okinawa", "沖縄県": "kyusyu-okinawa",
     }
 
+    # 指定都道府県が属する地区だけ取得してサイトへの不要なアクセスを削減
     region_slugs: list[str] | None = None
-    if prefecture:
-        slug = PREF_TO_REGION.get(prefecture)
-        if slug:
-            region_slugs = [slug]
-            logger.info("Prefecture filter: %s → fetching region '%s' only", prefecture, slug)
+    if prefectures:
+        slugs = list({PREF_TO_REGION[p] for p in prefectures if p in PREF_TO_REGION})
+        if slugs:
+            region_slugs = slugs
+            logger.info("Prefecture filter: %s → fetching regions %s", prefectures, slugs)
         else:
-            logger.warning("Unknown prefecture %r, fetching all regions", prefecture)
+            logger.warning("Unknown prefectures %r, fetching all regions", prefectures)
 
     # 1) サイトをスクレイプ
     logger.info("Step 1/3: Scraping kaitori-daikichi.jp store pages")
     all_stores: list[Store] = list(scrape_all(region_slugs=region_slugs))
     stores = (
-        [s for s in all_stores if s.prefecture == prefecture]
-        if prefecture
+        [s for s in all_stores if s.prefecture in prefectures]
+        if prefectures
         else all_stores
     )
     logger.info(
