@@ -95,6 +95,10 @@
   // ============================================================
   const map = L.map('map', { preferCanvas: true }).setView([35.69, 139.69], 10);
 
+  // 店舗ピンを常にコロプレスの上に表示するための専用ペイン
+  map.createPane('stores');
+  map.getPane('stores').style.zIndex = 650; // デフォルトの overlayPane(400) より高い値
+
   const baseTile = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
@@ -207,6 +211,7 @@
       if (!s.lat || !s.lng) return;
       const col = PREF_COLORS[s.prefecture] || '#888';
       const m = L.circleMarker([s.lat, s.lng], {
+        pane: 'stores', // 常にコロプレスより前面に描画
         radius: 5,
         fillColor: col,
         color: '#fff',
