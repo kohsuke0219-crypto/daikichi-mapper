@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+*.pyc
+
+# 環境変数・シークレット
+.env
+.env.*
+!.env.example
+
+# Google サービスアカウント JSON（絶対コミットしない）
+*.json
+!.devcontainer/*.json
+
+# Geocoding キャッシュ
+geocache.json
+geocache*.json
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# テスト・カバレッジ
+.pytest_cache/
+.coverage
+htmlcov/
