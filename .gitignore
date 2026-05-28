@@ -21,6 +21,10 @@ env/
 # Google サービスアカウント JSON（絶対コミットしない）
 *.json
 !.devcontainer/*.json
+# docs/data/ の JSON は GitHub Pages 用なのでコミット対象
+!docs/data/*.json
+# population/ の CSV はデータキャッシュ（コミット対象外）
+population/*.csv
 
 # Geocoding キャッシュ
 geocache.json

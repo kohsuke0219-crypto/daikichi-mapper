@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>買取大吉 商圏マップ（40歳以上女性人口）</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; }
+    #map { width: 100vw; height: 100vh; }
+
+    /* ---- Legend ---- */
+    .legend {
+      background: rgba(255,255,255,0.92);
+      padding: 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+    .legend h4 { margin-bottom: 6px; font-size: 13px; }
+    .legend i {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+    .legend .sep { border-top: 1px solid #ddd; margin: 8px 0; }
+    .legend .dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1.5px solid #fff;
+      box-shadow: 0 0 0 1px #999;
+    }
+
+    /* ---- Info box (hover) ---- */
+    .info {
+      background: rgba(255,255,255,0.92);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      font-size: 13px;
+      min-width: 160px;
+    }
+    .info h4 { margin-bottom: 4px; font-size: 14px; }
+
+    /* ---- Loading overlay ---- */
+    #loading {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">データ読み込み中...</div>
+  <div id="map"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+  // ============================================================
+  // 設定
+  // ============================================================
+  const PREF_COLORS = {
+    '東京都':   '#e74c3c',
+    '神奈川県': '#3498db',
+    '埼玉県':   '#2ecc71',
+    '千葉県':   '#f39c12',
+  };
+
+  // コロプレス色スケール (YlOrRd 7段階)
+  const COLOR_BREAKS = [0, 10000, 30000, 60000, 100000, 150000, 200000];
+  const COLOR_PALETTE = ['#ffffb2','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#800026'];
+
+  function getColor(v) {
+    for (let i = COLOR_BREAKS.length - 1; i >= 0; i--) {
+      if (v >= COLOR_BREAKS[i]) return COLOR_PALETTE[i];
+    }
+    return COLOR_PALETTE[0];
+  }
+
+  function fmtNum(n) {
+    return (n || 0).toLocaleString('ja-JP');
+  }
+
+  // ============================================================
+  // 地図初期化
+  // ============================================================
+  const map = L.map('map', { preferCanvas: true }).setView([35.69, 139.69], 10);
+
+  const baseTile = L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18,
+    }
+  ).addTo(map);
+
+  // ============================================================
+  // ホバー情報ボックス
+  // ============================================================
+  const info = L.control({ position: 'topright' });
+  info.onAdd = function () {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+  };
+  info.update = function (props) {
+    if (!props) {
+      this._div.innerHTML = '<h4>市区町村を選択</h4>（ホバーで詳細表示）';
+      return;
+    }
+    const tp = props.total_pop || 0;
+    const wp = props.women_40plus || 0;
+    const pct = tp > 0 ? (wp / tp * 100).toFixed(1) : '—';
+    this._div.innerHTML =
+      `<h4>${props.city}</h4>` +
+      `総人口: ${fmtNum(tp)}人<br>` +
+      `女性40歳以上: <b>${fmtNum(wp)}</b>人<br>` +
+      `（全人口比: ${pct}%）`;
+  };
+  info.addTo(map);
+
+  // ============================================================
+  // 凡例
+  // ============================================================
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'legend');
+    div.innerHTML = '<h4>女性40歳以上人口（市区町村）</h4>';
+    for (let i = 0; i < COLOR_BREAKS.length; i++) {
+      const lo = COLOR_BREAKS[i].toLocaleString('ja-JP');
+      const hi = i + 1 < COLOR_BREAKS.length
+        ? (COLOR_BREAKS[i + 1] - 1).toLocaleString('ja-JP')
+        : '';
+      div.innerHTML +=
+        `<i style="background:${COLOR_PALETTE[i]}"></i>` +
+        `${lo}${hi ? '–' + hi : '以上'}<br>`;
+    }
+    div.innerHTML += '<div class="sep"></div>';
+    div.innerHTML += '<h4>店舗（都道府県別）</h4>';
+    for (const [pref, col] of Object.entries(PREF_COLORS)) {
+      div.innerHTML += `<span class="dot" style="background:${col};border-color:${col}"></span>${pref}<br>`;
+    }
+    return div;
+  };
+  legend.addTo(map);
+
+  // ============================================================
+  // データ読み込み & レイヤー構築
+  // ============================================================
+  let choroplethLayer, storeLayer;
+
+  async function loadAll() {
+    const [geoData, storeData] = await Promise.all([
+      fetch('data/tokyo_ward_population.geojson').then(r => r.json()),
+      fetch('data/stores.json').then(r => r.json()),
+    ]);
+
+    // --- コロプレス ---
+    choroplethLayer = L.geoJSON(geoData, {
+      style: feature => ({
+        fillColor: getColor(feature.properties.women_40plus || 0),
+        weight: 1,
+        opacity: 0.8,
+        color: '#888',
+        fillOpacity: 0.65,
+      }),
+      onEachFeature: (feature, layer) => {
+        layer.on({
+          mouseover(e) {
+            e.target.setStyle({ weight: 2.5, color: '#333', fillOpacity: 0.85 });
+            e.target.bringToFront();
+            info.update(feature.properties);
+          },
+          mouseout(e) {
+            choroplethLayer.resetStyle(e.target);
+            info.update();
+          },
+          click(e) {
+            map.fitBounds(e.target.getBounds(), { padding: [40, 40] });
+          },
+        });
+        const p = feature.properties;
+        const tp = p.total_pop || 0;
+        const wp = p.women_40plus || 0;
+        const pct = tp > 0 ? (wp / tp * 100).toFixed(1) : '—';
+        layer.bindPopup(
+          `<b>${p.city}</b><br>` +
+          `総人口: ${fmtNum(tp)} 人<br>` +
+          `女性40歳以上: <b>${fmtNum(wp)}</b> 人<br>` +
+          `全人口比: ${pct}%`
+        );
+      },
+    }).addTo(map);
+
+    // --- 店舗ピン ---
+    const storeMarkers = [];
+    storeData.forEach(s => {
+      if (!s.lat || !s.lng) return;
+      const col = PREF_COLORS[s.prefecture] || '#888';
+      const m = L.circleMarker([s.lat, s.lng], {
+        radius: 5,
+        fillColor: col,
+        color: '#fff',
+        weight: 1.5,
+        fillOpacity: 0.9,
+      }).bindPopup(
+        `<b>${s.name}</b><br>` +
+        `<span style="color:#555">${s.prefecture}</span><br>` +
+        s.address
+      );
+      storeMarkers.push(m);
+    });
+    storeLayer = L.layerGroup(storeMarkers).addTo(map);
+
+    // --- レイヤーコントロール ---
+    L.control.layers(
+      {},
+      {
+        '女性40歳以上人口（コロプレス）': choroplethLayer,
+        '買取大吉 店舗': storeLayer,
+      },
+      { collapsed: false, position: 'topleft' }
+    ).addTo(map);
+
+    document.getElementById('loading').style.display = 'none';
+  }
+
+  loadAll().catch(err => {
+    document.getElementById('loading').textContent = 'データ読み込み失敗: ' + err.message;
+    console.error(err);
+  });
+  </script>
+</body>
+</html>

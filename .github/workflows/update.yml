@@ -35,6 +35,21 @@ jobs:
         run: |
           python -m scraper.main --spreadsheet-id "$SPREADSHEET_ID" --prefecture "$PREFECTURE"
 
+      - name: Export stores.json for GitHub Pages
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+        run: |
+          python -m population.export_stores
+
+      - name: Commit and push updated stores.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/stores.json
+          git diff --cached --quiet || git commit -m "Auto-update stores.json [$(date -u '+%Y-%m-%d')]"
+          git push
+
       - name: Notify on failure
         if: failure()
         run: |
