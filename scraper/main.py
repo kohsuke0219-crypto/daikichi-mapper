@@ -18,7 +18,7 @@ import sys
 from dataclasses import asdict
 
 from scraper.geocoder import GeocodeResult, Geocoder
-from scraper.scraper import Store, scrape_all
+from scraper.scraper import REGIONS, Store, scrape_all
 from scraper.sheets_writer import (
     append_run_log,
     load_existing_geocache,
@@ -34,8 +34,16 @@ def setup_logging() -> None:
     )
 
 
-def run(spreadsheet_id: str, dry_run: bool = False) -> int:
+def run(
+    spreadsheet_id: str,
+    dry_run: bool = False,
+    prefecture: str | None = None,
+) -> int:
     """全工程を実行する。
+
+    Args:
+        prefecture: 指定した都道府県のみに絞り込む（例: "東京都"）。
+                    None の場合は全店舗を対象にする。
 
     Returns:
         終了コード（0 = 成功）
@@ -43,13 +51,58 @@ def run(spreadsheet_id: str, dry_run: bool = False) -> int:
     setup_logging()
     logger = logging.getLogger("main")
 
+    # 都道府県フィルター指定時は、その都道府県が属する地区だけ取得する
+    # （東京都 → 関東のみ取得してサイトへの不要なアクセスを減らす）
+    PREF_TO_REGION: dict[str, str] = {
+        "北海道": "hokkaido-tohoku",
+        "青森県": "hokkaido-tohoku", "岩手県": "hokkaido-tohoku",
+        "宮城県": "hokkaido-tohoku", "秋田県": "hokkaido-tohoku",
+        "山形県": "hokkaido-tohoku", "福島県": "hokkaido-tohoku",
+        "茨城県": "kanto", "栃木県": "kanto", "群馬県": "kanto",
+        "埼玉県": "kanto", "千葉県": "kanto", "東京都": "kanto",
+        "神奈川県": "kanto",
+        "新潟県": "tyubu", "富山県": "tyubu", "石川県": "tyubu",
+        "福井県": "tyubu", "山梨県": "tyubu", "長野県": "tyubu",
+        "岐阜県": "tyubu", "静岡県": "tyubu", "愛知県": "tyubu",
+        "三重県": "kinki-tiku", "滋賀県": "kinki-tiku",
+        "京都府": "kinki-tiku", "大阪府": "kinki-tiku",
+        "兵庫県": "kinki-tiku", "奈良県": "kinki-tiku",
+        "和歌山県": "kinki-tiku",
+        "鳥取県": "tyugoku-sikoku", "島根県": "tyugoku-sikoku",
+        "岡山県": "tyugoku-sikoku", "広島県": "tyugoku-sikoku",
+        "山口県": "tyugoku-sikoku", "徳島県": "tyugoku-sikoku",
+        "香川県": "tyugoku-sikoku", "愛媛県": "tyugoku-sikoku",
+        "高知県": "tyugoku-sikoku",
+        "福岡県": "kyusyu-okinawa", "佐賀県": "kyusyu-okinawa",
+        "長崎県": "kyusyu-okinawa", "熊本県": "kyusyu-okinawa",
+        "大分県": "kyusyu-okinawa", "宮崎県": "kyusyu-okinawa",
+        "鹿児島県": "kyusyu-okinawa", "沖縄県": "kyusyu-okinawa",
+    }
+
+    region_slugs: list[str] | None = None
+    if prefecture:
+        slug = PREF_TO_REGION.get(prefecture)
+        if slug:
+            region_slugs = [slug]
+            logger.info("Prefecture filter: %s → fetching region '%s' only", prefecture, slug)
+        else:
+            logger.warning("Unknown prefecture %r, fetching all regions", prefecture)
+
     # 1) サイトをスクレイプ
     logger.info("Step 1/3: Scraping kaitori-daikichi.jp store pages")
-    stores: list[Store] = list(scrape_all())
-    logger.info("Scraped %d stores total", len(stores))
+    all_stores: list[Store] = list(scrape_all(region_slugs=region_slugs))
+    stores = (
+        [s for s in all_stores if s.prefecture == prefecture]
+        if prefecture
+        else all_stores
+    )
+    logger.info(
+        "Scraped %d stores total, %d after prefecture filter",
+        len(all_stores), len(stores),
+    )
 
     if not stores:
-        logger.error("No stores scraped. サイト構造が変わった可能性があります。")
+        logger.error("No stores found. サイト構造が変わったか、フィルター条件が厳しすぎます。")
         return 1
 
     # 2) ジオコーディング（キャッシュ活用）
@@ -113,12 +166,21 @@ def main() -> None:
         action="store_true",
         help="スクレイプとジオコードのみ行い、シートには書き込まない",
     )
+    parser.add_argument(
+        "--prefecture",
+        default=os.environ.get("PREFECTURE", ""),
+        help="取得対象の都道府県（例: 東京都）。省略時は全国。",
+    )
     args = parser.parse_args()
 
     if not args.dry_run and not args.spreadsheet_id:
         parser.error("--spreadsheet-id または環境変数 SPREADSHEET_ID が必要です")
 
-    sys.exit(run(args.spreadsheet_id, dry_run=args.dry_run))
+    sys.exit(run(
+        args.spreadsheet_id,
+        dry_run=args.dry_run,
+        prefecture=args.prefecture or None,
+    ))
 
 
 if __name__ == "__main__":

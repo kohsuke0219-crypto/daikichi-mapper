@@ -251,13 +251,19 @@ def _extract_prefecture(address: str) -> str:
     return m.group(1) if m else ""
 
 
-def scrape_all(throttle_sec: float = 1.0) -> Iterator[Store]:
-    """全地区を順に取得して店舗を yield する。
+def scrape_all(
+    throttle_sec: float = 1.0,
+    region_slugs: list[str] | None = None,
+) -> Iterator[Store]:
+    """指定した地区（省略時は全地区）を順に取得して店舗を yield する。
 
-    サイトに優しくするため、地区ページ間に throttle_sec 秒のスリープを入れる。
+    Args:
+        throttle_sec: 地区ページ間のスリープ秒数。
+        region_slugs: 取得する地区スラッグのリスト。None の場合は全地区。
     """
+    target = {k: v for k, v in REGIONS.items() if region_slugs is None or k in region_slugs}
     session = requests.Session()
-    for slug, region_name in REGIONS.items():
+    for slug, region_name in target.items():
         logger.info("Fetching region: %s (%s)", region_name, slug)
         html = fetch_region_html(slug, session=session)
         stores = parse_region_html(html, region_name)
