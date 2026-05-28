@@ -182,19 +182,20 @@ def parse_region_html(html: str, region_name: str) -> list[Store]:
 
 
 def _find_card_root(link: Tag) -> Tag | None:
-    """「店舗詳細を見る」リンクから、住所等を含む最小の親要素を見つける。
+    """「店舗詳細を見る」リンクから、住所等と店舗名をまとめて含む最小の親要素を見つける。
 
-    サイト側は店舗ごとに <article> や <div class="store-card"> 風の
-    まとまりがある想定。住所ラベルが現れる最小の祖先を返す。
+    サイトは <details><summary>店舗名</summary><div>住所...</div></details> 構造を使っている。
+    住所・営業時間に加え、店舗名を持つ要素（summary/strong/h3/h4）が存在する最小の祖先を返す。
     """
     cur = link
-    for _ in range(8):  # 高さ 8 まで遡れば十分（無限ループ防止）
+    for _ in range(10):
         parent = cur.parent
         if parent is None:
             return None
         text = parent.get_text(" ", strip=True)
         if "住所" in text and "営業時間" in text:
-            return parent
+            if parent.find(["summary", "strong", "h3", "h4"]):
+                return parent
         cur = parent
     return None
 
@@ -202,15 +203,20 @@ def _find_card_root(link: Tag) -> Tag | None:
 def _extract_store_name(card: Tag) -> str:
     """店舗カード内の店舗名を取得する。
 
-    通常は <strong> または見出しタグ。「店舗詳細を見る」「地図を見る」
-    のようなリンクテキストは除外する。
+    サイトは <details><summary>店舗名</summary>...</details> 構造なので summary を優先。
+    「店舗詳細を見る」「地図を見る」のようなリンクテキストは除外する。
     """
-    # 1) strong タグを優先
+    # 1) summary タグ（details/summary 構造）
+    summary = card.find("summary")
+    if summary:
+        t = _text(summary)
+        if t and "店舗詳細" not in t and "地図" not in t:
+            return t
+    # 2) strong / 見出しタグ
     for tag in card.find_all(["strong", "h3", "h4"]):
         t = _text(tag)
         if t and "店舗詳細" not in t and "地図" not in t:
             return t
-    # 2) 見つからなければカード内最初のテキストノード
     return ""
 
 

@@ -55,27 +55,28 @@ def run(spreadsheet_id: str, dry_run: bool = False) -> int:
     # 2) ジオコーディング（キャッシュ活用）
     logger.info("Step 2/3: Geocoding addresses")
     spreadsheet = None
-    geocache: dict[str, GeocodeResult] = {}
+    new_count = 0
 
-    if not dry_run:
-        spreadsheet = open_sheet(spreadsheet_id)
-        existing = load_existing_geocache(spreadsheet)
-        # 既存シートの (lat, lng) を Geocoder のキャッシュ形式に変換
-        geocache = {
-            addr: GeocodeResult(latitude=lat, longitude=lng, status="OK")
-            for addr, (lat, lng) in existing.items()
-        }
+    if dry_run:
+        logger.info("DRY RUN: skipping geocoding and sheet write. First 3 stores:")
+        for s in stores[:3]:
+            logger.info("  %s", asdict(s))
+        return 0
+
+    geocache: dict[str, GeocodeResult] = {}
+    spreadsheet = open_sheet(spreadsheet_id)
+    existing = load_existing_geocache(spreadsheet)
+    geocache = {
+        addr: GeocodeResult(latitude=lat, longitude=lng, status="OK")
+        for addr, (lat, lng) in existing.items()
+    }
 
     geocoder = Geocoder(cache=geocache)
-    new_count = 0
     for s in stores:
         result = geocoder.geocode(s.address)
         s.latitude = result.latitude
         s.longitude = result.longitude
-        if result.status == "OK" and result.latitude is not None:
-            # キャッシュヒットだったかは Geocoder.api_call_count で別途追跡
-            pass
-        else:
+        if result.status != "OK" or result.latitude is None:
             logger.warning("Geocoding failed for %s: %s", s.name, result.status)
 
     logger.info(
@@ -84,11 +85,6 @@ def run(spreadsheet_id: str, dry_run: bool = False) -> int:
 
     # 3) シートに書き込み
     logger.info("Step 3/3: Writing to Google Sheets")
-    if dry_run:
-        logger.info("DRY RUN: not writing to sheet. First 3 stores:")
-        for s in stores[:3]:
-            logger.info("  %s", asdict(s))
-        return 0
 
     assert spreadsheet is not None
     write_stores(spreadsheet, [asdict(s) for s in stores])
