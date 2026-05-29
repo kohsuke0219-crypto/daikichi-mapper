@@ -42,3 +42,9 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# フェーズ10 中間データ（大容量・再生成可能）
+analysis/geo_data/       # 生ZIPファイル（MLIT ダウンロード）
+analysis/residential_ratio.csv
+analysis/effective_distance.csv
+analysis/score_v2.csv
