@@ -118,6 +118,22 @@
     '千葉県':   '#f39c12',
   };
 
+  // [3] 競合スコア v3 (同 YlGn だが v2 と区別)
+  const V3_BREAKS  = [0, 1, 3, 8, 25, 100];
+  const V3_PALETTE = ['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b','#002007'];
+  function getV3Color(v) {
+    for (let i = V3_BREAKS.length - 1; i >= 0; i--)
+      if (v >= V3_BREAKS[i]) return V3_PALETTE[i];
+    return V3_PALETTE[0];
+  }
+
+  // 競合ブランド色
+  const BRAND_COLORS = {
+    'おたからや': '#9b59b6',
+    'バイセル':   '#f1c40f',
+    'なんぼや':   '#1abc9c',
+  };
+
   function fmtNum(n) { return (n || 0).toLocaleString('ja-JP'); }
 
   // ============================================================
@@ -143,6 +159,17 @@
     this._div = L.DomUtil.create('div', 'info');
     this.update();
     return this._div;
+  };
+  info.updateV3 = function (props, s3) {
+    if (!props) { this._div.innerHTML = '<h4>市区町村を選択</h4>ホバーで詳細表示'; return; }
+    let html = `<h4>${props.city}</h4>`;
+    if (s3) {
+      html += `<b>v3スコア: ${s3.v3}</b> (競合考慮)<br>`;
+      html += `v2スコア: ${s3.v2}<br>`;
+      html += `半径1km競合: ${s3.comp1km}店<br>`;
+      html += `ペナルティ: ×${s3.penalty}`;
+    }
+    this._div.innerHTML = html;
   };
   info.update = function (props, scoreEntry) {
     if (!props) {
@@ -177,7 +204,7 @@
     this._div = L.DomUtil.create('div', 'legend');
     return this._div;
   };
-  legend.render = function (showPop, showScore, showParks, showRivers, showMtns) {
+  legend.render = function (showPop, showScore, showScoreV3, showParks, showRivers, showMtns, showComp) {
     let html = '';
     if (showPop) {
       html += '<h4>女性40歳以上人口</h4>';
@@ -189,11 +216,20 @@
     }
     if (showScore) {
       if (html) html += '<div class="sep"></div>';
-      html += '<h4>出店スコア（高=緑 / 低=白）</h4>';
+      html += '<h4>出店スコア v2（高=緑 / 低=白）</h4>';
       for (let i = 0; i < SCORE_BREAKS.length; i++) {
         const lo = SCORE_BREAKS[i];
         const hi = i + 1 < SCORE_BREAKS.length ? SCORE_BREAKS[i+1] : '';
         html += `<i style="background:${SCORE_PALETTE[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
+      }
+    }
+    if (showScoreV3) {
+      if (html) html += '<div class="sep"></div>';
+      html += '<h4>出店スコア v3（競合考慮）</h4>';
+      for (let i = 0; i < V3_BREAKS.length; i++) {
+        const lo = V3_BREAKS[i];
+        const hi = i + 1 < V3_BREAKS.length ? V3_BREAKS[i+1] : '';
+        html += `<i style="background:${V3_PALETTE[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
       }
     }
     if (showParks || showRivers || showMtns) {
@@ -205,6 +241,11 @@
     html += '<div class="sep"></div><h4>店舗</h4>';
     for (const [pref, col] of Object.entries(PREF_COLORS))
       html += `<span class="dot" style="background:${col};border-color:${col}"></span>${pref}<br>`;
+    if (showComp) {
+      html += '<div class="sep"></div><h4>競合店</h4>';
+      for (const [brand, col] of Object.entries(BRAND_COLORS))
+        html += `<span class="dot" style="background:${col};border-color:${col}"></span>${brand}<br>`;
+    }
     this._div.innerHTML = html;
   };
   legend.addTo(map);
@@ -217,18 +258,21 @@
     if (el) el.textContent = msg;
   }
 
-  let choroplethLayer, scoreLayer, parksLayer, riversLayer, mountainsLayer, storeLayer;
-  let scoreData = {};  // code → {score, eff_dist, res_ratio, barrier, nearest}
+  let choroplethLayer, scoreLayer, scoreV3Layer, parksLayer, riversLayer, mountainsLayer, storeLayer, competitorLayer;
+  let scoreData = {};   // code → {score, eff_dist, res_ratio, barrier, nearest}
+  let scoreV3Data = {}; // code → {v3, v2, comp1km, comp2km, penalty}
 
   async function loadAll() {
     // ---- フェーズ1: 必須データ（地図表示に必要）----
     setLoadingDetail('基本データ読み込み中...');
-    const [geoData, storeData, scoreRaw] = await Promise.all([
+    const [geoData, storeData, scoreRaw, scoreV3Raw] = await Promise.all([
       fetch('data/ward_population.geojson').then(r => r.json()),
       fetch('data/stores.json').then(r => r.json()),
       fetch('data/score_v2_data.json').then(r => r.json()),
+      fetch('data/score_v3_data.json').then(r => r.json()),
     ]);
-    scoreData = scoreRaw;
+    scoreData   = scoreRaw;
+    scoreV3Data = scoreV3Raw;
 
     // --- [A] 人口コロプレス（デフォルト表示）---
     setLoadingDetail('コロプレス構築中...');
@@ -262,7 +306,7 @@
       },
     }).addTo(map);
 
-    // --- [B] スコアコロプレス（デフォルト非表示）---
+    // --- [B] スコア v2 コロプレス（非表示）---
     scoreLayer = L.geoJSON(geoData, {
       style: feature => ({
         fillColor: getScoreColor(scoreData[feature.properties.code]?.score || 0),
@@ -275,24 +319,44 @@
             e.target.bringToFront();
             info.update(feature.properties, scoreData[feature.properties.code]);
           },
-          mouseout(e) {
-            scoreLayer.resetStyle(e.target);
-            info.update();
-          },
+          mouseout(e) { scoreLayer.resetStyle(e.target); info.update(); },
           click(e) { map.fitBounds(e.target.getBounds(), { padding: [40, 40] }); },
         });
-        const p = feature.properties;
-        const s = scoreData[p.code];
+        const p = feature.properties; const s = scoreData[p.code];
+        let popup = `<b>${p.city}</b>`;
+        if (s) popup += `<br>v2スコア: <b>${s.score}</b><br>住宅地比率: ${(s.res_ratio*100).toFixed(0)}%<br>実効距離: ${s.eff_dist}km`;
+        layer.bindPopup(popup);
+      },
+    });
+
+    // --- [B2] スコア v3 コロプレス（競合密度考慮、非表示）---
+    scoreV3Layer = L.geoJSON(geoData, {
+      style: feature => ({
+        fillColor: getV3Color(scoreV3Data[feature.properties.code]?.v3 || 0),
+        weight: 1, opacity: 0.8, color: '#888', fillOpacity: 0.65,
+      }),
+      onEachFeature: (feature, layer) => {
+        layer.on({
+          mouseover(e) {
+            e.target.setStyle({ weight: 2.5, color: '#333', fillOpacity: 0.85 });
+            e.target.bringToFront();
+            const s3 = scoreV3Data[feature.properties.code];
+            const infoProps = { ...feature.properties, _v3: s3 };
+            info.updateV3(feature.properties, s3);
+          },
+          mouseout(e) { scoreV3Layer.resetStyle(e.target); info.update(); },
+          click(e) { map.fitBounds(e.target.getBounds(), { padding: [40, 40] }); },
+        });
+        const p = feature.properties; const s = scoreV3Data[p.code];
         let popup = `<b>${p.city}</b>`;
         if (s) {
-          popup += `<br>出店スコア: <b>${s.score}</b>`;
-          popup += `<br>住宅地比率: ${(s.res_ratio * 100).toFixed(0)}%`;
-          popup += `<br>実効距離: ${s.eff_dist}km (補正×${s.barrier})`;
-          popup += `<br>最寄り店舗: ${s.nearest}`;
+          popup += `<br>v3スコア（競合考慮）: <b>${s.v3}</b>`;
+          popup += `<br>v2スコア: ${s.v2}`;
+          popup += `<br>半径1km競合店: ${s.comp1km}店 (ペナルティ×${s.penalty})`;
         }
         layer.bindPopup(popup);
       },
-    }); // addTo しない（デフォルト非表示）
+    });
 
     // --- [C] 店舗ピン ---
     const storeMarkers = [];
@@ -308,12 +372,13 @@
     });
     storeLayer = L.layerGroup(storeMarkers).addTo(map);
 
-    // ---- フェーズ2: 分断要素データ（バックグラウンドで読み込み）----
-    setLoadingDetail('分断要素データ読み込み中...');
-    const [parksData, riversData, mtnsData] = await Promise.all([
+    // ---- フェーズ2: 分断要素データ + 競合店データ ----
+    setLoadingDetail('追加データ読み込み中...');
+    const [parksData, riversData, mtnsData, competitorData] = await Promise.all([
       fetch('data/parks.geojson').then(r => r.json()),
       fetch('data/rivers.geojson').then(r => r.json()),
       fetch('data/mountains.geojson').then(r => r.json()),
+      fetch('data/competitors_all.json').then(r => r.json()),
     ]);
 
     // --- [D] 都市公園（緑・半透明）---
@@ -348,16 +413,38 @@
         fillColor: '#795548', color: '#5D4037',
         weight: 0.5, fillOpacity: 0.30, opacity: 0.5,
       },
-    }).bindTooltip('山地（標高150m以上）', { sticky: true }); // デフォルト非表示
+    }).bindTooltip('山地（標高150m以上）', { sticky: true });
+
+    // --- [G] 競合店ピン ---
+    const compMarkers = [];
+    competitorData.forEach(s => {
+      if (!s.latitude || !s.longitude) return;
+      const col = BRAND_COLORS[s.brand] || '#888';
+      compMarkers.push(
+        L.circleMarker([s.latitude, s.longitude], {
+          pane: 'stores', renderer: storeRenderer,
+          radius: 4, fillColor: col, color: '#fff', weight: 1.2, fillOpacity: 0.85,
+        }).bindPopup(
+          `<b>${s.name}</b><br>` +
+          `<span style="color:${col};font-weight:bold">${s.brand}</span><br>` +
+          `${s.prefecture}` + (s.address ? `<br>${s.address}` : '')
+        )
+      );
+    });
+    competitorLayer = L.layerGroup(compMarkers); // デフォルト非表示
 
     // ---- レイヤーコントロール ----
     const overlayLayers = {
       '👥 女性40歳以上人口': choroplethLayer,
-      '🏪 出店スコア（改良版）': scoreLayer,
+      '🏪 出店スコア v2 （分断考慮）': scoreLayer,
+      '🏆 出店スコア v3 （競合考慮）': scoreV3Layer,
       '<span style="color:#4CAF50">■</span> 都市公園 (1ha+)': parksLayer,
       '<span style="color:#1565C0">─</span> 一・二級河川': riversLayer,
       '<span style="color:#795548">■</span> 山地 (150m+)': mountainsLayer,
       '📍 買取大吉 店舗': storeLayer,
+      `<span style="color:#9b59b6">●</span>おたからや` +
+      `<span style="color:#f1c40f"> ●</span>バイセル` +
+      `<span style="color:#1abc9c"> ●</span>なんぼや`: competitorLayer,
     };
     const layerControl = L.control.layers({}, overlayLayers,
       { collapsed: false, position: 'topleft' }).addTo(map);
@@ -372,12 +459,14 @@
   }
 
   function updateLegend() {
-    const showPop    = map.hasLayer(choroplethLayer);
-    const showScore  = scoreLayer   && map.hasLayer(scoreLayer);
-    const showParks  = parksLayer   && map.hasLayer(parksLayer);
-    const showRivers = riversLayer  && map.hasLayer(riversLayer);
-    const showMtns   = mountainsLayer && map.hasLayer(mountainsLayer);
-    legend.render(showPop, showScore, showParks, showRivers, showMtns);
+    const showPop     = map.hasLayer(choroplethLayer);
+    const showScore   = scoreLayer    && map.hasLayer(scoreLayer);
+    const showScoreV3 = scoreV3Layer  && map.hasLayer(scoreV3Layer);
+    const showParks   = parksLayer    && map.hasLayer(parksLayer);
+    const showRivers  = riversLayer   && map.hasLayer(riversLayer);
+    const showMtns    = mountainsLayer && map.hasLayer(mountainsLayer);
+    const showComp    = competitorLayer && map.hasLayer(competitorLayer);
+    legend.render(showPop, showScore, showScoreV3, showParks, showRivers, showMtns, showComp);
   }
 
   loadAll().catch(err => {
