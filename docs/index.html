@@ -362,7 +362,7 @@
         const col = BRAND_COLORS[s.brand]||'#888';
         compMarkers.push(
           L.circleMarker([s.latitude,s.longitude], {
-            // pane/renderer 省略 → map の preferCanvas:true で Canvas 描画（高速）
+            pane: 'stores', renderer: storeRenderer, // 常にコロプレスより前面＆イベント受取
             radius:4, fillColor:'#222', color:'#888', weight:0.8, fillOpacity:0.85,
           }).bindPopup(`<b>${s.name}</b><br><span style="color:${col};font-weight:bold">${s.brand}</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}`)
         );
