@@ -129,9 +129,12 @@
   const storeRenderer = L.svg({ pane: 'stores' });
 
   // 駅・道路用ペイン（ズーム12+でのみ表示。display で一括ON/OFF）
+  // SVGレンダラーを使う: 実際の点/線だけがイベントを受け取り、空白は
+  // 下のコロプレスへ透過する（Canvasだとペイン全面が市区町村ホバーを遮断する）
   map.createPane('rail'); map.getPane('rail').style.zIndex = 620;
   map.createPane('road'); map.getPane('road').style.zIndex = 410;
-  const railRenderer = L.canvas({ pane: 'rail' });
+  const railRenderer = L.svg({ pane: 'rail' });
+  const roadRenderer = L.svg({ pane: 'road' });
   function applyZoomGate() {
     const show = map.getZoom() >= 12;
     map.getPane('rail').style.display = show ? '' : 'none';
@@ -431,7 +434,7 @@
 
       // ---- 主要道路（オレンジ細線・road ペイン）----
       roadsLayer = L.geoJSON(roadsGeo, {
-        pane: 'road',
+        pane: 'road', renderer: roadRenderer, // SVGで描画→空白はコロプレスへ透過
         style: { color:'#ff8c00', weight:1.5, opacity:0.75 },
         onEachFeature: (f,l) => { const n=f.properties.name||f.properties.ref; if(n) l.bindTooltip(`国道${n}`,{sticky:true}); },
       });
