@@ -49,3 +49,6 @@ analysis/land_use_compact.csv
 analysis/residential_ratio.csv
 analysis/effective_distance.csv
 analysis/score_v2.csv
+
+analysis/geo_data/roads_*.json
+analysis/geo_data/stations_*.json
