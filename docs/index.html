@@ -10,7 +10,7 @@
     body { font-family: 'Helvetica Neue', Arial, sans-serif; }
     #map { width: 100vw; height: 100vh; }
 
-    /* ---- Legend ---- */
+    /* ---- 凡例 ---- */
     .legend {
       background: rgba(255,255,255,0.92);
       padding: 10px 14px;
@@ -30,46 +30,35 @@
     }
     .legend .sep { border-top: 1px solid #ddd; margin: 6px 0; }
     .legend .dot {
-      display: inline-block;
-      width: 11px; height: 11px;
-      border-radius: 50%;
-      margin-right: 5px;
-      vertical-align: middle;
-      border: 1.5px solid #fff;
-      box-shadow: 0 0 0 1px #999;
+      display: inline-block; width: 11px; height: 11px;
+      border-radius: 50%; margin-right: 5px; vertical-align: middle;
+      border: 1.5px solid #fff; box-shadow: 0 0 0 1px #999;
     }
     .legend .line {
-      display: inline-block;
-      width: 18px; height: 3px;
-      margin-right: 5px;
-      vertical-align: middle;
-      border-radius: 2px;
+      display: inline-block; width: 18px; height: 3px;
+      margin-right: 5px; vertical-align: middle; border-radius: 2px;
+    }
+
+    /* ---- コロプレス切替セレクタ ---- */
+    #choropleth-select {
+      position: absolute; top: 10px; left: 55px; z-index: 800;
+      background: rgba(255,255,255,0.93);
+      border: 1px solid #ccc; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+      cursor: pointer;
     }
 
     /* ---- Info box ---- */
     .info {
       background: rgba(255,255,255,0.95);
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 8px 12px; border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,.25);
-      font-size: 12px;
-      min-width: 180px;
-      max-width: 240px;
+      font-size: 12px; min-width: 180px; max-width: 240px;
     }
     .info h4 { margin-bottom: 4px; font-size: 13px; }
-    .info .score-bar {
-      height: 8px; border-radius: 4px;
-      background: linear-gradient(to right, #f7fcf5, #00441b);
-      margin: 4px 0 2px;
-      position: relative;
-    }
-    .info .score-marker {
-      position: absolute; top: -2px;
-      width: 3px; height: 12px;
-      background: #333; border-radius: 1px;
-    }
 
-    /* ---- Loading ---- */
+    /* ---- ローディング ---- */
     #loading {
       position: fixed; inset: 0;
       background: rgba(255,255,255,.85);
@@ -77,402 +66,333 @@
       align-items: center; justify-content: center;
       font-size: 16px; z-index: 9999;
     }
-    #loading-detail { font-size: 12px; color: #666; margin-top: 8px; }
+    #loading-sub { font-size: 12px; color: #666; margin-top: 8px; }
+    #bg-status {
+      position: fixed; bottom: 8px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.55); color: #fff;
+      padding: 4px 12px; border-radius: 12px;
+      font-size: 11px; z-index: 700; display: none;
+    }
   </style>
 </head>
 <body>
-  <div id="loading">
-    データ読み込み中...
-    <div id="loading-detail"></div>
-  </div>
+  <div id="loading">地図を読み込み中…<div id="loading-sub"></div></div>
   <div id="map"></div>
+  <select id="choropleth-select" title="コロプレス表示切替">
+    <option value="pop">👥 女性40歳以上人口</option>
+    <option value="v2">🏪 出店スコア v2（分断考慮）</option>
+    <option value="v3">🏆 出店スコア v3（競合考慮）</option>
+    <option value="none">（非表示）</option>
+  </select>
+  <div id="bg-status"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script>
   // ============================================================
-  // 色スケール定義
+  // 色スケール
   // ============================================================
+  const POP_BREAKS  = [0,10000,30000,60000,100000,150000,200000];
+  const POP_PAL     = ['#ffffb2','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#800026'];
+  const SCORE_BREAKS= [0,1,3,8,25,100];
+  const SCORE_PAL   = ['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b','#002007'];
 
-  // [1] 女性40歳以上人口 (YlOrRd)
-  const POP_BREAKS   = [0, 10000, 30000, 60000, 100000, 150000, 200000];
-  const POP_PALETTE  = ['#ffffb2','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#800026'];
-  function getPopColor(v) {
-    for (let i = POP_BREAKS.length - 1; i >= 0; i--)
-      if (v >= POP_BREAKS[i]) return POP_PALETTE[i];
-    return POP_PALETTE[0];
+  function pickColor(breaks, pal, v) {
+    for (let i = breaks.length-1; i >= 0; i--)
+      if (v >= breaks[i]) return pal[i];
+    return pal[0];
   }
 
-  // [2] 改良版出店スコア (YlGn 〜 dark green)
-  const SCORE_BREAKS  = [0, 1, 3, 8, 25, 100];
-  const SCORE_PALETTE = ['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b','#002007'];
-  function getScoreColor(v) {
-    for (let i = SCORE_BREAKS.length - 1; i >= 0; i--)
-      if (v >= SCORE_BREAKS[i]) return SCORE_PALETTE[i];
-    return SCORE_PALETTE[0];
-  }
-
-  // 店舗カラー（都道府県別）
   const PREF_COLORS = {
-    '東京都':   '#e74c3c',
-    '神奈川県': '#3498db',
-    '埼玉県':   '#2ecc71',
-    '千葉県':   '#f39c12',
+    '東京都':'#e74c3c','神奈川県':'#3498db','埼玉県':'#2ecc71','千葉県':'#f39c12'
   };
-
-  // [3] 競合スコア v3 (同 YlGn だが v2 と区別)
-  const V3_BREAKS  = [0, 1, 3, 8, 25, 100];
-  const V3_PALETTE = ['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b','#002007'];
-  function getV3Color(v) {
-    for (let i = V3_BREAKS.length - 1; i >= 0; i--)
-      if (v >= V3_BREAKS[i]) return V3_PALETTE[i];
-    return V3_PALETTE[0];
-  }
-
-  // 競合ブランド色
   const BRAND_COLORS = {
-    'おたからや': '#9b59b6',
-    'バイセル':   '#f1c40f',
-    'なんぼや':   '#1abc9c',
+    'おたからや':'#9b59b6','バイセル':'#f1c40f','なんぼや':'#1abc9c'
   };
-
-  function fmtNum(n) { return (n || 0).toLocaleString('ja-JP'); }
+  const fmtN = n => (n||0).toLocaleString('ja-JP');
 
   // ============================================================
   // 地図初期化
   // ============================================================
   const map = L.map('map', { preferCanvas: true }).setView([35.69, 139.69], 10);
 
-  // 店舗ピン専用ペイン（常に最前面）
+  // 買取大吉店舗ピン専用ペイン（最前面・SVGレンダラー）
   map.createPane('stores');
   map.getPane('stores').style.zIndex = 650;
   const storeRenderer = L.svg({ pane: 'stores' });
 
-  L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 18 }
-  ).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18,
+  }).addTo(map);
 
   // ============================================================
   // ホバー情報ボックス
   // ============================================================
   const info = L.control({ position: 'topright' });
-  info.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'info');
-    this.update();
-    return this._div;
+  info.onAdd = function() {
+    this._div = L.DomUtil.create('div','info');
+    this.clear(); return this._div;
   };
-  info.updateV3 = function (props, s3) {
-    if (!props) { this._div.innerHTML = '<h4>市区町村を選択</h4>ホバーで詳細表示'; return; }
-    let html = `<h4>${props.city}</h4>`;
-    if (s3) {
-      html += `<b>v3スコア: ${s3.v3}</b> (競合考慮)<br>`;
-      html += `v2スコア: ${s3.v2}<br>`;
-      html += `半径1km競合: ${s3.comp1km}店<br>`;
-      html += `ペナルティ: ×${s3.penalty}`;
-    }
-    this._div.innerHTML = html;
+  info.clear = function() {
+    this._div.innerHTML = '<h4>市区町村を選択</h4>ホバーで詳細表示';
   };
-  info.update = function (props, scoreEntry) {
-    if (!props) {
-      this._div.innerHTML = '<h4>市区町村を選択</h4>ホバーで詳細表示';
-      return;
+  info.show = function(p, mode) {
+    const tp = p.total_pop||0, wp = p.women_40plus||0;
+    const pct = tp>0 ? (wp/tp*100).toFixed(1) : '—';
+    let h = `<h4>${p.city}</h4>総人口: ${fmtN(tp)}人<br>女性40+: <b>${fmtN(wp)}</b>人 (${pct}%)`;
+    const s  = scoreData[p.code];
+    const s3 = scoreV3Data[p.code];
+    if (mode==='v2' && s) {
+      h += `<hr style="margin:4px 0">出店スコアv2: <b>${s.score}</b><br>`
+         + `住宅地比率: ${(s.res_ratio*100).toFixed(0)}%<br>`
+         + `最寄り店: ${s.eff_dist}km`;
     }
-    const tp  = props.total_pop || 0;
-    const wp  = props.women_40plus || 0;
-    const pct = tp > 0 ? (wp / tp * 100).toFixed(1) : '—';
-    let html  = `<h4>${props.city}</h4>`;
-    html += `総人口: ${fmtNum(tp)}人<br>`;
-    html += `女性40歳以上: <b>${fmtNum(wp)}</b>人 (${pct}%)<br>`;
-    if (scoreEntry) {
-      const s   = scoreEntry.score;
-      const pct2 = Math.min(100, s);
-      html += `<div class="sep"></div>`;
-      html += `<b>出店スコア: ${s.toFixed(1)}</b><br>`;
-      html += `<div class="score-bar"><div class="score-marker" style="left:${pct2}%"></div></div>`;
-      html += `住宅地比率: ${(scoreEntry.res_ratio * 100).toFixed(0)}%<br>`;
-      html += `最寄り店舗: ${scoreEntry.eff_dist}km<br>`;
-      html += `<span style="color:#555;font-size:11px">${scoreEntry.nearest}</span>`;
+    if (mode==='v3' && s3) {
+      h += `<hr style="margin:4px 0">出店スコアv3: <b>${s3.v3}</b><br>`
+         + `競合(1km): ${s3.comp1km}店 ×${s3.penalty}<br>`
+         + `v2スコア: ${s3.v2}`;
     }
-    this._div.innerHTML = html;
+    this._div.innerHTML = h;
   };
   info.addTo(map);
 
   // ============================================================
-  // 凡例（動的）
+  // 凡例
   // ============================================================
   const legend = L.control({ position: 'bottomright' });
-  legend.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'legend');
-    return this._div;
+  legend.onAdd = function() {
+    this._div = L.DomUtil.create('div','legend'); return this._div;
   };
-  legend.render = function (showPop, showScore, showScoreV3, showParks, showRivers, showMtns, showComp) {
-    let html = '';
-    if (showPop) {
-      html += '<h4>女性40歳以上人口</h4>';
-      for (let i = 0; i < POP_BREAKS.length; i++) {
-        const lo = POP_BREAKS[i].toLocaleString('ja-JP');
-        const hi = i + 1 < POP_BREAKS.length ? (POP_BREAKS[i+1]-1).toLocaleString('ja-JP') : '';
-        html += `<i style="background:${POP_PALETTE[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
-      }
+  legend.update = function(mode, showParks, showRivers, showMtns, showComp) {
+    let h = '';
+    if (mode==='pop') {
+      h += '<h4>女性40歳以上人口</h4>';
+      POP_BREAKS.forEach((lo,i) => {
+        const hi = i+1<POP_BREAKS.length ? (POP_BREAKS[i+1]-1).toLocaleString('ja-JP') : '';
+        h += `<i style="background:${POP_PAL[i]}"></i>${lo.toLocaleString('ja-JP')}${hi?'–'+hi:'以上'}<br>`;
+      });
+    } else if (mode==='v2'||mode==='v3') {
+      h += `<h4>出店スコア ${mode==='v3'?'v3（競合考慮）':'v2'}（高=緑）</h4>`;
+      SCORE_BREAKS.forEach((lo,i) => {
+        const hi = i+1<SCORE_BREAKS.length ? SCORE_BREAKS[i+1] : '';
+        h += `<i style="background:${SCORE_PAL[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
+      });
     }
-    if (showScore) {
-      if (html) html += '<div class="sep"></div>';
-      html += '<h4>出店スコア v2（高=緑 / 低=白）</h4>';
-      for (let i = 0; i < SCORE_BREAKS.length; i++) {
-        const lo = SCORE_BREAKS[i];
-        const hi = i + 1 < SCORE_BREAKS.length ? SCORE_BREAKS[i+1] : '';
-        html += `<i style="background:${SCORE_PALETTE[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
-      }
+    if (showParks||showRivers||showMtns) {
+      h += '<div class="sep"></div><h4>地理的分断要素</h4>';
+      if (showParks)  h += `<i style="background:#4CAF50;opacity:.6"></i>都市公園(1ha+)<br>`;
+      if (showRivers) h += `<span class="line" style="background:#1565C0"></span>一・二級河川<br>`;
+      if (showMtns)   h += `<i style="background:#795548;opacity:.5"></i>山地(150m+)<br>`;
     }
-    if (showScoreV3) {
-      if (html) html += '<div class="sep"></div>';
-      html += '<h4>出店スコア v3（競合考慮）</h4>';
-      for (let i = 0; i < V3_BREAKS.length; i++) {
-        const lo = V3_BREAKS[i];
-        const hi = i + 1 < V3_BREAKS.length ? V3_BREAKS[i+1] : '';
-        html += `<i style="background:${V3_PALETTE[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
-      }
-    }
-    if (showParks || showRivers || showMtns) {
-      html += '<div class="sep"></div><h4>地理的分断要素</h4>';
-      if (showParks)  html += `<i style="background:#4CAF50;opacity:.6"></i>都市公園 (1ha+)<br>`;
-      if (showRivers) html += `<span class="line" style="background:#1565C0"></span>一・二級河川<br>`;
-      if (showMtns)   html += `<i style="background:#795548;opacity:.5"></i>山地 (標高150m+)<br>`;
-    }
-    html += '<div class="sep"></div><h4>店舗</h4>';
-    for (const [pref, col] of Object.entries(PREF_COLORS))
-      html += `<span class="dot" style="background:${col};border-color:${col}"></span>${pref}<br>`;
+    h += '<div class="sep"></div><h4>買取大吉</h4>';
+    for (const [k,v] of Object.entries(PREF_COLORS))
+      h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
     if (showComp) {
-      html += '<div class="sep"></div><h4>競合店</h4>';
-      for (const [brand, col] of Object.entries(BRAND_COLORS))
-        html += `<span class="dot" style="background:${col};border-color:${col}"></span>${brand}<br>`;
+      h += '<div class="sep"></div><h4>競合店</h4>';
+      for (const [k,v] of Object.entries(BRAND_COLORS))
+        h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
     }
-    this._div.innerHTML = html;
+    this._div.innerHTML = h;
   };
   legend.addTo(map);
 
   // ============================================================
-  // データ読み込み & レイヤー構築
+  // データ & 状態
   // ============================================================
-  function setLoadingDetail(msg) {
-    const el = document.getElementById('loading-detail');
-    if (el) el.textContent = msg;
+  let geoData = null;
+  let scoreData = {}, scoreV3Data = {};
+  let choroplethLayer = null;
+  let storeLayer, parksLayer, riversLayer, mountainsLayer, competitorLayer;
+  let layerControl = null;
+  let choroplethMode = 'pop';   // 'pop' | 'v2' | 'v3' | 'none'
+
+  // ============================================================
+  // コロプレスのスタイル関数
+  // ============================================================
+  function choroplethStyle(feature) {
+    const p = feature.properties;
+    let color = '#ccc';
+    if (choroplethMode === 'pop')
+      color = pickColor(POP_BREAKS, POP_PAL, p.women_40plus||0);
+    else if (choroplethMode === 'v2')
+      color = pickColor(SCORE_BREAKS, SCORE_PAL, scoreData[p.code]?.score||0);
+    else if (choroplethMode === 'v3')
+      color = pickColor(SCORE_BREAKS, SCORE_PAL, scoreV3Data[p.code]?.v3||0);
+    return { fillColor: color, weight:1, opacity:0.8, color:'#888', fillOpacity: choroplethMode==='none'?0:0.65 };
   }
 
-  let choroplethLayer, scoreLayer, scoreV3Layer, parksLayer, riversLayer, mountainsLayer, storeLayer, competitorLayer;
-  let scoreData = {};   // code → {score, eff_dist, res_ratio, barrier, nearest}
-  let scoreV3Data = {}; // code → {v3, v2, comp1km, comp2km, penalty}
+  function refreshChoropleth() {
+    if (!choroplethLayer) return;
+    choroplethLayer.setStyle(choroplethStyle);
+    refreshLegend();
+  }
 
-  async function loadAll() {
-    // ---- フェーズ1: 必須データ（地図表示に必要）----
-    setLoadingDetail('基本データ読み込み中...');
-    const [geoData, storeData, scoreRaw, scoreV3Raw] = await Promise.all([
-      fetch('data/ward_population.geojson').then(r => r.json()),
-      fetch('data/stores.json').then(r => r.json()),
-      fetch('data/score_v2_data.json').then(r => r.json()),
-      fetch('data/score_v3_data.json').then(r => r.json()),
+  // ============================================================
+  // 凡例更新
+  // ============================================================
+  function refreshLegend() {
+    legend.update(
+      choroplethMode,
+      parksLayer   && map.hasLayer(parksLayer),
+      riversLayer  && map.hasLayer(riversLayer),
+      mountainsLayer && map.hasLayer(mountainsLayer),
+      competitorLayer && map.hasLayer(competitorLayer),
+    );
+  }
+
+  // ============================================================
+  // Phase 1: 人口コロプレス + 店舗ピン（即表示）
+  // ============================================================
+  async function phase1() {
+    document.getElementById('loading-sub').textContent = '基本データ取得中…';
+    const [geo, stores] = await Promise.all([
+      fetch('data/ward_population.geojson').then(r=>r.json()),
+      fetch('data/stores.json').then(r=>r.json()),
     ]);
-    scoreData   = scoreRaw;
-    scoreV3Data = scoreV3Raw;
+    geoData = geo;
 
-    // --- [A] 人口コロプレス（デフォルト表示）---
-    setLoadingDetail('コロプレス構築中...');
-    const choroplethStyle = feature => ({
-      fillColor: getPopColor(feature.properties.women_40plus || 0),
-      weight: 1, opacity: 0.8, color: '#888', fillOpacity: 0.65,
-    });
-
+    // ---- コロプレス（1レイヤー・動的スタイル）----
     choroplethLayer = L.geoJSON(geoData, {
       style: choroplethStyle,
       onEachFeature: (feature, layer) => {
         layer.on({
           mouseover(e) {
-            e.target.setStyle({ weight: 2.5, color: '#333', fillOpacity: 0.85 });
+            e.target.setStyle({ weight:2.5, color:'#333', fillOpacity:0.85 });
             e.target.bringToFront();
-            info.update(feature.properties, scoreData[feature.properties.code]);
+            info.show(feature.properties, choroplethMode);
           },
           mouseout(e) {
             choroplethLayer.resetStyle(e.target);
-            info.update();
+            info.clear();
           },
-          click(e) { map.fitBounds(e.target.getBounds(), { padding: [40, 40] }); },
+          click(e) { map.fitBounds(e.target.getBounds(), { padding:[40,40] }); },
         });
         const p = feature.properties;
-        const s = scoreData[p.code];
-        const tp = p.total_pop || 0, wp = p.women_40plus || 0;
-        const pct = tp > 0 ? (wp / tp * 100).toFixed(1) : '—';
-        let popup = `<b>${p.city}</b><br>総人口: ${fmtNum(tp)} 人<br>女性40歳以上: <b>${fmtNum(wp)}</b> 人 (${pct}%)`;
-        if (s) popup += `<br>出店スコア: <b>${s.score}</b> / 最寄り店: ${s.eff_dist}km`;
-        layer.bindPopup(popup);
+        const tp=p.total_pop||0, wp=p.women_40plus||0, pct=tp>0?(wp/tp*100).toFixed(1):'—';
+        layer.bindPopup(`<b>${p.city}</b><br>総人口: ${fmtN(tp)} 人<br>女性40+: <b>${fmtN(wp)}</b> 人 (${pct}%)`);
       },
     }).addTo(map);
 
-    // --- [B] スコア v2 コロプレス（非表示）---
-    scoreLayer = L.geoJSON(geoData, {
-      style: feature => ({
-        fillColor: getScoreColor(scoreData[feature.properties.code]?.score || 0),
-        weight: 1, opacity: 0.8, color: '#888', fillOpacity: 0.65,
-      }),
-      onEachFeature: (feature, layer) => {
-        layer.on({
-          mouseover(e) {
-            e.target.setStyle({ weight: 2.5, color: '#333', fillOpacity: 0.85 });
-            e.target.bringToFront();
-            info.update(feature.properties, scoreData[feature.properties.code]);
-          },
-          mouseout(e) { scoreLayer.resetStyle(e.target); info.update(); },
-          click(e) { map.fitBounds(e.target.getBounds(), { padding: [40, 40] }); },
-        });
-        const p = feature.properties; const s = scoreData[p.code];
-        let popup = `<b>${p.city}</b>`;
-        if (s) popup += `<br>v2スコア: <b>${s.score}</b><br>住宅地比率: ${(s.res_ratio*100).toFixed(0)}%<br>実効距離: ${s.eff_dist}km`;
-        layer.bindPopup(popup);
-      },
-    });
-
-    // --- [B2] スコア v3 コロプレス（競合密度考慮、非表示）---
-    scoreV3Layer = L.geoJSON(geoData, {
-      style: feature => ({
-        fillColor: getV3Color(scoreV3Data[feature.properties.code]?.v3 || 0),
-        weight: 1, opacity: 0.8, color: '#888', fillOpacity: 0.65,
-      }),
-      onEachFeature: (feature, layer) => {
-        layer.on({
-          mouseover(e) {
-            e.target.setStyle({ weight: 2.5, color: '#333', fillOpacity: 0.85 });
-            e.target.bringToFront();
-            const s3 = scoreV3Data[feature.properties.code];
-            const infoProps = { ...feature.properties, _v3: s3 };
-            info.updateV3(feature.properties, s3);
-          },
-          mouseout(e) { scoreV3Layer.resetStyle(e.target); info.update(); },
-          click(e) { map.fitBounds(e.target.getBounds(), { padding: [40, 40] }); },
-        });
-        const p = feature.properties; const s = scoreV3Data[p.code];
-        let popup = `<b>${p.city}</b>`;
-        if (s) {
-          popup += `<br>v3スコア（競合考慮）: <b>${s.v3}</b>`;
-          popup += `<br>v2スコア: ${s.v2}`;
-          popup += `<br>半径1km競合店: ${s.comp1km}店 (ペナルティ×${s.penalty})`;
-        }
-        layer.bindPopup(popup);
-      },
-    });
-
-    // --- [C] 店舗ピン ---
-    const storeMarkers = [];
-    storeData.forEach(s => {
-      if (!s.lat || !s.lng) return;
-      const col = PREF_COLORS[s.prefecture] || '#888';
-      storeMarkers.push(
-        L.circleMarker([s.lat, s.lng], {
-          pane: 'stores', renderer: storeRenderer,
-          radius: 5, fillColor: col, color: '#fff', weight: 1.5, fillOpacity: 0.9,
+    // ---- 買取大吉店舗ピン ----
+    const markers = [];
+    stores.forEach(s => {
+      if (!s.lat||!s.lng) return;
+      const col = PREF_COLORS[s.prefecture]||'#888';
+      markers.push(
+        L.circleMarker([s.lat,s.lng], {
+          pane:'stores', renderer:storeRenderer,
+          radius:5, fillColor:col, color:'#fff', weight:1.5, fillOpacity:0.9,
         }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}`)
       );
     });
-    storeLayer = L.layerGroup(storeMarkers).addTo(map);
+    storeLayer = L.layerGroup(markers).addTo(map);
 
-    // ---- フェーズ2: 分断要素データ + 競合店データ ----
-    setLoadingDetail('追加データ読み込み中...');
-    const [parksData, riversData, mtnsData, competitorData] = await Promise.all([
-      fetch('data/parks.geojson').then(r => r.json()),
-      fetch('data/rivers.geojson').then(r => r.json()),
-      fetch('data/mountains.geojson').then(r => r.json()),
-      fetch('data/competitors_all.json').then(r => r.json()),
-    ]);
+    // ---- レイヤーコントロール（初期 = 最低限のレイヤーのみ）----
+    layerControl = L.control.layers(
+      {},
+      { '📍 買取大吉 店舗': storeLayer },
+      { collapsed: false, position: 'topleft' }
+    ).addTo(map);
 
-    // --- [D] 都市公園（緑・半透明）---
-    parksLayer = L.geoJSON(parksData, {
-      style: {
-        fillColor: '#4CAF50', color: '#388E3C',
-        weight: 0.8, fillOpacity: 0.35, opacity: 0.7,
-      },
-      onEachFeature: (feature, layer) => {
-        const a = feature.properties.area_m2;
-        if (a) layer.bindTooltip(`${(a / 10000).toFixed(1)} ha`, { sticky: true });
-      },
-    }); // デフォルト非表示
-
-    // --- [E] 河川（青線）---
-    riversLayer = L.geoJSON(riversData, {
-      style: feature => ({
-        color: feature.properties.river_class === 1 ? '#1565C0' : '#42A5F5',
-        weight: feature.properties.river_class === 1 ? 2.5 : 1.5,
-        opacity: 0.8,
-      }),
-      onEachFeature: (feature, layer) => {
-        const n = feature.properties.river_name;
-        const c = feature.properties.river_class === 1 ? '一級河川' : '二級河川';
-        if (n && n !== '名称不明') layer.bindTooltip(`${n}（${c}）`, { sticky: true });
-      },
-    }); // デフォルト非表示
-
-    // --- [F] 山地（茶色・半透明）---
-    mountainsLayer = L.geoJSON(mtnsData, {
-      style: {
-        fillColor: '#795548', color: '#5D4037',
-        weight: 0.5, fillOpacity: 0.30, opacity: 0.5,
-      },
-    }).bindTooltip('山地（標高150m以上）', { sticky: true });
-
-    // --- [G] 競合店ピン ---
-    const compMarkers = [];
-    competitorData.forEach(s => {
-      if (!s.latitude || !s.longitude) return;
-      const col = BRAND_COLORS[s.brand] || '#888';
-      compMarkers.push(
-        L.circleMarker([s.latitude, s.longitude], {
-          pane: 'stores', renderer: storeRenderer,
-          radius: 4, fillColor: col, color: '#fff', weight: 1.2, fillOpacity: 0.85,
-        }).bindPopup(
-          `<b>${s.name}</b><br>` +
-          `<span style="color:${col};font-weight:bold">${s.brand}</span><br>` +
-          `${s.prefecture}` + (s.address ? `<br>${s.address}` : '')
-        )
-      );
+    // ---- コロプレス切替セレクタのイベント ----
+    document.getElementById('choropleth-select').addEventListener('change', e => {
+      choroplethMode = e.target.value;
+      refreshChoropleth();
     });
-    competitorLayer = L.layerGroup(compMarkers); // デフォルト非表示
 
-    // ---- レイヤーコントロール ----
-    const overlayLayers = {
-      '👥 女性40歳以上人口': choroplethLayer,
-      '🏪 出店スコア v2 （分断考慮）': scoreLayer,
-      '🏆 出店スコア v3 （競合考慮）': scoreV3Layer,
-      '<span style="color:#4CAF50">■</span> 都市公園 (1ha+)': parksLayer,
-      '<span style="color:#1565C0">─</span> 一・二級河川': riversLayer,
-      '<span style="color:#795548">■</span> 山地 (150m+)': mountainsLayer,
-      '📍 買取大吉 店舗': storeLayer,
-      `<span style="color:#9b59b6">●</span>おたからや` +
-      `<span style="color:#f1c40f"> ●</span>バイセル` +
-      `<span style="color:#1abc9c"> ●</span>なんぼや`: competitorLayer,
-    };
-    const layerControl = L.control.layers({}, overlayLayers,
-      { collapsed: false, position: 'topleft' }).addTo(map);
-
-    // ---- 凡例 初期描画 ----
-    updateLegend();
-
-    // ---- レイヤー切替時に凡例を更新 ----
-    map.on('overlayadd overlayremove', updateLegend);
-
+    refreshLegend();
     document.getElementById('loading').style.display = 'none';
   }
 
-  function updateLegend() {
-    const showPop     = map.hasLayer(choroplethLayer);
-    const showScore   = scoreLayer    && map.hasLayer(scoreLayer);
-    const showScoreV3 = scoreV3Layer  && map.hasLayer(scoreV3Layer);
-    const showParks   = parksLayer    && map.hasLayer(parksLayer);
-    const showRivers  = riversLayer   && map.hasLayer(riversLayer);
-    const showMtns    = mountainsLayer && map.hasLayer(mountainsLayer);
-    const showComp    = competitorLayer && map.hasLayer(competitorLayer);
-    legend.render(showPop, showScore, showScoreV3, showParks, showRivers, showMtns, showComp);
+  // ============================================================
+  // Phase 2: スコアデータ + 分断要素 + 競合店（バックグラウンド）
+  // ============================================================
+  async function phase2() {
+    const bgEl = document.getElementById('bg-status');
+    bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
+    try {
+      // スコアデータ（軽量JSON）
+      const [sv2, sv3] = await Promise.all([
+        fetch('data/score_v2_data.json').then(r=>r.json()),
+        fetch('data/score_v3_data.json').then(r=>r.json()),
+      ]);
+      scoreData   = sv2;
+      scoreV3Data = sv3;
+      // 既にスコアモードが選択されていれば再描画
+      if (choroplethMode==='v2'||choroplethMode==='v3') refreshChoropleth();
+
+      bgEl.textContent = '地理データ読み込み中…';
+
+      // 地理データ（並行）
+      const [parks, rivers, mtns, comp] = await Promise.all([
+        fetch('data/parks.geojson').then(r=>r.json()),
+        fetch('data/rivers.geojson').then(r=>r.json()),
+        fetch('data/mountains.geojson').then(r=>r.json()),
+        fetch('data/competitors_all.json').then(r=>r.json()),
+      ]);
+
+      // ---- 都市公園 ----
+      parksLayer = L.geoJSON(parks, {
+        style: { fillColor:'#4CAF50', color:'#388E3C', weight:0.8, fillOpacity:0.35, opacity:0.7 },
+        onEachFeature: (f,l) => { const a=f.properties.area_m2; if(a) l.bindTooltip(`${(a/10000).toFixed(1)} ha`,{sticky:true}); },
+      });
+
+      // ---- 河川 ----
+      riversLayer = L.geoJSON(rivers, {
+        style: f => ({
+          color: f.properties.river_class===1 ? '#1565C0' : '#42A5F5',
+          weight: f.properties.river_class===1 ? 2.5 : 1.5, opacity: 0.8,
+        }),
+        onEachFeature: (f,l) => {
+          const n=f.properties.river_name, c=f.properties.river_class===1?'一級河川':'二級河川';
+          if(n&&n!=='名称不明') l.bindTooltip(`${n}（${c}）`,{sticky:true});
+        },
+      });
+
+      // ---- 山地 ----
+      mountainsLayer = L.geoJSON(mtns, {
+        style: { fillColor:'#795548', color:'#5D4037', weight:0.5, fillOpacity:0.30, opacity:0.5 },
+      }).bindTooltip('山地（標高150m以上）',{sticky:true});
+
+      // ---- 競合店マーカー（Canvas = 高速）----
+      const compMarkers = [];
+      comp.forEach(s => {
+        if (!s.latitude||!s.longitude) return;
+        const col = BRAND_COLORS[s.brand]||'#888';
+        compMarkers.push(
+          L.circleMarker([s.latitude,s.longitude], {
+            // pane/renderer 省略 → map の preferCanvas:true で Canvas 描画（高速）
+            radius:4, fillColor:col, color:'#fff', weight:1.2, fillOpacity:0.85,
+          }).bindPopup(`<b>${s.name}</b><br><span style="color:${col};font-weight:bold">${s.brand}</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}`)
+        );
+      });
+      competitorLayer = L.layerGroup(compMarkers);
+
+      // レイヤーコントロールに追加
+      layerControl.addOverlay(parksLayer,      '<span style="color:#4CAF50">■</span> 都市公園 (1ha+)');
+      layerControl.addOverlay(riversLayer,     '<span style="color:#1565C0">─</span> 一・二級河川');
+      layerControl.addOverlay(mountainsLayer,  '<span style="color:#795548">■</span> 山地 (150m+)');
+      layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
+
+      map.on('overlayadd overlayremove', refreshLegend);
+
+      bgEl.style.display = 'none';
+    } catch(err) {
+      bgEl.textContent = '追加データ読込失敗: ' + err.message;
+      console.error(err);
+    }
   }
 
-  loadAll().catch(err => {
-    document.getElementById('loading').textContent = 'データ読み込み失敗: ' + err.message;
-    console.error(err);
-  });
+  // ============================================================
+  // 起動
+  // ============================================================
+  phase1()
+    .then(() => phase2())
+    .catch(err => {
+      document.getElementById('loading').textContent = '読み込み失敗: ' + err.message;
+      console.error(err);
+    });
   </script>
 </body>
 </html>
