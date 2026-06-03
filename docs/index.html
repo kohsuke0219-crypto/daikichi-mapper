@@ -46,6 +46,19 @@
       justify-content: space-between; gap: 10px;
     }
     .legend-toggle { font-size: 11px; color: #666; }
+    /* ---- 出店候補ランキングピン ---- */
+    .rank-pin-wrap { background: transparent !important; border: none !important; }
+    .rank-pin {
+      border-radius: 50%; color: #fff; font-weight: bold; text-align: center;
+      border: 2.5px solid #fff;
+      box-shadow: 0 2px 7px rgba(0,0,0,.55);
+      font-family: Arial, sans-serif;
+    }
+    .rank-pin.top1 { border-width: 3px; box-shadow: 0 0 0 2px #FFD700, 0 3px 9px rgba(0,0,0,.6); }
+    .rank-crown {
+      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+      font-size: 17px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4));
+    }
     .legend .legend-body { margin-top: 6px; }
     .legend.collapsed .legend-body { display: none; }
     .legend.collapsed { padding: 6px 12px; }
@@ -127,6 +140,9 @@
   // 生活動線（スーパー・複合施設）= マゼンタ / 新規オープン予定 = 金/琥珀
   const LIFELINE_COLOR = '#DB2777';
   const NEWOPEN_COLOR  = '#D4A017';
+  // 出店候補ランキング: 戦略①=濃ブルー / 戦略②=濃グリーン
+  const RANK1_COLOR = '#1D4ED8';
+  const RANK2_COLOR = '#047857';
   const fmtN = n => (n||0).toLocaleString('ja-JP');
 
   // 座標から Googleマップ / ストリートビュー へのリンクHTMLを生成
@@ -139,6 +155,51 @@
     + `target="_blank" rel="noopener" style="color:#1a73e8;font-weight:bold">🚶 ストリートビュー</a>`
     + `</div>`;
 
+  // 出店候補ランキング: 番号入りdivIconを生成（1位は王冠＋大きめ）
+  function rankIcon(rank, color) {
+    const top = rank === 1;
+    const size = top ? 40 : 30;
+    const crown = top ? '<div class="rank-crown">👑</div>' : '';
+    return L.divIcon({
+      className: 'rank-pin-wrap',
+      html: crown + `<div class="rank-pin${top ? ' top1' : ''}" `
+          + `style="background:${color};width:${size}px;height:${size}px;`
+          + `line-height:${size - 5}px;font-size:${top ? 18 : 14}px;">${rank}</div>`,
+      iconSize: [size, size], iconAnchor: [size/2, size/2],
+    });
+  }
+
+  // ランキングピンのポップアップHTML（スコア内訳・需要内訳・最寄り競合・商圏人口・近接スーパー）
+  function rankPopup(r, strat) {
+    const m = r.metrics, dd = r.demand_detail;
+    const head = strat === 1 ? '出店候補 戦略①' : '出店候補 戦略②';
+    const hcol = strat === 1 ? RANK1_COLOR : RANK2_COLOR;
+    let h = `<div style="font-size:12px;min-width:210px">`;
+    h += `<div style="color:${hcol};font-weight:bold">${head}　第${r.rank}位</div>`;
+    h += `<b>${r.name}</b><br><span style="color:#555">${r.chain}・${r.category}</span><br>`;
+    h += `${r.prefecture}${r.city}<br>`;
+    h += `<div style="margin:4px 0;font-weight:bold">総合スコア: <span style="color:${hcol};font-size:14px">${r.total_score}</span> /100</div>`;
+    h += `<table style="font-size:11px;border-collapse:collapse">`;
+    const rows = [
+      ['スーパー近接', m.super_proximity], ['競合の少なさ', m.competitor_scarcity],
+      ['40歳以上女性人口', m.women_pop], ['カニバリ回避', m.cannibal_avoid],
+      ['ロードサイド適性', m.roadside], ['需要の裏付け(複合)', m.demand_backing],
+    ];
+    rows.forEach(([k,v]) => { h += `<tr><td style="padding:0 6px 0 0">${k}</td><td><b>${v}</b>/10</td></tr>`; });
+    h += `</table>`;
+    h += `<div style="margin-top:4px;border-top:1px solid #ddd;padding-top:3px">`;
+    h += `需要内訳: 漁業${dd['漁業']} / 製造業${dd['製造業']} / 農業${dd['農業']} / 商業${dd['商業']}<br>`;
+    h += `<b>効いた裏付け: ${dd.top_source}</b>`;
+    if (strat === 2 && r.dead_ocean) h += ` <span style="color:#c0392b">⚠デッドオーシャン懸念</span>`;
+    h += `</div>`;
+    h += `<div style="margin-top:3px">最寄り競合: ${r.nearest_comp_km}km（2km内${r.n_comp_2km}店）<br>`;
+    h += `推定商圏(女性40+): ${fmtN(r.women_40plus)}人 / 市区町村人口 ${fmtN(r.muni_pop)}人<br>`;
+    if (r.near_super_names && r.near_super_names.length)
+      h += `近接スーパー: ${r.near_super_names.slice(0,3).join('、')}`;
+    h += `</div>${mapsLinks(r.lat, r.lng)}</div>`;
+    return h;
+  }
+
   // ============================================================
   // 地図初期化
   // ============================================================
@@ -149,6 +210,10 @@
   map.createPane('stores');
   map.getPane('stores').style.zIndex = 650;
   const storeRenderer = L.svg({ pane: 'stores' });
+
+  // 出店候補ランキングピン専用ペイン（全ピン中で最前面・人口色塗りに埋もれない）
+  map.createPane('ranking');
+  map.getPane('ranking').style.zIndex = 700;
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -217,7 +282,7 @@
     }
     return this._div;
   };
-  legend.update = function(mode, showComp, showLifeline, showNewOpen) {
+  legend.update = function(mode, showComp, showLifeline, showNewOpen, showRank1, showRank2) {
     let h = '';
     if (mode==='pop') {
       h += '<h4>女性40歳以上人口</h4>';
@@ -241,6 +306,13 @@
       if (showNewOpen)
         h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
     }
+    if (showRank1 || showRank2) {
+      h += '<div class="sep"></div><h4>出店候補ランキング</h4>';
+      if (showRank1)
+        h += `<span class="dot" style="background:${RANK1_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK1_COLOR}"></span>①スーパー近郊 上位10<br>`;
+      if (showRank2)
+        h += `<span class="dot" style="background:${RANK2_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK2_COLOR}"></span>②田舎ブルーオーシャン 上位10<br>`;
+    }
     this._body.innerHTML = h;
   };
   legend.addTo(map);
@@ -252,6 +324,7 @@
   let choroplethLayer = null;
   let storeLayer, competitorLayer;
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
+  let ranking1Layer = null, ranking2Layer = null;   // 出店候補ランキング①/②
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -283,6 +356,8 @@
       competitorLayer && map.hasLayer(competitorLayer),
       lifelineLayer && map.hasLayer(lifelineLayer),
       newOpeningLayer && map.hasLayer(newOpeningLayer),
+      ranking1Layer && map.hasLayer(ranking1Layer),
+      ranking2Layer && map.hasLayer(ranking2Layer),
     );
   }
 
@@ -363,10 +438,12 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen] = await Promise.all([
+      const [comp, lifeline, newOpen, rank1, rank2] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
+        fetch('data/ranking_strategy1.json').then(r=>r.json()),
+        fetch('data/ranking_strategy2.json').then(r=>r.json()),
       ]);
 
       // ---- 競合店マーカー ----
@@ -412,10 +489,30 @@
       });
       newOpeningLayer = L.layerGroup(noMarkers);
 
+      // ---- 出店候補ランキング①/②（番号入り大型ピン・rankingペインz700で最前面）----
+      function buildRanking(arr, color, strat) {
+        const markers = [];
+        arr.forEach(r => {
+          if (!r.lat || !r.lng) return;
+          markers.push(
+            L.marker([r.lat, r.lng], { icon: rankIcon(r.rank, color), pane: 'ranking',
+                                       zIndexOffset: 1000 + (50 - r.rank) })
+              .bindTooltip(`第${r.rank}位 ${r.name}（${r.prefecture}${r.city}）総合${r.total_score}`,
+                           { direction: 'top', offset: [0, -16] })
+              .bindPopup(rankPopup(r, strat), { maxWidth: 280 })
+          );
+        });
+        return L.layerGroup(markers);
+      }
+      ranking1Layer = buildRanking(rank1, RANK1_COLOR, 1).addTo(map);
+      ranking2Layer = buildRanking(rank2, RANK2_COLOR, 2).addTo(map);
+
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
+      layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補ランキング①（スーパー近郊）`);
+      layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補ランキング②（田舎ブルーオーシャン）`);
 
       map.on('overlayadd overlayremove', refreshLegend);
 
