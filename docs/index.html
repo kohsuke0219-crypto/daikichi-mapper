@@ -111,6 +111,9 @@
   const BRAND_COLORS = {
     'おたからや':'#9b59b6','バイセル':'#f1c40f','なんぼや':'#1abc9c'
   };
+  // 生活動線（スーパー・複合施設）= マゼンタ / 新規オープン予定 = 金/琥珀
+  const LIFELINE_COLOR = '#DB2777';
+  const NEWOPEN_COLOR  = '#D4A017';
   // エリアタイプ4分類カラー
   const AREA_TYPE_COLORS = {
     '超都心':'#c0392b','都心住宅':'#e67e22','郊外住宅':'#f1c40f','ロードサイド':'#27ae60'
@@ -198,7 +201,7 @@
   legend.onAdd = function() {
     this._div = L.DomUtil.create('div','legend'); return this._div;
   };
-  legend.update = function(mode, showParks, showRivers, showMtns, showComp) {
+  legend.update = function(mode, showParks, showRivers, showMtns, showComp, showLifeline, showNewOpen) {
     let h = '';
     if (mode==='pop') {
       h += '<h4>女性40歳以上人口</h4>';
@@ -234,6 +237,13 @@
       for (const [k,v] of Object.entries(BRAND_COLORS))
         h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
     }
+    if (showLifeline || showNewOpen) {
+      h += '<div class="sep"></div>';
+      if (showLifeline)
+        h += `<h4>生活動線（スーパー・複合施設）</h4><span class="dot" style="background:${LIFELINE_COLOR};border-color:${LIFELINE_COLOR}"></span>スーパー・複合施設<br>`;
+      if (showNewOpen)
+        h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
+    }
     this._div.innerHTML = h;
   };
   legend.addTo(map);
@@ -245,6 +255,7 @@
   let scoreData = {}, scoreV3Data = {}, scoreV4Data = {};
   let choroplethLayer = null;
   let storeLayer, parksLayer, riversLayer, mountainsLayer, competitorLayer;
+  let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
   let stationsLayer = null, roadsLayer = null; // ズーム12+でのみ表示(rail/roadペイン)
   let layerControl = null;
   let choroplethMode = 'v4';   // 'v4' | 'type' | 'pop' | 'v2' | 'v3' | 'none'
@@ -284,6 +295,8 @@
       riversLayer  && map.hasLayer(riversLayer),
       mountainsLayer && map.hasLayer(mountainsLayer),
       competitorLayer && map.hasLayer(competitorLayer),
+      lifelineLayer && map.hasLayer(lifelineLayer),
+      newOpeningLayer && map.hasLayer(newOpeningLayer),
     );
   }
 
@@ -373,13 +386,15 @@
       bgEl.textContent = '地理データ読み込み中…';
 
       // 地理データ（並行）
-      const [parks, rivers, mtns, comp, stationsGeo, roadsGeo] = await Promise.all([
+      const [parks, rivers, mtns, comp, stationsGeo, roadsGeo, lifeline, newOpen] = await Promise.all([
         fetch('data/parks.geojson').then(r=>r.json()),
         fetch('data/rivers.geojson').then(r=>r.json()),
         fetch('data/mountains.geojson').then(r=>r.json()),
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/rail_stations.geojson').then(r=>r.json()),
         fetch('data/major_roads.geojson').then(r=>r.json()),
+        fetch('data/lifeline_stores.json').then(r=>r.json()),
+        fetch('data/new_openings.json').then(r=>r.json()),
       ]);
 
       // ---- 都市公園 ----
@@ -439,6 +454,33 @@
         onEachFeature: (f,l) => { const n=f.properties.name||f.properties.ref; if(n) l.bindTooltip(`国道${n}`,{sticky:true}); },
       });
 
+      // ---- 生活動線（スーパー・複合施設）#DB2777 半透明・一回り小さめ ----
+      // storesペイン(zIndex650)+SVGレンダラーで人口色塗りより必ず上＆空白透過
+      const llMarkers = [];
+      lifeline.forEach(s => {
+        if (!s.lat||!s.lng) return;
+        llMarkers.push(
+          L.circleMarker([s.lat,s.lng], {
+            pane:'stores', renderer:storeRenderer,
+            radius:3, fillColor:LIFELINE_COLOR, color:'#fff', weight:0.6, fillOpacity:0.65,
+          }).bindTooltip(`${s.name}<br><span style="color:#555">${s.category}・${s.chain}</span>`,{sticky:true})
+        );
+      });
+      lifelineLayer = L.layerGroup(llMarkers);
+
+      // ---- 新規オープン予定 #D4A017 ----
+      const noMarkers = [];
+      newOpen.forEach(s => {
+        if (!s.lat||!s.lng) return;
+        noMarkers.push(
+          L.circleMarker([s.lat,s.lng], {
+            pane:'stores', renderer:storeRenderer,
+            radius:5, fillColor:NEWOPEN_COLOR, color:'#7a5c00', weight:1.2, fillOpacity:0.9,
+          }).bindTooltip(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span><br>オープン: ${s.opening||'時期未定'}`,{sticky:true})
+        );
+      });
+      newOpeningLayer = L.layerGroup(noMarkers);
+
       // レイヤーコントロールに追加
       layerControl.addOverlay(parksLayer,      '<span style="color:#4CAF50">■</span> 都市公園 (1ha+)');
       layerControl.addOverlay(riversLayer,     '<span style="color:#1565C0">─</span> 一・二級河川');
@@ -446,6 +488,8 @@
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(stationsLayer,   '<span style="color:#111">●</span> 鉄道駅 (ズーム12+)');
       layerControl.addOverlay(roadsLayer,      '<span style="color:#ff8c00">─</span> 主要道路 (ズーム12+)');
+      layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
+      layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
 
       applyZoomGate(); // 初期ズームに応じて駅・道路ペインの表示可否を設定
       map.on('overlayadd overlayremove', refreshLegend);
