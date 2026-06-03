@@ -1,5 +1,16 @@
 [
   {
+    "name": "調布駅前天神通り店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.6543283,
+    "longitude": 139.5446984,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e8%aa%bf%e5%b8%83%e9%a7%85%e5%89%8d%e5%a4%a9%e7%a5%9e%e9%80%9a%e3%82%8a%e5%ba%97/"
+  },
+  {
     "name": "王子駅前店",
     "brand": "おたからや",
     "address": "",
@@ -385,7 +396,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/%e6%98%8e%e5%a4%a7%e5%89%8d%e5%ba%97-2/"
   },
   {
-    "name": "アクロスプラザ八王子大船店",
+    "name": "アクロスプラザ<br class=\"is-sp\">八王子大船店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.62984483351004,
@@ -847,7 +858,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/chofu-somechi/"
   },
   {
-    "name": "イオンフードスタイル小平店",
+    "name": "<br class=\"is-sp\">イオンフードスタイル小平店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.743287053979216,
@@ -1276,7 +1287,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/seiyu-hibarigaoka/"
   },
   {
-    "name": "イトーヨーカドー多摩センター店",
+    "name": "イトーヨーカドー<br class=\"is-sp\">多摩センター店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.62364191112785,
@@ -1848,6 +1859,28 @@
     "detail_url": "https://www.otakaraya.jp/shop/%e4%b8%ad%e7%9b%ae%e9%bb%92%e9%a7%85%e5%89%8d%e5%ba%97/"
   },
   {
+    "name": "八王子店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.65786279,
+    "longitude": 139.34198379,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/7462/"
+  },
+  {
+    "name": "西八王子店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.6570482,
+    "longitude": 139.31209194,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/95135/"
+  },
+  {
     "name": "ぐりーんうぉーく店",
     "brand": "おたからや",
     "address": "",
@@ -1912,61 +1945,6 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/475/"
-  },
-  {
-    "name": "八王子店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.65786279,
-    "longitude": 139.34198379,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/7462/"
-  },
-  {
-    "name": "西八王子店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.6570482,
-    "longitude": 139.31209194,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/95135/"
-  },
-  {
-    "name": "銀座松屋通り店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.67254001727209,
-    "longitude": 139.76491725950817,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/ginza/"
-  },
-  {
-    "name": "新富町店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.67154419,
-    "longitude": 139.77489649,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/88297/"
-  },
-  {
-    "name": "日本橋人形町店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.68619575,
-    "longitude": 139.7854769,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/50258/"
   },
   {
     "name": "東武練馬店",
@@ -2046,48 +2024,37 @@
     "detail_url": "https://www.otakaraya.jp/shop/5368/"
   },
   {
-    "name": "成城学園前駅前店",
+    "name": "銀座松屋通り店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.641026568859786,
-    "longitude": 139.59981110239806,
+    "latitude": 35.67254001727209,
+    "longitude": 139.76491725950817,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/seijogakuenmae/"
+    "detail_url": "https://www.otakaraya.jp/shop/ginza/"
   },
   {
-    "name": "二子玉川店",
+    "name": "新富町店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.61307297,
-    "longitude": 139.62588977,
+    "latitude": 35.67154419,
+    "longitude": 139.77489649,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/12711/"
+    "detail_url": "https://www.otakaraya.jp/shop/88297/"
   },
   {
-    "name": "千歳烏山店",
+    "name": "日本橋人形町店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.66715966,
-    "longitude": 139.60232795,
+    "latitude": 35.68619575,
+    "longitude": 139.7854769,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/16708/"
-  },
-  {
-    "name": "等々力店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.6078178,
-    "longitude": 139.64712629,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/94979/"
+    "detail_url": "https://www.otakaraya.jp/shop/50258/"
   },
   {
     "name": "並木橋明治通り店",
@@ -2134,70 +2101,48 @@
     "detail_url": "https://www.otakaraya.jp/shop/sangenjaya/"
   },
   {
-    "name": "十条店",
+    "name": "成城学園前駅前店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.76534617,
-    "longitude": 139.72134181,
+    "latitude": 35.641026568859786,
+    "longitude": 139.59981110239806,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/65075/"
+    "detail_url": "https://www.otakaraya.jp/shop/seijogakuenmae/"
   },
   {
-    "name": "赤羽店",
+    "name": "二子玉川店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.77990259,
-    "longitude": 139.72091074,
+    "latitude": 35.61307297,
+    "longitude": 139.62588977,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/56052/"
+    "detail_url": "https://www.otakaraya.jp/shop/12711/"
   },
   {
-    "name": "尾久店",
+    "name": "千歳烏山店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.74595227,
-    "longitude": 139.75718416,
+    "latitude": 35.66715966,
+    "longitude": 139.60232795,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/24300/"
+    "detail_url": "https://www.otakaraya.jp/shop/16708/"
   },
   {
-    "name": "大山店",
+    "name": "等々力店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.748306,
-    "longitude": 139.70163029,
+    "latitude": 35.6078178,
+    "longitude": 139.64712629,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/33019/"
-  },
-  {
-    "name": "成増店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.77754518,
-    "longitude": 139.6320184,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/33698/"
-  },
-  {
-    "name": "大山東町店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.74949489,
-    "longitude": 139.70676036,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/77545/"
+    "detail_url": "https://www.otakaraya.jp/shop/94979/"
   },
   {
     "name": "志村三丁目店",
@@ -2253,6 +2198,72 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/10865/"
+  },
+  {
+    "name": "長原駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.60270295,
+    "longitude": 139.69671114,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/39604/"
+  },
+  {
+    "name": "幡ヶ谷店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.67804665,
+    "longitude": 139.67769914,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/10865/"
+  },
+  {
+    "name": "十条店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.76534617,
+    "longitude": 139.72134181,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/65075/"
+  },
+  {
+    "name": "赤羽店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.77990259,
+    "longitude": 139.72091074,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/56052/"
+  },
+  {
+    "name": "尾久店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.74595227,
+    "longitude": 139.75718416,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/24300/"
+  },
+  {
+    "name": "大山店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.748306,
+    "longitude": 139.70163029,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/33019/"
   },
   {
     "name": "浅草店",
@@ -2354,39 +2365,6 @@
     "detail_url": "https://www.otakaraya.jp/shop/86211/"
   },
   {
-    "name": "新宿西口店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.68935146540131,
-    "longitude": 139.69765124095858,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/shinjuku-nishiguchi/"
-  },
-  {
-    "name": "祐天寺店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.63901539,
-    "longitude": 139.69417135,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/70948/"
-  },
-  {
-    "name": "パークシティ武蔵小山ザモール店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.6198738819777,
-    "longitude": 139.70422544998453,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/pc-musashikoyama/"
-  },
-  {
     "name": "目黒店",
     "brand": "おたからや",
     "address": "",
@@ -2418,6 +2396,50 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/20258/"
+  },
+  {
+    "name": "新宿西口店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.68935146540131,
+    "longitude": 139.69765124095858,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/shinjuku-nishiguchi/"
+  },
+  {
+    "name": "祐天寺店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.63901539,
+    "longitude": 139.69417135,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/70948/"
+  },
+  {
+    "name": "パークシティ<br class=\"is-sp\">武蔵小山ザモール店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.6198738819777,
+    "longitude": 139.70422544998453,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/pc-musashikoyama/"
+  },
+  {
+    "name": "南林間西口店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.4939111,
+    "longitude": 139.447236,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%8d%97%e6%9e%97%e9%96%93%e8%a5%bf%e5%8f%a3%e5%ba%97/"
   },
   {
     "name": "高津駅西口店",
@@ -2728,7 +2750,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/%e8%be%bb%e5%a0%82%e5%8c%97%e5%8f%a3%e5%ba%97/"
   },
   {
-    "name": "コースカベイサイド横須賀店",
+    "name": "<br class=\"is-sp\">コースカベイサイド横須賀店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.28293137676416,
@@ -2904,7 +2926,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/kamiooka-chuo/"
   },
   {
-    "name": "イトーヨーカドー相模原店",
+    "name": "<br class=\"is-sp\">イトーヨーカドー相模原店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.51537982610524,
@@ -3443,39 +3465,6 @@
     "detail_url": "https://www.otakaraya.jp/shop/97918/"
   },
   {
-    "name": "ラ・フロール橋本店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.59734095,
-    "longitude": 139.33814227,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/81856/"
-  },
-  {
-    "name": "寒川駅前店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.36809766,
-    "longitude": 139.38702184,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/26580/"
-  },
-  {
-    "name": "ライズモールひばりが丘店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.48040789,
-    "longitude": 139.43259613,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/57243/"
-  },
-  {
     "name": "久里浜店",
     "brand": "おたからや",
     "address": "",
@@ -3518,6 +3507,105 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/35600/"
+  },
+  {
+    "name": "ラ・フロール橋本店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.59734095,
+    "longitude": 139.33814227,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/81856/"
+  },
+  {
+    "name": "寒川駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.36809766,
+    "longitude": 139.38702184,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/26580/"
+  },
+  {
+    "name": "ライズモールひばりが丘店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.48040789,
+    "longitude": 139.43259613,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/57243/"
+  },
+  {
+    "name": "田名店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.55251284,
+    "longitude": 139.33964606,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/29067/"
+  },
+  {
+    "name": "溝の口店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.6009057,
+    "longitude": 139.61400351,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/42841/"
+  },
+  {
+    "name": "秦野店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.37458871,
+    "longitude": 139.22747278,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/19538/"
+  },
+  {
+    "name": "元住吉店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.56557268,
+    "longitude": 139.6508102,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/66744/"
+  },
+  {
+    "name": "片倉店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.48693288,
+    "longitude": 139.60399469,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/68596/"
+  },
+  {
+    "name": "中野島店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.63220912,
+    "longitude": 139.55174946,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/24927/"
   },
   {
     "name": "たちばな通り店",
@@ -3608,81 +3696,59 @@
     "detail_url": "https://www.otakaraya.jp/shop/40000/"
   },
   {
-    "name": "田名店",
+    "name": "柿生店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.55251284,
-    "longitude": 139.33964606,
+    "latitude": 35.58794863,
+    "longitude": 139.49767291,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/29067/"
+    "detail_url": "https://www.otakaraya.jp/shop/21223/"
   },
   {
-    "name": "溝の口店",
+    "name": "中央林間店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.6009057,
-    "longitude": 139.61400351,
+    "latitude": 35.5069009,
+    "longitude": 139.44294157,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/42841/"
+    "detail_url": "https://www.otakaraya.jp/shop/74590/"
   },
   {
-    "name": "秦野店",
+    "name": "早川城山店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.37458871,
-    "longitude": 139.22747278,
+    "latitude": 35.44479063,
+    "longitude": 139.42212845,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/19538/"
+    "detail_url": "https://www.otakaraya.jp/shop/22164/"
   },
   {
-    "name": "元住吉店",
+    "name": "藤沢店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.56557268,
-    "longitude": 139.6508102,
+    "latitude": 35.340438418588754,
+    "longitude": 139.48581174110672,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/66744/"
+    "detail_url": "https://www.otakaraya.jp/shop/fujisawa/"
   },
   {
-    "name": "片倉店",
+    "name": "弘明寺駅前店",
     "brand": "おたからや",
     "address": "",
-    "latitude": 35.48693288,
-    "longitude": 139.60399469,
+    "latitude": 35.4244208,
+    "longitude": 139.59797375,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/68596/"
-  },
-  {
-    "name": "中野島店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.63220912,
-    "longitude": 139.55174946,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/24927/"
-  },
-  {
-    "name": "鹿島田店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.55161116,
-    "longitude": 139.6738282,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/70323/"
+    "detail_url": "https://www.otakaraya.jp/shop/52910/"
   },
   {
     "name": "相鉄横浜駅前店",
@@ -3762,105 +3828,6 @@
     "detail_url": "https://www.otakaraya.jp/shop/61345/"
   },
   {
-    "name": "柿生店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.58794863,
-    "longitude": 139.49767291,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/21223/"
-  },
-  {
-    "name": "中央林間店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.5069009,
-    "longitude": 139.44294157,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/74590/"
-  },
-  {
-    "name": "早川城山店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.44479063,
-    "longitude": 139.42212845,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/22164/"
-  },
-  {
-    "name": "藤沢店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.340438418588754,
-    "longitude": 139.48581174110672,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/fujisawa/"
-  },
-  {
-    "name": "弘明寺駅前店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.4244208,
-    "longitude": 139.59797375,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/52910/"
-  },
-  {
-    "name": "横浜本店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.46914120356949,
-    "longitude": 139.6179943246817,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/yokohama-honten/"
-  },
-  {
-    "name": "上大岡本店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.4072431722307,
-    "longitude": 139.59540100690404,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/kamiooka/"
-  },
-  {
-    "name": "大和店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.4685317182259,
-    "longitude": 139.46309231967305,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/yamato/"
-  },
-  {
-    "name": "鶴ヶ峰店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.47533159624843,
-    "longitude": 139.54593866405713,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/tsurugamine/"
-  },
-  {
     "name": "中山南口店",
     "brand": "おたからや",
     "address": "",
@@ -3936,6 +3903,61 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/yokosukachuo/"
+  },
+  {
+    "name": "横浜本店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.46914120356949,
+    "longitude": 139.6179943246817,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/yokohama-honten/"
+  },
+  {
+    "name": "上大岡本店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.4072431722307,
+    "longitude": 139.59540100690404,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/kamiooka/"
+  },
+  {
+    "name": "大和店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.4685317182259,
+    "longitude": 139.46309231967305,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/yamato/"
+  },
+  {
+    "name": "鶴ヶ峰店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.47533159624843,
+    "longitude": 139.54593866405713,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/tsurugamine/"
+  },
+  {
+    "name": "東所沢店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.7909091,
+    "longitude": 139.4956684,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%9d%b1%e6%89%80%e6%b2%a2%e5%ba%97/"
   },
   {
     "name": "岩槻城町店",
@@ -4873,6 +4895,17 @@
     "detail_url": "https://www.otakaraya.jp/shop/soka-akos/"
   },
   {
+    "name": "寳登山店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.09796052,
+    "longitude": 139.11017042,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/3256/"
+  },
+  {
     "name": "市役所南2号店",
     "brand": "おたからや",
     "address": "",
@@ -4915,50 +4948,6 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/34595/"
-  },
-  {
-    "name": "寳登山店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 36.09796052,
-    "longitude": 139.11017042,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/3256/"
-  },
-  {
-    "name": "本庄・児玉店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 36.18504963,
-    "longitude": 139.1476659,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/8093/"
-  },
-  {
-    "name": "新所沢店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.80661176,
-    "longitude": 139.45462731,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/24794/"
-  },
-  {
-    "name": "東浦和店",
-    "brand": "おたからや",
-    "address": "",
-    "latitude": 35.8676563,
-    "longitude": 139.70284594,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://www.otakaraya.jp/shop/97559/"
   },
   {
     "name": "大和田駅前店",
@@ -5005,6 +4994,39 @@
     "detail_url": "https://www.otakaraya.jp/shop/81265/"
   },
   {
+    "name": "本庄・児玉店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.18504963,
+    "longitude": 139.1476659,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/8093/"
+  },
+  {
+    "name": "新所沢店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.80661176,
+    "longitude": 139.45462731,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/24794/"
+  },
+  {
+    "name": "東浦和店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.8676563,
+    "longitude": 139.70284594,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/97559/"
+  },
+  {
     "name": "熊谷店",
     "brand": "おたからや",
     "address": "",
@@ -5038,7 +5060,18 @@
     "detail_url": "https://www.otakaraya.jp/shop/73304/"
   },
   {
-    "name": "イオンスタイル検見川浜店",
+    "name": "あすみが丘店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.521847329456314,
+    "longitude": 140.2734441226467,
+    "prefecture": "千葉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/asumigaoka/"
+  },
+  {
+    "name": "<br class=\"is-sp\">イオンスタイル検見川浜店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.63775772071413,
@@ -5291,7 +5324,7 @@
     "detail_url": "https://www.otakaraya.jp/shop/%e3%82%89%e3%82%89%e3%83%86%e3%83%a9%e3%82%b9tokyo-bay%e5%ba%97/"
   },
   {
-    "name": "ジョイフル本田千葉ニュータウン店",
+    "name": "ジョイフル本田<br class=\"is-sp\">千葉ニュータウン店",
     "brand": "おたからや",
     "address": "",
     "latitude": 35.8066753527217,
@@ -5938,5 +5971,456 @@
     "city": "",
     "phone": "",
     "detail_url": "https://www.otakaraya.jp/shop/75518/"
+  },
+  {
+    "name": "サンユーストアー千波店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.354058688801274,
+    "longitude": 140.44412907583188,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/ss-senba/"
+  },
+  {
+    "name": "たつのこ店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.9116106,
+    "longitude": 140.1823263,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e3%81%9f%e3%81%a4%e3%81%ae%e3%81%93%e5%ba%97/"
+  },
+  {
+    "name": "牛久駅前東店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.9779848,
+    "longitude": 140.1427312,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e7%89%9b%e4%b9%85%e9%a7%85%e5%89%8d%e6%9d%b1%e5%ba%97/"
+  },
+  {
+    "name": "辺田店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.0407847,
+    "longitude": 139.891176,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e8%be%ba%e7%94%b0%e5%ba%97/"
+  },
+  {
+    "name": "平須店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.3287061,
+    "longitude": 140.4404073,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%b9%b3%e9%a0%88%e5%ba%97/"
+  },
+  {
+    "name": "京成百貨店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.378118166146265,
+    "longitude": 140.4643225663578,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/mito-keisei/"
+  },
+  {
+    "name": "鹿嶋宮中店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.96562444,
+    "longitude": 140.64065494,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e9%b9%bf%e5%b6%8b%e5%ae%ae%e4%b8%ad%e5%ba%97/"
+  },
+  {
+    "name": "西光地店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.41723544,
+    "longitude": 140.53254091,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e8%a5%bf%e5%85%89%e5%9c%b0%e5%ba%97/"
+  },
+  {
+    "name": "日立森山店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.52199219,
+    "longitude": 140.62002564,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%97%a5%e7%ab%8b%e6%a3%ae%e5%b1%b1%e5%ba%97/"
+  },
+  {
+    "name": "ライフガーデンみどりの店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.027362844192744,
+    "longitude": 140.05730007939448,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/lg-midorino/"
+  },
+  {
+    "name": "日立田尻店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.62698987,
+    "longitude": 140.67406042,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%97%a5%e7%ab%8b%e7%94%b0%e5%b0%bb%e5%ba%97/"
+  },
+  {
+    "name": "349バイパス店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.43674069,
+    "longitude": 140.50014462,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/349%e3%83%90%e3%82%a4%e3%83%91%e3%82%b9%e5%ba%97/"
+  },
+  {
+    "name": "袴塚店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.39866595,
+    "longitude": 140.44278904,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e8%a2%b4%e5%a1%9a%e5%ba%97/"
+  },
+  {
+    "name": "水戸オーパ店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.37119373,
+    "longitude": 140.4742679,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%b0%b4%e6%88%b8%e3%82%aa%e3%83%bc%e3%83%91%e5%ba%97/"
+  },
+  {
+    "name": "BRANCH守谷店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.95264879,
+    "longitude": 139.99363325,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/branch%e5%ae%88%e8%b0%b7%e5%ba%97/"
+  },
+  {
+    "name": "幸町店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.59141826,
+    "longitude": 140.65854655,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%b9%b8%e7%94%ba%e5%ba%97/"
+  },
+  {
+    "name": "戸頭店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.9212411,
+    "longitude": 140.00955014,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%88%b8%e9%a0%ad%e5%ba%97/"
+  },
+  {
+    "name": "江戸崎ショッピングセンター店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.9591096838351,
+    "longitude": 140.3158395948062,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/edosaki-sc/"
+  },
+  {
+    "name": "セイミヤ神栖店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.91223270692212,
+    "longitude": 140.64121607724726,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/s-kamisu/"
+  },
+  {
+    "name": "かわねや木崎店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.53323517567461,
+    "longitude": 140.52355795341114,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/k-kizaki/"
+  },
+  {
+    "name": "日立北店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.62209546630499,
+    "longitude": 140.67890261757054,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/hitachikita/"
+  },
+  {
+    "name": "トナリエつくばスクエア店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.08190057439153,
+    "longitude": 140.11151190432034,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/tonarie-tsukuba/"
+  },
+  {
+    "name": "リボンとりで店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.89638947579327,
+    "longitude": 140.0622828755898,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/ribon-toride/"
+  },
+  {
+    "name": "取手駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.89402718,
+    "longitude": 140.06315664,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%8f%96%e6%89%8b%e9%a7%85%e5%89%8d%e5%ba%97/"
+  },
+  {
+    "name": "下辺見店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.19385211,
+    "longitude": 139.73083573,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e4%b8%8b%e8%be%ba%e8%a6%8b%e5%ba%97/"
+  },
+  {
+    "name": "神立店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.11406246,
+    "longitude": 140.21934095,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e7%a5%9e%e7%ab%8b%e5%ba%97/"
+  },
+  {
+    "name": "梅が丘通り店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.3784343,
+    "longitude": 140.4250101,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e6%a2%85%e3%81%8c%e4%b8%98%e9%80%9a%e3%82%8a%e5%ba%97/"
+  },
+  {
+    "name": "国府店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.18773407,
+    "longitude": 140.27753152,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%9b%bd%e5%ba%9c%e5%ba%97/"
+  },
+  {
+    "name": "下館駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.30737444,
+    "longitude": 139.97959816,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e4%b8%8b%e9%a4%a8%e9%a7%85%e5%89%8d%e5%ba%97/"
+  },
+  {
+    "name": "境中央店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.1036222,
+    "longitude": 139.82024204,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/%e5%a2%83%e4%b8%ad%e5%a4%ae%e5%ba%97/"
+  },
+  {
+    "name": "50号バイパス店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.28984844,
+    "longitude": 139.87166965,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/619/"
+  },
+  {
+    "name": "あかやまJOY店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.19927076,
+    "longitude": 139.71213687,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/43179/"
+  },
+  {
+    "name": "イオン高萩店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.70587818,
+    "longitude": 140.70805723,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/84486/"
+  },
+  {
+    "name": "土浦店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.07910473,
+    "longitude": 140.20346682,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/67585/"
+  },
+  {
+    "name": "つくば店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.07794462,
+    "longitude": 140.1211919,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/9593/"
+  },
+  {
+    "name": "赤塚店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.37766022,
+    "longitude": 140.40789266,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/86780/"
+  },
+  {
+    "name": "勝田店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.3929061,
+    "longitude": 140.52673281,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/71003/"
+  },
+  {
+    "name": "牛久駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.97459182,
+    "longitude": 140.13918284,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/12064/"
+  },
+  {
+    "name": "御所ケ丘店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 35.96560248,
+    "longitude": 139.9827197,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/46841/"
+  },
+  {
+    "name": "研究学園駅前店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.08373533,
+    "longitude": 140.08280212,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/97820/"
+  },
+  {
+    "name": "６号東大通り入口店",
+    "brand": "おたからや",
+    "address": "",
+    "latitude": 36.0418613,
+    "longitude": 140.16335346,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://www.otakaraya.jp/shop/98730/"
   }
 ]

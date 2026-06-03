@@ -22,7 +22,7 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
-TARGET_PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県"]
+TARGET_PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県"]
 
 DOCS_DATA = Path(__file__).parents[2] / "docs" / "data"
 DOCS_DATA.mkdir(parents=True, exist_ok=True)

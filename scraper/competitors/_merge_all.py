@@ -1,4 +1,4 @@
-import sys, io, json
+import sys, io, json, re
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 from pathlib import Path
 
@@ -10,6 +10,8 @@ for brand, fname in [
 ]:
     data = json.loads(Path(f'docs/data/{fname}').read_text(encoding='utf-8'))
     valid = [s for s in data if s.get('latitude') and s.get('longitude')]
+    for s in valid:  # HTMLタグ除去（おたからや等に <br class=is-sp> が混入）
+        s['name'] = re.sub(r'<[^>]+>', '', s.get('name', '')).strip()
     print(f'{brand}: 全{len(data)}件 → 座標あり{len(valid)}件')
     all_c.extend(valid)
 

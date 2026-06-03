@@ -860,9 +860,9 @@
   {
     "name": "アトレ松戸店",
     "brand": "なんぼや",
-    "address": "千葉県松戸市松戸1319-1 アトレ松戸",
-    "latitude": 35.7762,
-    "longitude": 139.9026,
+    "address": "",
+    "latitude": null,
+    "longitude": null,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
@@ -900,5 +900,16 @@
     "city": "",
     "phone": "",
     "detail_url": "https://nanboya.com/shop/nagareyama-otakanomori-sc-brandshop/"
+  },
+  {
+    "name": "水戸エクセルみなみ店",
+    "brand": "なんぼや",
+    "address": "〒310-0015 茨城県水戸市宮町1-7-31 水戸駅ビル エクセルみなみ3F",
+    "latitude": 36.3700643,
+    "longitude": 140.4766399,
+    "prefecture": "茨城県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/mito-excel-minami-brandshop/"
   }
 ]
