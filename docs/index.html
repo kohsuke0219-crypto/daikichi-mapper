@@ -175,7 +175,7 @@
     const head = strat === 1 ? '出店候補 戦略①' : '出店候補 戦略②';
     const hcol = strat === 1 ? RANK1_COLOR : RANK2_COLOR;
     let h = `<div style="font-size:12px;min-width:210px">`;
-    h += `<div style="color:${hcol};font-weight:bold">${head}　第${r.rank}位</div>`;
+    h += `<div style="color:${hcol};font-weight:bold">${head}　[${r.area_type}] 第${r.rank}位</div>`;
     h += `<b>${r.name}</b><br><span style="color:#555">${r.chain}・${r.category}</span><br>`;
     h += `${r.prefecture}${r.city}<br>`;
     h += `<div style="margin:4px 0;font-weight:bold">総合スコア: <span style="color:${hcol};font-size:14px">${r.total_score}</span> /100</div>`;
@@ -310,11 +310,12 @@
         h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
     }
     if (showRank1 || showRank2) {
-      h += '<div class="sep"></div><h4>出店候補ランキング</h4>';
+      h += '<div class="sep"></div><h4>出店候補（エリアタイプ別 各上位3）</h4>';
       if (showRank1)
-        h += `<span class="dot" style="background:${RANK1_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK1_COLOR}"></span>①スーパー近郊 上位10<br>`;
+        h += `<span class="dot" style="background:${RANK1_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK1_COLOR}"></span>①スーパー近郊<br>`;
       if (showRank2)
-        h += `<span class="dot" style="background:${RANK2_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK2_COLOR}"></span>②田舎ブルーオーシャン 上位10<br>`;
+        h += `<span class="dot" style="background:${RANK2_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK2_COLOR}"></span>②田舎ブルーオーシャン<br>`;
+      h += `<span style="color:#777;font-size:10px">※番号は各エリアタイプ内の順位</span><br>`;
     }
     this._body.innerHTML = h;
   };
@@ -500,7 +501,7 @@
           markers.push(
             L.marker([r.lat, r.lng], { icon: rankIcon(r.rank, color), pane: 'ranking',
                                        zIndexOffset: 1000 + (50 - r.rank) })
-              .bindTooltip(`第${r.rank}位 ${r.name}（${r.prefecture}${r.city}）総合${r.total_score}`,
+              .bindTooltip(`[${r.area_type}] 第${r.rank}位 ${r.name}（${r.prefecture}${r.city}）総合${r.total_score}`,
                            { direction: 'top', offset: [0, -16] })
               .bindPopup(rankPopup(r, strat), { maxWidth: 280 })
           );
@@ -514,8 +515,8 @@
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
-      layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補ランキング①（スーパー近郊）`);
-      layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補ランキング②（田舎ブルーオーシャン）`);
+      layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補①（スーパー近郊・エリア別）`);
+      layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補②（田舎ブルーオーシャン・エリア別）`);
 
       map.on('overlayadd overlayremove', refreshLegend);
 

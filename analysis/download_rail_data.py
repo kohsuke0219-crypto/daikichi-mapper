@@ -37,20 +37,37 @@ PREF_BBOXES = {
     "神奈川県": "35.12,138.93,35.70,139.78",
     "埼玉県":   "35.74,138.72,36.30,139.95",
     "千葉県":   "35.18,139.72,35.95,140.90",
+    "茨城県":   "35.73,139.66,36.95,140.88",
+    "栃木県":   "36.18,139.32,37.16,140.30",
+    "群馬県":   "35.98,138.40,37.06,139.67",
+    "静岡県":   "34.57,137.45,35.66,139.18",
 }
 
 
+def _urllib_post(url: str, query: str, timeout_sec: int) -> list[dict]:
+    """urllib POST（overpass-api.de は requests POST だと406になるため）"""
+    import urllib.parse, urllib.request, json as _json
+    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
+    req = urllib.request.Request(url, data=data, method="POST")
+    req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    req.add_header("User-Agent", "daikichi-mapper/1.0")
+    with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
+        return _json.loads(resp.read()).get("elements", [])
+
+
 def overpass_query(query: str, timeout_sec: int = 120) -> list[dict]:
-    """複数サーバー・GET/POST を試しながら Overpass クエリを実行"""
+    """複数サーバー・GET/POST/urllib を試しながら Overpass クエリを実行"""
     attempts = [
-        ("GET",  OVERPASS_URLS[0]),
-        ("POST", OVERPASS_URLS[0]),
-        ("POST", OVERPASS_URLS[1]),
-        ("GET",  OVERPASS_URLS[1]),
+        ("urllib", "https://overpass-api.de/api/interpreter"),
+        ("GET",    OVERPASS_URLS[0]),
+        ("POST",   OVERPASS_URLS[0]),
+        ("urllib", OVERPASS_URLS[0]),
     ]
     for method, url in attempts:
         try:
-            if method == "GET":
+            if method == "urllib":
+                return _urllib_post(url, query, timeout_sec + 30)
+            elif method == "GET":
                 r = requests.get(url, params={"data": query},
                                  headers={"Accept": "application/json"},
                                  timeout=timeout_sec + 30)
@@ -58,11 +75,12 @@ def overpass_query(query: str, timeout_sec: int = 120) -> list[dict]:
                 r = requests.post(url, data={"data": query},
                                   headers={"Accept": "application/json"},
                                   timeout=timeout_sec + 30)
-            if r.status_code == 200:
+            if method != "urllib" and r.status_code == 200:
                 return r.json().get("elements", [])
-            log.warning(f"  {method} {url}: {r.status_code}")
+            if method != "urllib":
+                log.warning(f"  {method} {url}: {r.status_code}")
         except Exception as e:
-            log.warning(f"  {method} {url}: {e}")
+            log.warning(f"  {method} {url}: {type(e).__name__}")
         time.sleep(3)
     raise RuntimeError("全 Overpass サーバーで失敗")
 
