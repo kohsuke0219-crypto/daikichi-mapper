@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>買取大吉 商圏マップ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -80,24 +81,19 @@
   <div id="loading">地図を読み込み中…<div id="loading-sub"></div></div>
   <div id="map"></div>
   <select id="choropleth-select" title="コロプレス表示切替">
-    <option value="v4">🎯 出店スコア v4（エリア別商圏）</option>
-    <option value="type">🗾 エリアタイプ4分類</option>
     <option value="pop">👥 女性40歳以上人口</option>
-    <option value="v3">🏆 出店スコア v3（競合考慮）</option>
-    <option value="v2">🏪 出店スコア v2（分断考慮）</option>
     <option value="none">（非表示）</option>
   </select>
   <div id="bg-status"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
   <script>
   // ============================================================
   // 色スケール
   // ============================================================
   const POP_BREAKS  = [0,10000,30000,60000,100000,150000,200000];
   const POP_PAL     = ['#ffffb2','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#800026'];
-  const SCORE_BREAKS= [0,1,3,8,25,100];
-  const SCORE_PAL   = ['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b','#002007'];
 
   function pickColor(breaks, pal, v) {
     for (let i = breaks.length-1; i >= 0; i--)
@@ -114,11 +110,6 @@
   // 生活動線（スーパー・複合施設）= マゼンタ / 新規オープン予定 = 金/琥珀
   const LIFELINE_COLOR = '#DB2777';
   const NEWOPEN_COLOR  = '#D4A017';
-  // エリアタイプ4分類カラー
-  const AREA_TYPE_COLORS = {
-    '超都心':'#c0392b','都心住宅':'#e67e22','郊外住宅':'#f1c40f','ロードサイド':'#27ae60'
-  };
-  const AREA_TYPE_ORDER = ['超都心','都心住宅','郊外住宅','ロードサイド'];
   const fmtN = n => (n||0).toLocaleString('ja-JP');
 
   // ============================================================
@@ -131,24 +122,27 @@
   map.getPane('stores').style.zIndex = 650;
   const storeRenderer = L.svg({ pane: 'stores' });
 
-  // 駅・道路用ペイン（ズーム12+でのみ表示。display で一括ON/OFF）
-  // SVGレンダラーを使う: 実際の点/線だけがイベントを受け取り、空白は
-  // 下のコロプレスへ透過する（Canvasだとペイン全面が市区町村ホバーを遮断する）
-  map.createPane('rail'); map.getPane('rail').style.zIndex = 620;
-  map.createPane('road'); map.getPane('road').style.zIndex = 410;
-  const railRenderer = L.svg({ pane: 'rail' });
-  const roadRenderer = L.svg({ pane: 'road' });
-  function applyZoomGate() {
-    const show = map.getZoom() >= 12;
-    map.getPane('rail').style.display = show ? '' : 'none';
-    map.getPane('road').style.display = show ? '' : 'none';
-  }
-  map.on('zoomend', applyZoomGate);
-
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18,
   }).addTo(map);
+
+  // ============================================================
+  // 地名検索（入力した地名へ地図を移動）
+  // ============================================================
+  if (L.Control && L.Control.Geocoder) {
+    L.Control.geocoder({
+      position: 'topright',
+      placeholder: '地名で検索…',
+      errorMessage: '見つかりませんでした',
+      defaultMarkGeocode: false,
+      geocoder: L.Control.Geocoder.nominatim({
+        geocodingQueryParams: { countrycodes: 'jp', 'accept-language': 'ja', limit: 5 },
+      }),
+    }).on('markgeocode', function (e) {
+      map.flyTo(e.geocode.center, 14);
+    }).addTo(map);
+  }
 
   // ============================================================
   // ホバー情報ボックス
@@ -161,36 +155,11 @@
   info.clear = function() {
     this._div.innerHTML = '<h4>市区町村を選択</h4>ホバーで詳細表示';
   };
-  info.show = function(p, mode) {
+  info.show = function(p) {
     const tp = p.total_pop||0, wp = p.women_40plus||0;
     const pct = tp>0 ? (wp/tp*100).toFixed(1) : '—';
-    let h = `<h4>${p.city}</h4>総人口: ${fmtN(tp)}人<br>女性40+: <b>${fmtN(wp)}</b>人 (${pct}%)`;
-    const s  = scoreData[p.code];
-    const s3 = scoreV3Data[p.code];
-    if (mode==='v2' && s) {
-      h += `<hr style="margin:4px 0">出店スコアv2: <b>${s.score}</b><br>`
-         + `住宅地比率: ${(s.res_ratio*100).toFixed(0)}%<br>`
-         + `最寄り店: ${s.eff_dist}km`;
-    }
-    if (mode==='v3' && s3) {
-      h += `<hr style="margin:4px 0">出店スコアv3: <b>${s3.v3}</b><br>`
-         + `競合(1km): ${s3.comp1km}店 ×${s3.penalty}<br>`
-         + `v2スコア: ${s3.v2}`;
-    }
-    const s4 = scoreV4Data[p.code];
-    if ((mode==='v4'||mode==='type') && s4) {
-      h += `<hr style="margin:4px 0">`;
-      h += `<b style="color:${AREA_TYPE_COLORS[s4.type]||'#333'}">${s4.type}</b>（商圏${s4.radius}km）<br>`;
-      if (mode==='v4') h += `出店スコアv4: <b>${s4.v4}</b><br>`;
-      h += `女40+: ${fmtN(s4.w40)}人 / 住宅${(s4.res*100).toFixed(0)}%<br>`;
-      // 都心は駅距離、郊外は道路距離を表示
-      if (s4.type==='超都心'||s4.type==='都心住宅')
-        h += `最寄り駅: ${s4.st_m}m<br>`;
-      else
-        h += `最寄り幹線道路: ${s4.rd_m}m<br>`;
-      h += `商圏内競合: ${s4.comp}店`;
-    }
-    this._div.innerHTML = h;
+    this._div.innerHTML =
+      `<h4>${p.city}</h4>総人口: ${fmtN(tp)}人<br>女性40+: <b>${fmtN(wp)}</b>人 (${pct}%)`;
   };
   info.addTo(map);
 
@@ -201,7 +170,7 @@
   legend.onAdd = function() {
     this._div = L.DomUtil.create('div','legend'); return this._div;
   };
-  legend.update = function(mode, showParks, showRivers, showMtns, showComp, showLifeline, showNewOpen) {
+  legend.update = function(mode, showComp, showLifeline, showNewOpen) {
     let h = '';
     if (mode==='pop') {
       h += '<h4>女性40歳以上人口</h4>';
@@ -209,27 +178,8 @@
         const hi = i+1<POP_BREAKS.length ? (POP_BREAKS[i+1]-1).toLocaleString('ja-JP') : '';
         h += `<i style="background:${POP_PAL[i]}"></i>${lo.toLocaleString('ja-JP')}${hi?'–'+hi:'以上'}<br>`;
       });
-    } else if (mode==='v2'||mode==='v3'||mode==='v4') {
-      const label = {v2:'v2（分断考慮）',v3:'v3（競合考慮）',v4:'v4（エリア別商圏）'}[mode];
-      h += `<h4>出店スコア ${label}（高=緑）</h4>`;
-      SCORE_BREAKS.forEach((lo,i) => {
-        const hi = i+1<SCORE_BREAKS.length ? SCORE_BREAKS[i+1] : '';
-        h += `<i style="background:${SCORE_PAL[i]}"></i>${lo}${hi?'–'+hi:'以上'}<br>`;
-      });
-    } else if (mode==='type') {
-      h += '<h4>エリアタイプ4分類</h4>';
-      AREA_TYPE_ORDER.forEach(t => {
-        const r = {'超都心':1,'都心住宅':2,'郊外住宅':3,'ロードサイド':5}[t];
-        h += `<i style="background:${AREA_TYPE_COLORS[t]}"></i>${t}（${r}km）<br>`;
-      });
     }
-    if (showParks||showRivers||showMtns) {
-      h += '<div class="sep"></div><h4>地理的分断要素</h4>';
-      if (showParks)  h += `<i style="background:#4CAF50;opacity:.6"></i>都市公園(1ha+)<br>`;
-      if (showRivers) h += `<span class="line" style="background:#1565C0"></span>一・二級河川<br>`;
-      if (showMtns)   h += `<i style="background:#795548;opacity:.5"></i>山地(150m+)<br>`;
-    }
-    h += '<div class="sep"></div><h4>買取大吉</h4>';
+    h += (h?'<div class="sep"></div>':'') + '<h4>買取大吉</h4>';
     for (const [k,v] of Object.entries(PREF_COLORS))
       h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
     if (showComp) {
@@ -252,31 +202,23 @@
   // データ & 状態
   // ============================================================
   let geoData = null;
-  let scoreData = {}, scoreV3Data = {}, scoreV4Data = {};
   let choroplethLayer = null;
-  let storeLayer, parksLayer, riversLayer, mountainsLayer, competitorLayer;
+  let storeLayer, competitorLayer;
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
-  let stationsLayer = null, roadsLayer = null; // ズーム12+でのみ表示(rail/roadペイン)
   let layerControl = null;
-  let choroplethMode = 'v4';   // 'v4' | 'type' | 'pop' | 'v2' | 'v3' | 'none'
+  let choroplethMode = 'pop';   // 'pop' | 'none'
 
   // ============================================================
   // コロプレスのスタイル関数
   // ============================================================
   function choroplethStyle(feature) {
     const p = feature.properties;
-    let color = '#ccc';
-    if (choroplethMode === 'pop')
-      color = pickColor(POP_BREAKS, POP_PAL, p.women_40plus||0);
-    else if (choroplethMode === 'v2')
-      color = pickColor(SCORE_BREAKS, SCORE_PAL, scoreData[p.code]?.score||0);
-    else if (choroplethMode === 'v3')
-      color = pickColor(SCORE_BREAKS, SCORE_PAL, scoreV3Data[p.code]?.v3||0);
-    else if (choroplethMode === 'v4')
-      color = pickColor(SCORE_BREAKS, SCORE_PAL, scoreV4Data[p.code]?.v4||0);
-    else if (choroplethMode === 'type')
-      color = AREA_TYPE_COLORS[scoreV4Data[p.code]?.type] || '#ccc';
-    return { fillColor: color, weight:1, opacity:0.8, color:'#888', fillOpacity: choroplethMode==='none'?0:0.65 };
+    // 非表示時はフィルも枠線も完全に消す→店舗ピンが見やすくなる
+    if (choroplethMode === 'none')
+      return { fillOpacity: 0, opacity: 0, weight: 0 };
+    // 人口ヒートマップ（色を薄めに: fillOpacity 0.45、枠線も淡く）
+    const color = pickColor(POP_BREAKS, POP_PAL, p.women_40plus||0);
+    return { fillColor: color, weight: 0.8, opacity: 0.5, color: '#bbb', fillOpacity: 0.45 };
   }
 
   function refreshChoropleth() {
@@ -291,9 +233,6 @@
   function refreshLegend() {
     legend.update(
       choroplethMode,
-      parksLayer   && map.hasLayer(parksLayer),
-      riversLayer  && map.hasLayer(riversLayer),
-      mountainsLayer && map.hasLayer(mountainsLayer),
       competitorLayer && map.hasLayer(competitorLayer),
       lifelineLayer && map.hasLayer(lifelineLayer),
       newOpeningLayer && map.hasLayer(newOpeningLayer),
@@ -317,9 +256,12 @@
       onEachFeature: (feature, layer) => {
         layer.on({
           mouseover(e) {
-            e.target.setStyle({ weight:2.5, color:'#333', fillOpacity:0.85 });
-            e.target.bringToFront();
-            info.show(feature.properties, choroplethMode);
+            // 非表示モードではハイライトしない（ピン視認を妨げない）
+            if (choroplethMode !== 'none') {
+              e.target.setStyle({ weight:2.5, color:'#333', fillOpacity:0.85 });
+              e.target.bringToFront();
+            }
+            info.show(feature.properties);
           },
           mouseout(e) {
             choroplethLayer.resetStyle(e.target);
@@ -365,62 +307,20 @@
   }
 
   // ============================================================
-  // Phase 2: スコアデータ + 分断要素 + 競合店（バックグラウンド）
+  // Phase 2: 競合店・生活動線・新規オープン予定（バックグラウンド）
   // ============================================================
   async function phase2() {
     const bgEl = document.getElementById('bg-status');
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
-      // スコアデータ（軽量JSON）
-      const [sv2, sv3, sv4] = await Promise.all([
-        fetch('data/score_v2_data.json').then(r=>r.json()),
-        fetch('data/score_v3_data.json').then(r=>r.json()),
-        fetch('data/score_v4_data.json').then(r=>r.json()),
-      ]);
-      scoreData   = sv2;
-      scoreV3Data = sv3;
-      scoreV4Data = sv4;
-      // v4 は初期表示モードなので必ず再描画
-      refreshChoropleth();
-
-      bgEl.textContent = '地理データ読み込み中…';
-
-      // 地理データ（並行）
-      const [parks, rivers, mtns, comp, stationsGeo, roadsGeo, lifeline, newOpen] = await Promise.all([
-        fetch('data/parks.geojson').then(r=>r.json()),
-        fetch('data/rivers.geojson').then(r=>r.json()),
-        fetch('data/mountains.geojson').then(r=>r.json()),
+      // 店舗データ（並行取得）
+      const [comp, lifeline, newOpen] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
-        fetch('data/rail_stations.geojson').then(r=>r.json()),
-        fetch('data/major_roads.geojson').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
       ]);
 
-      // ---- 都市公園 ----
-      parksLayer = L.geoJSON(parks, {
-        style: { fillColor:'#4CAF50', color:'#388E3C', weight:0.8, fillOpacity:0.35, opacity:0.7 },
-        onEachFeature: (f,l) => { const a=f.properties.area_m2; if(a) l.bindTooltip(`${(a/10000).toFixed(1)} ha`,{sticky:true}); },
-      });
-
-      // ---- 河川 ----
-      riversLayer = L.geoJSON(rivers, {
-        style: f => ({
-          color: f.properties.river_class===1 ? '#1565C0' : '#42A5F5',
-          weight: f.properties.river_class===1 ? 2.5 : 1.5, opacity: 0.8,
-        }),
-        onEachFeature: (f,l) => {
-          const n=f.properties.river_name, c=f.properties.river_class===1?'一級河川':'二級河川';
-          if(n&&n!=='名称不明') l.bindTooltip(`${n}（${c}）`,{sticky:true});
-        },
-      });
-
-      // ---- 山地 ----
-      mountainsLayer = L.geoJSON(mtns, {
-        style: { fillColor:'#795548', color:'#5D4037', weight:0.5, fillOpacity:0.30, opacity:0.5 },
-      }).bindTooltip('山地（標高150m以上）',{sticky:true});
-
-      // ---- 競合店マーカー（Canvas = 高速）----
+      // ---- 競合店マーカー ----
       const compMarkers = [];
       comp.forEach(s => {
         if (!s.latitude||!s.longitude) return;
@@ -433,26 +333,6 @@
         );
       });
       competitorLayer = L.layerGroup(compMarkers);
-
-      // ---- 鉄道駅（小さな黒点・rail ペイン → ズーム12+でのみ表示）----
-      const stMarkers = [];
-      (stationsGeo.features||[]).forEach(f => {
-        const c = f.geometry?.coordinates; if (!c) return;
-        stMarkers.push(
-          L.circleMarker([c[1], c[0]], {
-            pane:'rail', renderer:railRenderer,
-            radius:2.5, fillColor:'#111', color:'#111', weight:0.5, fillOpacity:0.9,
-          }).bindPopup(`<b>${f.properties.name||'駅'}</b><br><span style="color:#555">${f.properties.operator||''}</span>`)
-        );
-      });
-      stationsLayer = L.layerGroup(stMarkers);
-
-      // ---- 主要道路（オレンジ細線・road ペイン）----
-      roadsLayer = L.geoJSON(roadsGeo, {
-        pane: 'road', renderer: roadRenderer, // SVGで描画→空白はコロプレスへ透過
-        style: { color:'#ff8c00', weight:1.5, opacity:0.75 },
-        onEachFeature: (f,l) => { const n=f.properties.name||f.properties.ref; if(n) l.bindTooltip(`国道${n}`,{sticky:true}); },
-      });
 
       // ---- 生活動線（スーパー・複合施設）#DB2777 半透明・一回り小さめ ----
       // storesペイン(zIndex650)+SVGレンダラーで人口色塗りより必ず上＆空白透過
@@ -482,16 +362,10 @@
       newOpeningLayer = L.layerGroup(noMarkers);
 
       // レイヤーコントロールに追加
-      layerControl.addOverlay(parksLayer,      '<span style="color:#4CAF50">■</span> 都市公園 (1ha+)');
-      layerControl.addOverlay(riversLayer,     '<span style="color:#1565C0">─</span> 一・二級河川');
-      layerControl.addOverlay(mountainsLayer,  '<span style="color:#795548">■</span> 山地 (150m+)');
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
-      layerControl.addOverlay(stationsLayer,   '<span style="color:#111">●</span> 鉄道駅 (ズーム12+)');
-      layerControl.addOverlay(roadsLayer,      '<span style="color:#ff8c00">─</span> 主要道路 (ズーム12+)');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
 
-      applyZoomGate(); // 初期ズームに応じて駅・道路ペインの表示可否を設定
       map.on('overlayadd overlayremove', refreshLegend);
 
       bgEl.style.display = 'none';
