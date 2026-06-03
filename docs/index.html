@@ -39,6 +39,22 @@
       display: inline-block; width: 18px; height: 3px;
       margin-right: 5px; vertical-align: middle; border-radius: 2px;
     }
+    /* ---- 凡例の折りたたみ ---- */
+    .legend-header {
+      font-weight: bold; font-size: 12px; cursor: pointer;
+      user-select: none; display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+    }
+    .legend-toggle { font-size: 11px; color: #666; }
+    .legend .legend-body { margin-top: 6px; }
+    .legend.collapsed .legend-body { display: none; }
+    .legend.collapsed { padding: 6px 12px; }
+    /* ---- 小画面向け調整 ---- */
+    @media (max-width: 768px) {
+      .legend { max-width: 150px; font-size: 11px; max-height: 55vh; overflow: auto; }
+      .info   { max-width: 170px; font-size: 11px; min-width: 120px; }
+      #choropleth-select { font-size: 12px; padding: 4px 6px; }
+    }
 
     /* ---- コロプレス切替セレクタ ---- */
     #choropleth-select {
@@ -112,6 +128,16 @@
   const NEWOPEN_COLOR  = '#D4A017';
   const fmtN = n => (n||0).toLocaleString('ja-JP');
 
+  // 座標から Googleマップ / ストリートビュー へのリンクHTMLを生成
+  const mapsLinks = (lat, lng) =>
+    `<div style="margin-top:6px;font-size:12px">`
+    + `<a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" `
+    + `target="_blank" rel="noopener" style="color:#1a73e8;font-weight:bold">📍 Googleマップ</a>`
+    + ` ｜ `
+    + `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}" `
+    + `target="_blank" rel="noopener" style="color:#1a73e8;font-weight:bold">🚶 ストリートビュー</a>`
+    + `</div>`;
+
   // ============================================================
   // 地図初期化
   // ============================================================
@@ -168,7 +194,26 @@
   // ============================================================
   const legend = L.control({ position: 'bottomright' });
   legend.onAdd = function() {
-    this._div = L.DomUtil.create('div','legend'); return this._div;
+    this._div = L.DomUtil.create('div','legend');
+    this._div.innerHTML =
+      '<div class="legend-header"><span>凡例</span><span class="legend-toggle">▼</span></div>'
+      + '<div class="legend-body"></div>';
+    this._body = this._div.querySelector('.legend-body');
+    const tog = this._div.querySelector('.legend-toggle');
+    const hdr = this._div.querySelector('.legend-header');
+    L.DomEvent.on(hdr, 'click', () => {
+      const collapsed = this._div.classList.toggle('collapsed');
+      tog.textContent = collapsed ? '▶' : '▼';
+    });
+    // 凡例操作で地図がドラッグ/ズームされないようにする
+    L.DomEvent.disableClickPropagation(this._div);
+    L.DomEvent.disableScrollPropagation(this._div);
+    // 小画面では初期状態を折りたたみに
+    if (window.innerWidth < 768) {
+      this._div.classList.add('collapsed');
+      tog.textContent = '▶';
+    }
+    return this._div;
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen) {
     let h = '';
@@ -194,7 +239,7 @@
       if (showNewOpen)
         h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
     }
-    this._div.innerHTML = h;
+    this._body.innerHTML = h;
   };
   legend.addTo(map);
 
@@ -256,9 +301,10 @@
       onEachFeature: (feature, layer) => {
         layer.on({
           mouseover(e) {
-            // 非表示モードではハイライトしない（ピン視認を妨げない）
+            // ハイライトは「濃く塗る」のではなく「太い枠線＋やや薄いフィル」で示す
+            // （従来は fillOpacity 0.85 で暗くなりピンが見えにくかった）
             if (choroplethMode !== 'none') {
-              e.target.setStyle({ weight:2.5, color:'#333', fillOpacity:0.85 });
+              e.target.setStyle({ weight:3, color:'#333', fillOpacity:0.3 });
               e.target.bringToFront();
             }
             info.show(feature.properties);
@@ -284,16 +330,17 @@
         L.circleMarker([s.lat,s.lng], {
           pane:'stores', renderer:storeRenderer,
           radius:5, fillColor:col, color:'#fff', weight:1.5, fillOpacity:0.9,
-        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}`)
+        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}${mapsLinks(s.lat,s.lng)}`)
       );
     });
     storeLayer = L.layerGroup(markers).addTo(map);
 
     // ---- レイヤーコントロール（初期 = 最低限のレイヤーのみ）----
+    // 小画面(幅768px未満)では折りたたみ表示（アイコンをタップで展開）
     layerControl = L.control.layers(
       {},
       { '📍 買取大吉 店舗': storeLayer },
-      { collapsed: false, position: 'topleft' }
+      { collapsed: window.innerWidth < 768, position: 'topleft' }
     ).addTo(map);
 
     // ---- コロプレス切替セレクタのイベント ----
@@ -329,7 +376,7 @@
           L.circleMarker([s.latitude,s.longitude], {
             pane: 'stores', renderer: storeRenderer, // 常にコロプレスより前面＆イベント受取
             radius:4, fillColor:'#222', color:'#888', weight:0.8, fillOpacity:0.85,
-          }).bindPopup(`<b>${s.name}</b><br><span style="color:${col};font-weight:bold">${s.brand}</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}`)
+          }).bindPopup(`<b>${s.name}</b><br><span style="color:${col};font-weight:bold">${s.brand}</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}${mapsLinks(s.latitude,s.longitude)}`)
         );
       });
       competitorLayer = L.layerGroup(compMarkers);
@@ -344,6 +391,7 @@
             pane:'stores', renderer:storeRenderer,
             radius:3, fillColor:LIFELINE_COLOR, color:'#fff', weight:0.6, fillOpacity:0.65,
           }).bindTooltip(`${s.name}<br><span style="color:#555">${s.category}・${s.chain}</span>`,{sticky:true})
+           .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span>${mapsLinks(s.lat,s.lng)}`)
         );
       });
       lifelineLayer = L.layerGroup(llMarkers);
@@ -357,6 +405,7 @@
             pane:'stores', renderer:storeRenderer,
             radius:5, fillColor:NEWOPEN_COLOR, color:'#7a5c00', weight:1.2, fillOpacity:0.9,
           }).bindTooltip(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span><br>オープン: ${s.opening||'時期未定'}`,{sticky:true})
+           .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span><br>オープン: ${s.opening||'時期未定'}${mapsLinks(s.lat,s.lng)}`)
         );
       });
       newOpeningLayer = L.layerGroup(noMarkers);
