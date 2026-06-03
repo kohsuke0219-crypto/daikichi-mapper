@@ -22,6 +22,9 @@ PREF_SLUGS = {
     "埼玉県":   "saitama",
     "千葉県":   "chiba",
     "茨城県":   "ibaraki",
+    "栃木県":   "tochigi",
+    "群馬県":   "gunma",
+    "静岡県":   "shizuoka",
 }
 
 BASE_URL = "https://nanboya.com/shop"
