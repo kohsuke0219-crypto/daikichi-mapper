@@ -193,7 +193,10 @@
     if (strat === 2 && r.dead_ocean) h += ` <span style="color:#c0392b">⚠デッドオーシャン懸念</span>`;
     h += `</div>`;
     h += `<div style="margin-top:3px">最寄り競合: ${r.nearest_comp_km}km（2km内${r.n_comp_2km}店）<br>`;
-    h += `推定商圏(女性40+): ${fmtN(r.women_40plus)}人 / 市区町村人口 ${fmtN(r.muni_pop)}人<br>`;
+    h += `<b>推定商圏(メッシュ・半径2km/女性40+): ${fmtN(r.trade_women)}人</b><br>`;
+    h += `<span style="color:#777">市区町村: 総人口 ${fmtN(r.muni_pop)}人 / 女性40+ ${fmtN(r.muni_women_40plus)}人</span>`;
+    if (r.pop_sparse) h += `<br><span style="color:#c0392b">⚠周辺人口希薄（市は大きいが商圏内は薄い）</span>`;
+    h += `<br>`;
     if (r.near_super_names && r.near_super_names.length)
       h += `近接スーパー: ${r.near_super_names.slice(0,3).join('、')}`;
     h += `</div>${mapsLinks(r.lat, r.lng)}</div>`;
