@@ -302,6 +302,9 @@
   // 機能1: 半径集計の円ペイン（コロプレス400より上・店舗ピン650より下＝ピンが円の上に見える）
   map.createPane('measure');
   map.getPane('measure').style.zIndex = 640;
+  // 円はCanvasで全面を覆うため、ペインをpointer-events:noneにして
+  // 下のコロプレスへのホバー/クリックを遮らないようにする（円はinteractive:false）
+  map.getPane('measure').style.pointerEvents = 'none';
 
   // 機能3: お気に入り星ピン専用ペイン（全レイヤー中で最前面・必ず埋もれない）
   map.createPane('favorites');
