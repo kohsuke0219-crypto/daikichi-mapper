@@ -652,6 +652,8 @@
   function setClickMode(mode) {
     clickMode = mode;
     map.getContainer().style.cursor = (mode === 'none') ? '' : 'crosshair';
+    // 半径集計モードを抜けたら円は残さない（残った円が操作の邪魔になるため）
+    if (mode !== 'radius') clearMeasure();
     const hint = document.getElementById('mode-hint');
     if (hint) {
       hint.textContent =
