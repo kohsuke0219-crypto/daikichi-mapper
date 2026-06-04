@@ -658,15 +658,25 @@
     }
   }
 
-  map.on('click', e => {
+  // 半径集計/お気に入り追加モードのクリック処理。処理したら true を返す。
+  // ※ map.on('click') と、Canvasコロプレスのポリゴンclick の両方から呼ぶ。
+  //    （Canvasレンダラーはポリゴン上のクリックで map の click を fakeStop するため、
+  //      ポリゴン側ハンドラからも明示的に呼ばないと半径集計が発火しない）
+  function handleModeClick(latlng) {
     if (clickMode === 'radius') {
-      runMeasure(e.latlng);
-    } else if (clickMode === 'favorite') {
-      const f = addFavorite(e.latlng.lat, e.latlng.lng, '');
+      runMeasure(latlng);
+      return true;
+    }
+    if (clickMode === 'favorite') {
+      const f = addFavorite(latlng.lat, latlng.lng, '');
       const m = favMarkers[f.id];
       if (m) m.openPopup();
+      return true;
     }
-  });
+    return false;
+  }
+
+  map.on('click', e => { handleModeClick(e.latlng); });
 
   // ============================================================
   // ツールパネル（機能1: 半径集計 / 機能3: お気に入り）
@@ -763,8 +773,11 @@
             info.clear();
           },
           click(e) {
-            // 半径集計/お気に入り追加モード中は市区町村ズームを無効化（map clickに任せる）
-            if (clickMode === 'none') map.fitBounds(e.target.getBounds(), { padding:[40,40] });
+            // Canvasコロプレスはポリゴン上のクリックで map の click を止めるため、
+            // 半径集計/お気に入りモードはここで明示的に処理する。
+            if (handleModeClick(e.latlng)) return;
+            // 通常モードのみ市区町村ズーム
+            map.fitBounds(e.target.getBounds(), { padding:[40,40] });
           },
         });
         const p = feature.properties;
