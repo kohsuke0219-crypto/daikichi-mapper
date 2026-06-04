@@ -104,6 +104,51 @@
       padding: 4px 12px; border-radius: 12px;
       font-size: 11px; z-index: 700; display: none;
     }
+
+    /* ---- 機能1/3: ツールパネル（半径集計 + お気に入り） ---- */
+    .toolpanel {
+      background: rgba(255,255,255,0.95);
+      padding: 8px 10px; border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      font-size: 12px; width: 230px; max-width: 70vw;
+    }
+    .toolpanel h4 { font-size: 12px; margin: 6px 0 3px; }
+    .toolpanel .sep { border-top: 1px solid #ddd; margin: 7px 0; }
+    .toolpanel-header {
+      font-weight: bold; cursor: pointer; user-select: none;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .toolpanel.collapsed .toolpanel-body { display: none; }
+    .toolpanel.collapsed { width: auto; }
+    .tp-modes label { display: block; cursor: pointer; line-height: 1.6; }
+    .tp-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+    .tp-row input[type=range] { flex: 1; }
+    #measure-result {
+      background: #f0f9ff; border: 1px solid #bae6fd;
+      border-radius: 5px; padding: 5px 7px; margin: 5px 0; line-height: 1.45;
+    }
+    .tp-btn {
+      border: none; border-radius: 5px; padding: 4px 9px;
+      font-size: 11px; cursor: pointer; color: #fff;
+    }
+    #fav-list { max-height: 26vh; overflow: auto; margin-top: 4px; }
+    .fav-item {
+      display: flex; align-items: flex-start; gap: 5px;
+      padding: 4px 4px; border-radius: 4px; cursor: pointer; line-height: 1.35;
+    }
+    .fav-item:hover { background: #f3e8ff; }
+    .fav-item .fav-star { color: #6D28D9; flex: 0 0 auto; }
+    .fav-item .fav-text { word-break: break-word; }
+    /* ---- 機能3: お気に入り星ピン（最前面ペイン） ---- */
+    .fav-pin-wrap { background: transparent !important; border: none !important; }
+    .fav-pin {
+      color: #6D28D9; font-size: 26px; line-height: 26px; text-align: center;
+      text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 4px #fff, 0 1px 2px rgba(0,0,0,.5);
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .toolpanel { width: 175px; font-size: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -143,7 +188,36 @@
   // 出店候補ランキング: 戦略①=濃ブルー / 戦略②=濃グリーン
   const RANK1_COLOR = '#1D4ED8';
   const RANK2_COLOR = '#047857';
+
+  // ----- 機能1: クリック地点 半径n km圏内 人口集計 -----
+  // 集計指標は「40歳以上女性人口(women_40plus)」= マップのコロプレス指標と一致。
+  const MEASURE_RADIUS_DEFAULT_KM = 1.5;  // 初期半径
+  const MEASURE_RADIUS_MIN_KM     = 0.5;
+  const MEASURE_RADIUS_MAX_KM     = 3.0;
+  const MEASURE_RADIUS_STEP_KM    = 0.1;
+  const MEASURE_CIRCLE_COLOR      = '#0EA5E9';  // 半透明の集計円（既存色と別）
+
+  // ----- 機能2: 女性向け生活動線施設（5チェーン1色） -----
+  const WOMEN_LIFELINE_COLOR  = '#0891B2';  // ティール系（既存色と非重複）
+  const WOMEN_LIFELINE_CHAINS = ['カーブス','LAVA','カルド','ユザワヤ','トーカイ'];
+
+  // ----- 機能3: お気に入り地点（localStorage保存） -----
+  const FAV_STORAGE_KEY = 'daikichi_favorites_v1';  // localStorage キー
+  const FAV_COLOR       = '#6D28D9';                // お気に入りピン色（星マーク・既存色と非重複）
+
   const fmtN = n => (n||0).toLocaleString('ja-JP');
+  const escapeHtml = s => String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  // 2点間の距離(km) — haversine
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371, toR = Math.PI/180;
+    const dLat = (lat2-lat1)*toR, dLng = (lng2-lng1)*toR;
+    const a = Math.sin(dLat/2)**2
+            + Math.cos(lat1*toR)*Math.cos(lat2*toR)*Math.sin(dLng/2)**2;
+    return 2*R*Math.asin(Math.sqrt(a));
+  }
 
   // 座標から Googleマップ / ストリートビュー へのリンクHTMLを生成
   const mapsLinks = (lat, lng) =>
@@ -154,6 +228,13 @@
     + `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}" `
     + `target="_blank" rel="noopener" style="color:#1a73e8;font-weight:bold">🚶 ストリートビュー</a>`
     + `</div>`;
+
+  // 機能3: ポップアップ内「お気に入り登録」ボタン（既存候補地点をそのまま登録）
+  const favLinkHtml = (lat, lng) =>
+    `<div style="margin-top:5px">`
+    + `<button onclick="favAddFromPoint(${lat},${lng})" `
+    + `style="background:${FAV_COLOR};color:#fff;border:none;border-radius:4px;`
+    + `padding:3px 9px;font-size:11px;cursor:pointer">★ お気に入り登録</button></div>`;
 
   // 出店候補ランキング: 番号入りdivIconを生成（1位は王冠＋大きめ）
   function rankIcon(rank, color) {
@@ -199,7 +280,7 @@
     h += `<br>`;
     if (r.near_super_names && r.near_super_names.length)
       h += `近接スーパー: ${r.near_super_names.slice(0,3).join('、')}`;
-    h += `</div>${mapsLinks(r.lat, r.lng)}</div>`;
+    h += `</div>${mapsLinks(r.lat, r.lng)}${favLinkHtml(r.lat, r.lng)}</div>`;
     return h;
   }
 
@@ -217,6 +298,14 @@
   // 出店候補ランキングピン専用ペイン（全ピン中で最前面・人口色塗りに埋もれない）
   map.createPane('ranking');
   map.getPane('ranking').style.zIndex = 700;
+
+  // 機能1: 半径集計の円ペイン（コロプレス400より上・店舗ピン650より下＝ピンが円の上に見える）
+  map.createPane('measure');
+  map.getPane('measure').style.zIndex = 640;
+
+  // 機能3: お気に入り星ピン専用ペイン（全レイヤー中で最前面・必ず埋もれない）
+  map.createPane('favorites');
+  map.getPane('favorites').style.zIndex = 750;
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -285,7 +374,8 @@
     }
     return this._div;
   };
-  legend.update = function(mode, showComp, showLifeline, showNewOpen, showRank1, showRank2) {
+  legend.update = function(mode, showComp, showLifeline, showNewOpen, showRank1, showRank2,
+                           showWomenLifeline, showFav) {
     let h = '';
     if (mode==='pop') {
       h += '<h4>女性40歳以上人口</h4>';
@@ -309,6 +399,14 @@
       if (showNewOpen)
         h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
     }
+    if (showWomenLifeline) {
+      h += '<div class="sep"></div><h4>女性向け生活動線施設</h4>';
+      h += `<span class="dot" style="background:${WOMEN_LIFELINE_COLOR};border-color:${WOMEN_LIFELINE_COLOR}"></span>カーブス/LAVA/カルド/ユザワヤ/トーカイ<br>`;
+    }
+    if (showFav) {
+      h += '<div class="sep"></div><h4>お気に入り地点</h4>';
+      h += `<span style="color:${FAV_COLOR};font-size:15px;vertical-align:middle">★</span> メモ付き登録地点<br>`;
+    }
     if (showRank1 || showRank2) {
       h += '<div class="sep"></div><h4>出店候補（エリアタイプ別 各上位3）</h4>';
       if (showRank1)
@@ -329,8 +427,18 @@
   let storeLayer, competitorLayer;
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
   let ranking1Layer = null, ranking2Layer = null;   // 出店候補ランキング①/②
+  let womenLifelineLayer = null;                     // 機能2: 女性向け生活動線施設
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
+
+  // 機能1: 半径集計の状態
+  let popPoints = null, popMeta = null;       // 人口メッシュ点群 [[lat,lng,w],...]
+  let measureCircle = null, measureCenter = null;
+  let MEASURE_RADIUS_KM = MEASURE_RADIUS_DEFAULT_KM;
+  // 機能3: お気に入りの状態
+  let favorites = [], favLayer = null, favMarkers = {};
+  // クリック操作モード: 'none'(通常) | 'radius'(半径集計) | 'favorite'(お気に入り追加)
+  let clickMode = 'none';
 
   // ============================================================
   // コロプレスのスタイル関数
@@ -362,8 +470,268 @@
       newOpeningLayer && map.hasLayer(newOpeningLayer),
       ranking1Layer && map.hasLayer(ranking1Layer),
       ranking2Layer && map.hasLayer(ranking2Layer),
+      womenLifelineLayer && map.hasLayer(womenLifelineLayer),
+      favLayer && map.hasLayer(favLayer),
     );
   }
+
+  // ============================================================
+  // 機能1: クリック地点 半径n km圏内 人口集計（指標=40歳以上女性人口）
+  // ============================================================
+  // 円内集計: 人口メッシュ(町丁字centroid)を点として半径内に入るか判定する近似。
+  function sumPopWithinRadius(lat, lng, radiusKm) {
+    if (!popPoints) return null;
+    let sum = 0;
+    for (let i = 0; i < popPoints.length; i++) {
+      const p = popPoints[i];
+      if (haversineKm(lat, lng, p[0], p[1]) <= radiusKm) sum += p[2];
+    }
+    return sum;
+  }
+
+  function drawMeasureCircle() {
+    if (!measureCenter) return;
+    if (measureCircle) map.removeLayer(measureCircle);
+    measureCircle = L.circle(measureCenter, {
+      pane: 'measure',
+      radius: MEASURE_RADIUS_KM * 1000,
+      color: MEASURE_CIRCLE_COLOR, weight: 2, opacity: 0.9,
+      fillColor: MEASURE_CIRCLE_COLOR, fillOpacity: 0.12,
+      interactive: false,   // 円をクリックしても下のクリックを妨げない
+    }).addTo(map);
+  }
+
+  function updateMeasureResult() {
+    const el = document.getElementById('measure-result');
+    if (!el) return;
+    if (!measureCenter) {
+      el.innerHTML = '地図をクリックして中心を指定';
+      return;
+    }
+    if (!popPoints) { el.innerHTML = '人口メッシュ読込中…'; return; }
+    const sum = sumPopWithinRadius(measureCenter.lat, measureCenter.lng, MEASURE_RADIUS_KM);
+    el.innerHTML =
+      `半径${MEASURE_RADIUS_KM.toFixed(1)}km圏内の${popMeta ? popMeta.label : '40歳以上女性人口'}: `
+      + `<b>約${fmtN(sum)}人</b>`
+      + `<br><span style="color:#888;font-size:10px">※${popMeta ? popMeta.granularity : '小地域centroid'}の合計による近似値</span>`;
+  }
+
+  function runMeasure(latlng) {
+    measureCenter = latlng;
+    drawMeasureCircle();
+    updateMeasureResult();
+  }
+
+  function clearMeasure() {
+    if (measureCircle) { map.removeLayer(measureCircle); measureCircle = null; }
+    measureCenter = null;
+    updateMeasureResult();
+  }
+
+  // ============================================================
+  // 機能3: お気に入り地点（localStorage 保存 + コメント）
+  // ============================================================
+  function loadFavorites() {
+    try {
+      const raw = localStorage.getItem(FAV_STORAGE_KEY);
+      favorites = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(favorites)) favorites = [];
+    } catch (e) { favorites = []; }
+  }
+  function saveFavorites() {
+    try { localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(favorites)); }
+    catch (e) { console.error('お気に入り保存失敗', e); }
+  }
+  function genFavId() {
+    return 'f' + Date.now().toString(36) + Math.floor(Math.random() * 1e5).toString(36);
+  }
+
+  function favIcon() {
+    return L.divIcon({
+      className: 'fav-pin-wrap',
+      html: '<div class="fav-pin">★</div>',
+      iconSize: [28, 28], iconAnchor: [14, 26], popupAnchor: [0, -24],
+    });
+  }
+
+  function favPopupHtml(f) {
+    let h = `<div style="font-size:12px;min-width:200px">`;
+    h += `<div style="font-weight:bold;color:${FAV_COLOR}">★ お気に入り地点</div>`;
+    h += `<textarea id="fav-ta-${f.id}" rows="3" `
+       + `style="width:100%;margin:5px 0;font-size:12px;box-sizing:border-box" `
+       + `placeholder="コメント（例: コープ+カーブス併設、競合1.6km、駐車場要確認）">`
+       + `${escapeHtml(f.comment)}</textarea>`;
+    h += `<div style="display:flex;gap:6px">`
+       + `<button onclick="favSaveFromPopup('${f.id}')" class="tp-btn" style="background:${FAV_COLOR}">保存</button>`
+       + `<button onclick="favDeleteFromPopup('${f.id}')" class="tp-btn" style="background:#b91c1c">削除</button>`
+       + `</div>`;
+    h += `<div style="color:#888;font-size:10px;margin-top:4px">${f.lat.toFixed(5)}, ${f.lng.toFixed(5)}</div>`;
+    h += mapsLinks(f.lat, f.lng);
+    h += `</div>`;
+    return h;
+  }
+
+  function renderFavorites() {
+    if (!favLayer) return;
+    favLayer.clearLayers();
+    favMarkers = {};
+    favorites.forEach(f => {
+      const m = L.marker([f.lat, f.lng], { icon: favIcon(), pane: 'favorites', zIndexOffset: 3000 })
+        .bindPopup(favPopupHtml(f));
+      m.addTo(favLayer);
+      favMarkers[f.id] = m;
+    });
+    renderFavList();
+    refreshLegend();
+  }
+
+  function renderFavList() {
+    const el = document.getElementById('fav-list');
+    const cnt = document.getElementById('fav-count');
+    if (cnt) cnt.textContent = favorites.length;
+    if (!el) return;
+    if (!favorites.length) { el.innerHTML = '<span style="color:#999">登録なし</span>'; return; }
+    el.innerHTML = favorites.map(f => {
+      const txt = f.comment ? escapeHtml(f.comment) : '<span style="color:#999">(コメントなし)</span>';
+      return `<div class="fav-item" data-id="${f.id}"><span class="fav-star">★</span>`
+           + `<span class="fav-text">${txt}</span></div>`;
+    }).join('');
+    el.querySelectorAll('.fav-item').forEach(div => {
+      div.addEventListener('click', () => {
+        const f = favorites.find(x => x.id === div.dataset.id);
+        if (!f) return;
+        map.flyTo([f.lat, f.lng], Math.max(map.getZoom(), 14));
+        const m = favMarkers[f.id];
+        if (m) m.openPopup();
+      });
+    });
+  }
+
+  function addFavorite(lat, lng, comment) {
+    const f = { id: genFavId(), lat: +lat, lng: +lng, comment: comment || '',
+                createdAt: new Date().toISOString() };
+    favorites.push(f);
+    saveFavorites();
+    renderFavorites();
+    return f;
+  }
+  function updateFavorite(id, comment) {
+    const f = favorites.find(x => x.id === id);
+    if (!f) return;
+    f.comment = comment;
+    saveFavorites();
+    renderFavorites();
+  }
+  function deleteFavorite(id) {
+    favorites = favorites.filter(x => x.id !== id);
+    saveFavorites();
+    renderFavorites();
+  }
+
+  // ポップアップ内のボタンから呼ぶグローバル関数
+  window.favSaveFromPopup = function(id) {
+    const ta = document.getElementById('fav-ta-' + id);
+    if (ta) updateFavorite(id, ta.value);
+    map.closePopup();
+  };
+  window.favDeleteFromPopup = function(id) { deleteFavorite(id); map.closePopup(); };
+  // 既存候補地点の「お気に入り登録」ボタンから
+  window.favAddFromPoint = function(lat, lng) {
+    map.closePopup();
+    const f = addFavorite(lat, lng, '');
+    const m = favMarkers[f.id];
+    if (m) m.openPopup();
+  };
+
+  // ============================================================
+  // クリック操作モード切替 + 地図クリックの振り分け
+  // ============================================================
+  function setClickMode(mode) {
+    clickMode = mode;
+    map.getContainer().style.cursor = (mode === 'none') ? '' : 'crosshair';
+    const hint = document.getElementById('mode-hint');
+    if (hint) {
+      hint.textContent =
+        mode === 'radius'   ? '地図クリックで円の中心を指定' :
+        mode === 'favorite' ? '地図クリックでお気に入り追加' :
+        '通常モード（ピン/市区町村を操作）';
+    }
+  }
+
+  map.on('click', e => {
+    if (clickMode === 'radius') {
+      runMeasure(e.latlng);
+    } else if (clickMode === 'favorite') {
+      const f = addFavorite(e.latlng.lat, e.latlng.lng, '');
+      const m = favMarkers[f.id];
+      if (m) m.openPopup();
+    }
+  });
+
+  // ============================================================
+  // ツールパネル（機能1: 半径集計 / 機能3: お気に入り）
+  // ============================================================
+  const toolPanel = L.control({ position: 'bottomleft' });
+  toolPanel.onAdd = function() {
+    const div = L.DomUtil.create('div', 'toolpanel');
+    div.innerHTML =
+        '<div class="toolpanel-header"><span>🛠 商圏ツール</span><span class="tp-toggle">▼</span></div>'
+      + '<div class="toolpanel-body">'
+      +   '<div class="tp-modes">'
+      +     '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
+      +     '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
+      +     '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
+      +   '</div>'
+      +   '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
+      +   '<div class="sep"></div>'
+      +   '<h4>📏 半径集計（40歳以上女性人口）</h4>'
+      +   '<div class="tp-row"><span>半径</span>'
+      +     `<input type="range" id="measure-radius" min="${MEASURE_RADIUS_MIN_KM}" max="${MEASURE_RADIUS_MAX_KM}" step="${MEASURE_RADIUS_STEP_KM}" value="${MEASURE_RADIUS_KM}">`
+      +     '<span id="measure-radius-val" style="white-space:nowrap"></span></div>'
+      +   '<div id="measure-result">地図をクリックして中心を指定</div>'
+      +   '<button id="measure-clear" class="tp-btn" style="background:#64748b">クリア</button>'
+      +   '<div class="sep"></div>'
+      +   '<h4>★ お気に入り (<span id="fav-count">0</span>)</h4>'
+      +   '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
+      + '</div>';
+
+    // パネル操作で地図がドラッグ/ズームされないように
+    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableScrollPropagation(div);
+
+    // 折りたたみ
+    const tog = div.querySelector('.tp-toggle');
+    const hdr = div.querySelector('.toolpanel-header');
+    L.DomEvent.on(hdr, 'click', () => {
+      const collapsed = div.classList.toggle('collapsed');
+      tog.textContent = collapsed ? '▶' : '▼';
+    });
+    if (window.innerWidth < 768) { div.classList.add('collapsed'); tog.textContent = '▶'; }
+    return div;
+  };
+  toolPanel.addTo(map);
+
+  // ツールパネルのイベント配線（コントロール追加後にDOMが存在）
+  (function wireToolPanel() {
+    const radios = document.querySelectorAll('input[name="clickmode"]');
+    radios.forEach(r => r.addEventListener('change', e => { if (e.target.checked) setClickMode(e.target.value); }));
+
+    const slider = document.getElementById('measure-radius');
+    const sval   = document.getElementById('measure-radius-val');
+    const setVal = () => { sval.textContent = (+slider.value).toFixed(1) + 'km'; };
+    setVal();
+    slider.addEventListener('input', () => {
+      MEASURE_RADIUS_KM = +slider.value;
+      setVal();
+      if (measureCenter) { drawMeasureCircle(); updateMeasureResult(); }  // 即時再計算
+    });
+    document.getElementById('measure-clear').addEventListener('click', clearMeasure);
+  })();
+
+  // お気に入りレイヤーを作成（トグル可能・最前面ペイン）し、保存済みを描画
+  loadFavorites();
+  favLayer = L.layerGroup([]).addTo(map);
+  renderFavorites();
 
   // ============================================================
   // Phase 1: 人口コロプレス + 店舗ピン（即表示）
@@ -394,7 +762,10 @@
             choroplethLayer.resetStyle(e.target);
             info.clear();
           },
-          click(e) { map.fitBounds(e.target.getBounds(), { padding:[40,40] }); },
+          click(e) {
+            // 半径集計/お気に入り追加モード中は市区町村ズームを無効化（map clickに任せる）
+            if (clickMode === 'none') map.fitBounds(e.target.getBounds(), { padding:[40,40] });
+          },
         });
         const p = feature.properties;
         const tp=p.total_pop||0, wp=p.women_40plus||0, pct=tp>0?(wp/tp*100).toFixed(1):'—';
@@ -411,7 +782,7 @@
         L.circleMarker([s.lat,s.lng], {
           pane:'stores', renderer:storeRenderer,
           radius:5, fillColor:col, color:'#fff', weight:1.5, fillOpacity:0.9,
-        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}${mapsLinks(s.lat,s.lng)}`)
+        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
       );
     });
     storeLayer = L.layerGroup(markers).addTo(map);
@@ -423,6 +794,9 @@
       { '📍 買取大吉 店舗': storeLayer },
       { collapsed: window.innerWidth < 768, position: 'topleft' }
     ).addTo(map);
+
+    // 機能3: お気に入りレイヤーをトグル対象に追加
+    layerControl.addOverlay(favLayer, `<span style="color:${FAV_COLOR}">★</span> お気に入り地点`);
 
     // ---- コロプレス切替セレクタのイベント ----
     document.getElementById('choropleth-select').addEventListener('change', e => {
@@ -442,13 +816,20 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, rank1, rank2] = await Promise.all([
+      const [comp, lifeline, newOpen, rank1, rank2, popPts, womenLL] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
         fetch('data/ranking_strategy1.json').then(r=>r.json()),
         fetch('data/ranking_strategy2.json').then(r=>r.json()),
+        fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
+        fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
       ]);
+
+      // ---- 機能1: 人口メッシュ点群をセット（半径集計が使えるように）----
+      popMeta = { label: popPts.label, granularity: popPts.granularity, source: popPts.source };
+      popPoints = popPts.points;
+      updateMeasureResult();  // 「読込中」表示を更新
 
       // ---- 競合店マーカー ----
       const compMarkers = [];
@@ -474,10 +855,25 @@
             pane:'stores', renderer:storeRenderer,
             radius:3, fillColor:LIFELINE_COLOR, color:'#fff', weight:0.6, fillOpacity:0.65,
           }).bindTooltip(`${s.name}<br><span style="color:#555">${s.category}・${s.chain}</span>`,{sticky:true})
-           .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span>${mapsLinks(s.lat,s.lng)}`)
+           .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span>${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
         );
       });
       lifelineLayer = L.layerGroup(llMarkers);
+
+      // ---- 機能2: 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）#0891B2 ----
+      // storesペイン(z650)+SVGレンダラーで人口色塗りより前面＆空白透過。1色でまとめる。
+      const wlMarkers = [];
+      womenLL.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        wlMarkers.push(
+          L.circleMarker([s.lat, s.lng], {
+            pane:'stores', renderer:storeRenderer,
+            radius:4, fillColor:WOMEN_LIFELINE_COLOR, color:'#fff', weight:1, fillOpacity:0.85,
+          }).bindTooltip(`${s.name}<br><span style="color:#555">女性向け生活動線・${s.chain}</span>`,{sticky:true})
+           .bindPopup(`<b>${s.name}</b><br><span style="color:${WOMEN_LIFELINE_COLOR};font-weight:bold">女性向け生活動線施設</span>・${s.chain}<br>${s.prefecture}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
+        );
+      });
+      womenLifelineLayer = L.layerGroup(wlMarkers);
 
       // ---- 新規オープン予定 #D4A017 ----
       const noMarkers = [];
@@ -514,6 +910,7 @@
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
+      layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">●</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補①（スーパー近郊・エリア別）`);
       layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補②（田舎ブルーオーシャン・エリア別）`);
