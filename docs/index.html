@@ -116,12 +116,15 @@
     }
     .toolpanel h4 { font-size: 12px; margin: 6px 0 3px; }
     .toolpanel .sep { border-top: 1px solid #ddd; margin: 7px 0; }
-    .toolpanel-header {
+    /* 3セクション（商圏ツール / NGエリア / お気に入り）を独立開閉 */
+    .tp-section + .tp-section { border-top: 1px solid #ddd; margin-top: 6px; padding-top: 4px; }
+    .tp-sec-header {
       font-weight: bold; cursor: pointer; user-select: none;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-    .toolpanel.collapsed .toolpanel-body { display: none; }
-    .toolpanel.collapsed { width: auto; }
+    .tp-sec-header .tp-toggle { font-size: 11px; color: #666; }
+    .tp-sec-body { margin-top: 5px; }
+    .tp-sec-body.collapsed { display: none; }
     .tp-modes label { display: block; cursor: pointer; line-height: 1.6; }
     .tp-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
     .tp-row input[type=range] { flex: 1; }
@@ -897,54 +900,70 @@
   toolPanel.onAdd = function() {
     const div = L.DomUtil.create('div', 'toolpanel');
     div.innerHTML =
-        '<div class="toolpanel-header"><span>🛠 商圏ツール</span><span class="tp-toggle">▼</span></div>'
-      + '<div class="toolpanel-body">'
-      +   '<div class="tp-modes">'
-      +     '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
-      +     '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
-      +     '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
-      +     '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
-      +   '</div>'
-      +   '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
-      +   '<div class="sep"></div>'
-      +   '<h4>📏 半径集計（40歳以上女性人口）</h4>'
-      +   '<div class="tp-row"><span>半径</span>'
-      +     `<input type="range" id="measure-radius" min="${MEASURE_RADIUS_MIN_KM}" max="${MEASURE_RADIUS_MAX_KM}" step="${MEASURE_RADIUS_STEP_KM}" value="${MEASURE_RADIUS_KM}">`
-      +     '<span id="measure-radius-val" style="white-space:nowrap"></span></div>'
-      +   '<div id="measure-result">地図をクリックして中心を指定</div>'
-      +   '<button id="measure-clear" class="tp-btn" style="background:#64748b">クリア</button>'
-      +   '<div class="sep"></div>'
-      +   '<h4>🚫 NGエリア (<span id="ng-count">0</span>)</h4>'
-      +   '<div style="color:#888;font-size:10px;margin-bottom:3px">「NGエリア指定」モードで市区町村をクリックすると黒塗り（出店しない）</div>'
-      +   '<div id="ng-list"><span style="color:#999">指定なし</span></div>'
-      +   '<div class="sep"></div>'
-      +   '<h4>★ お気に入り (<span id="fav-count">0</span>)</h4>'
-      +   '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
-      +   '<div id="fav-share-status" style="font-size:10px;margin-top:5px;color:#888">⚪ この端末のみ（共有未設定）</div>'
-      +   '<details style="font-size:11px;margin-top:3px">'
-      +     '<summary style="cursor:pointer;color:#6D28D9">⚙ 共有設定（複数端末/複数人）</summary>'
-      +     '<div style="margin-top:4px;color:#888;font-size:10px">Apps Script WebアプリのURLを貼ると共有ONになります（端末ごとに設定）。</div>'
-      +     '<input id="fav-api-url" type="text" placeholder="https://script.google.com/macros/.../exec" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
-      +     '<input id="fav-api-token" type="text" placeholder="トークン（任意・Apps Script側と一致）" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
-      +     '<div style="display:flex;gap:5px;margin-top:3px">'
-      +       '<button id="fav-api-save" class="tp-btn" style="background:#6D28D9">保存して同期</button>'
-      +       '<button id="fav-sync" class="tp-btn" style="background:#64748b">今すぐ同期</button>'
+      // ===== セクション1: 商圏ツール（モード + 半径集計）=====
+        '<div class="tp-section">'
+      +   '<div class="tp-sec-header" data-sec="tool"><span>🛠 商圏ツール</span><span class="tp-toggle">▼</span></div>'
+      +   '<div class="tp-sec-body" id="sec-tool">'
+      +     '<div class="tp-modes">'
+      +       '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
+      +       '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
+      +       '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
+      +       '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
       +     '</div>'
-      +   '</details>'
+      +     '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
+      +     '<h4>📏 半径集計（40歳以上女性人口）</h4>'
+      +     '<div class="tp-row"><span>半径</span>'
+      +       `<input type="range" id="measure-radius" min="${MEASURE_RADIUS_MIN_KM}" max="${MEASURE_RADIUS_MAX_KM}" step="${MEASURE_RADIUS_STEP_KM}" value="${MEASURE_RADIUS_KM}">`
+      +       '<span id="measure-radius-val" style="white-space:nowrap"></span></div>'
+      +     '<div id="measure-result">地図をクリックして中心を指定</div>'
+      +     '<button id="measure-clear" class="tp-btn" style="background:#64748b">クリア</button>'
+      +   '</div>'
+      + '</div>'
+      // ===== セクション2: NGエリア =====
+      + '<div class="tp-section">'
+      +   '<div class="tp-sec-header" data-sec="ng"><span>🚫 NGエリア (<span id="ng-count">0</span>)</span><span class="tp-toggle">▶</span></div>'
+      +   '<div class="tp-sec-body collapsed" id="sec-ng">'
+      +     '<div style="color:#888;font-size:10px;margin-bottom:3px">「NGエリア指定」モードで市区町村をクリックすると黒塗り（出店しない）</div>'
+      +     '<div id="ng-list"><span style="color:#999">指定なし</span></div>'
+      +   '</div>'
+      + '</div>'
+      // ===== セクション3: お気に入り =====
+      + '<div class="tp-section">'
+      +   '<div class="tp-sec-header" data-sec="fav"><span>★ お気に入り (<span id="fav-count">0</span>)</span><span class="tp-toggle">▶</span></div>'
+      +   '<div class="tp-sec-body collapsed" id="sec-fav">'
+      +     '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
+      +     '<div id="fav-share-status" style="font-size:10px;margin-top:5px;color:#888">⚪ この端末のみ（共有未設定）</div>'
+      +     '<details style="font-size:11px;margin-top:3px">'
+      +       '<summary style="cursor:pointer;color:#6D28D9">⚙ 共有設定（複数端末/複数人）</summary>'
+      +       '<div style="margin-top:4px;color:#888;font-size:10px">Apps Script WebアプリのURLを貼ると共有ONになります（端末ごとに設定）。</div>'
+      +       '<input id="fav-api-url" type="text" placeholder="https://script.google.com/macros/.../exec" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
+      +       '<input id="fav-api-token" type="text" placeholder="トークン（任意・Apps Script側と一致）" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
+      +       '<div style="display:flex;gap:5px;margin-top:3px">'
+      +         '<button id="fav-api-save" class="tp-btn" style="background:#6D28D9">保存して同期</button>'
+      +         '<button id="fav-sync" class="tp-btn" style="background:#64748b">今すぐ同期</button>'
+      +       '</div>'
+      +     '</details>'
+      +   '</div>'
       + '</div>';
 
     // パネル操作で地図がドラッグ/ズームされないように
     L.DomEvent.disableClickPropagation(div);
     L.DomEvent.disableScrollPropagation(div);
 
-    // 折りたたみ
-    const tog = div.querySelector('.tp-toggle');
-    const hdr = div.querySelector('.toolpanel-header');
-    L.DomEvent.on(hdr, 'click', () => {
-      const collapsed = div.classList.toggle('collapsed');
-      tog.textContent = collapsed ? '▶' : '▼';
+    // 各セクションを独立して開閉
+    div.querySelectorAll('.tp-sec-header').forEach(hdr => {
+      const body = hdr.nextElementSibling;
+      const tog  = hdr.querySelector('.tp-toggle');
+      L.DomEvent.on(hdr, 'click', () => {
+        const collapsed = body.classList.toggle('collapsed');
+        tog.textContent = collapsed ? '▶' : '▼';
+      });
     });
-    if (window.innerWidth < 768) { div.classList.add('collapsed'); tog.textContent = '▶'; }
+    // 小画面では全セクション折りたたみ
+    if (window.innerWidth < 768) {
+      div.querySelectorAll('.tp-sec-body').forEach(b => b.classList.add('collapsed'));
+      div.querySelectorAll('.tp-sec-header .tp-toggle').forEach(t => t.textContent = '▶');
+    }
     return div;
   };
   favLoadShareConfig();   // パネル配線前に共有設定(URL/トークン)を読み込んでおく
