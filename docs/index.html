@@ -216,9 +216,13 @@
   const WOMEN_LIFELINE_COLOR  = '#0891B2';  // ティール系（既存色と非重複）
   const WOMEN_LIFELINE_CHAINS = ['カーブス','LAVA','カルド','ユザワヤ','トーカイ'];
 
-  // ----- 機能3: お気に入り地点（localStorage保存） -----
-  const FAV_STORAGE_KEY = 'daikichi_favorites_v1';  // localStorage キー
+  // ----- 機能3: お気に入り地点（localStorageキャッシュ + 任意でスプレッドシート共有） -----
+  const FAV_STORAGE_KEY = 'daikichi_favorites_v1';  // localStorage キー（オフライン/未設定時のキャッシュ）
   const FAV_COLOR       = '#6D28D9';                // お気に入りピン色（星マーク・既存色と非重複）
+  // 共有(Google Apps Script Webアプリ)設定は端末ごとにlocalStorageへ保存（公開ソースには出さない）
+  const FAV_API_URL_KEY   = 'daikichi_fav_api_url';
+  const FAV_API_TOKEN_KEY = 'daikichi_fav_api_token';
+  const FAV_SYNC_INTERVAL_MS = 60000;  // 他端末の変更を取り込む自動同期間隔
 
   const fmtN = n => (n||0).toLocaleString('ja-JP');
   const escapeHtml = s => String(s==null?'':s)
@@ -480,6 +484,10 @@
   let MEASURE_RADIUS_KM = MEASURE_RADIUS_DEFAULT_KM;
   // 機能3: お気に入りの状態
   let favorites = [], favLayer = null, favMarkers = {};
+  // 共有(リモート)状態
+  let favApiUrl = '', favApiToken = '';
+  let favEditing = false;   // お気に入りポップアップ編集中は自動同期で再描画しない
+  let favPending = 0;       // 送信中の書き込み数（同期と競合しないように）
   // クリック操作モード: 'none'(通常) | 'radius'(半径集計) | 'favorite'(お気に入り追加)
   let clickMode = 'none';
 
@@ -621,6 +629,8 @@
     favorites.forEach(f => {
       const m = L.marker([f.lat, f.lng], { icon: favIcon(), pane: 'favorites', zIndexOffset: 3000 })
         .bindPopup(favPopupHtml(f));
+      m.on('popupopen',  () => { favEditing = true;  });
+      m.on('popupclose', () => { favEditing = false; });
       m.addTo(favLayer);
       favMarkers[f.id] = m;
     });
@@ -652,23 +662,116 @@
 
   function addFavorite(lat, lng, comment) {
     const f = { id: genFavId(), lat: +lat, lng: +lng, comment: comment || '',
-                createdAt: new Date().toISOString() };
+                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     favorites.push(f);
     saveFavorites();
     renderFavorites();
+    favRemotePush('add', { item: f });   // 共有設定時はスプレッドシートへ
     return f;
   }
   function updateFavorite(id, comment) {
     const f = favorites.find(x => x.id === id);
     if (!f) return;
     f.comment = comment;
+    f.updatedAt = new Date().toISOString();
     saveFavorites();
     renderFavorites();
+    favRemotePush('update', { item: f });
   }
   function deleteFavorite(id) {
     favorites = favorites.filter(x => x.id !== id);
     saveFavorites();
     renderFavorites();
+    favRemotePush('delete', { id });
+  }
+
+  // ============================================================
+  // 機能3(共有): Google Apps Script Webアプリ経由でスプレッドシート同期
+  // ============================================================
+  function favShareEnabled() { return !!favApiUrl; }
+
+  function favLoadShareConfig() {
+    favApiUrl   = localStorage.getItem(FAV_API_URL_KEY)   || '';
+    favApiToken = localStorage.getItem(FAV_API_TOKEN_KEY) || '';
+  }
+
+  function favUpdateShareStatus() {
+    const el = document.getElementById('fav-share-status');
+    if (!el) return;
+    el.textContent = favShareEnabled()
+      ? '🟢 共有中（スプレッドシート同期）'
+      : '⚪ この端末のみ（共有未設定）';
+    el.style.color = favShareEnabled() ? '#047857' : '#888';
+  }
+
+  // GET: 全件取得（配列 もしくは {items:[...]} の両対応）
+  async function favRemoteList() {
+    const res = await fetch(favApiUrl, { method: 'GET' });
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.items || []);
+    return arr.map(x => ({
+      ...x, id: String(x.id), lat: Number(x.lat), lng: Number(x.lng),
+      comment: x.comment == null ? '' : String(x.comment),
+    })).filter(x => isFinite(x.lat) && isFinite(x.lng));
+  }
+
+  // POST: text/plain で送りCORSプリフライトを回避（Apps Scriptの制約対策）
+  async function favRemoteSend(action, payload) {
+    const body = JSON.stringify({ action, token: favApiToken, ...payload });
+    const res = await fetch(favApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body,
+    });
+    return res.json().catch(() => ({}));
+  }
+
+  function favRemotePush(action, payload) {
+    if (!favShareEnabled()) return;        // 未設定ならローカルのみ
+    favPending++;
+    favRemoteSend(action, payload)
+      .catch(e => console.error('お気に入り共有(送信)失敗', e))
+      .finally(() => { favPending = Math.max(0, favPending - 1); });
+  }
+
+  // 他端末の変更を取り込む（編集中・送信中はスキップして競合回避）
+  async function syncFavoritesFromRemote(force) {
+    if (!favShareEnabled()) return;
+    if (!force && (favEditing || favPending > 0)) return;
+    try {
+      const items = await favRemoteList();
+      favorites = items;
+      saveFavorites();                     // localStorageにもキャッシュ
+      if (!favEditing) renderFavorites();  // 編集中なら描画は次回に回す
+      favUpdateShareStatus();
+    } catch (e) {
+      console.error('お気に入り同期(取得)失敗', e);
+    }
+  }
+
+  // 共有設定の保存（URL/トークンを端末のlocalStorageへ）→統合して同期
+  async function favSaveShareConfig(url, token) {
+    favApiUrl = (url || '').trim();
+    favApiToken = (token || '').trim();
+    localStorage.setItem(FAV_API_URL_KEY, favApiUrl);
+    localStorage.setItem(FAV_API_TOKEN_KEY, favApiToken);
+    favUpdateShareStatus();
+    if (!favShareEnabled()) { renderFavorites(); return; }
+    try {
+      // 初回有効化時: ローカルだけにあるお気に入りをスプレッドシートへ送り、消失を防ぐ
+      const remote = await favRemoteList();
+      const remoteIds = new Set(remote.map(x => x.id));
+      const localOnly = favorites.filter(f => !remoteIds.has(String(f.id)));
+      for (const f of localOnly) {
+        favPending++;
+        try { await favRemoteSend('add', { item: f }); }
+        catch (e) { console.error('お気に入り統合(送信)失敗', e); }
+        finally { favPending = Math.max(0, favPending - 1); }
+      }
+      await syncFavoritesFromRemote(true);   // 統合後の最新を取得
+    } catch (e) {
+      console.error('お気に入り共有 有効化失敗', e);
+    }
   }
 
   // ポップアップ内のボタンから呼ぶグローバル関数
@@ -748,6 +851,17 @@
       +   '<div class="sep"></div>'
       +   '<h4>★ お気に入り (<span id="fav-count">0</span>)</h4>'
       +   '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
+      +   '<div id="fav-share-status" style="font-size:10px;margin-top:5px;color:#888">⚪ この端末のみ（共有未設定）</div>'
+      +   '<details style="font-size:11px;margin-top:3px">'
+      +     '<summary style="cursor:pointer;color:#6D28D9">⚙ 共有設定（複数端末/複数人）</summary>'
+      +     '<div style="margin-top:4px;color:#888;font-size:10px">Apps Script WebアプリのURLを貼ると共有ONになります（端末ごとに設定）。</div>'
+      +     '<input id="fav-api-url" type="text" placeholder="https://script.google.com/macros/.../exec" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
+      +     '<input id="fav-api-token" type="text" placeholder="トークン（任意・Apps Script側と一致）" style="width:100%;margin:3px 0;font-size:10px;box-sizing:border-box">'
+      +     '<div style="display:flex;gap:5px;margin-top:3px">'
+      +       '<button id="fav-api-save" class="tp-btn" style="background:#6D28D9">保存して同期</button>'
+      +       '<button id="fav-sync" class="tp-btn" style="background:#64748b">今すぐ同期</button>'
+      +     '</div>'
+      +   '</details>'
       + '</div>';
 
     // パネル操作で地図がドラッグ/ズームされないように
@@ -764,6 +878,7 @@
     if (window.innerWidth < 768) { div.classList.add('collapsed'); tog.textContent = '▶'; }
     return div;
   };
+  favLoadShareConfig();   // パネル配線前に共有設定(URL/トークン)を読み込んでおく
   toolPanel.addTo(map);
 
   // ツールパネルのイベント配線（コントロール追加後にDOMが存在）
@@ -781,12 +896,36 @@
       if (measureCenter) { drawMeasureCircle(); updateMeasureResult(); }  // 即時再計算
     });
     document.getElementById('measure-clear').addEventListener('click', clearMeasure);
+
+    // お気に入り共有設定の配線
+    const urlIn   = document.getElementById('fav-api-url');
+    const tokIn   = document.getElementById('fav-api-token');
+    if (urlIn) urlIn.value = favApiUrl;
+    if (tokIn) tokIn.value = favApiToken;
+    const saveBtn = document.getElementById('fav-api-save');
+    const syncBtn = document.getElementById('fav-sync');
+    if (saveBtn) saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true; saveBtn.textContent = '同期中…';
+      try { await favSaveShareConfig(urlIn.value, tokIn ? tokIn.value : ''); }
+      finally { saveBtn.disabled = false; saveBtn.textContent = '保存して同期'; }
+    });
+    if (syncBtn) syncBtn.addEventListener('click', async () => {
+      syncBtn.disabled = true; syncBtn.textContent = '取得中…';
+      try { await syncFavoritesFromRemote(true); }
+      finally { syncBtn.disabled = false; syncBtn.textContent = '今すぐ同期'; }
+    });
+    favUpdateShareStatus();
   })();
 
   // お気に入りレイヤーを作成（トグル可能・最前面ペイン）し、保存済みを描画
-  loadFavorites();
+  loadFavorites();        // まずlocalStorageキャッシュで即描画
   favLayer = L.layerGroup([]).addTo(map);
   renderFavorites();
+  // 共有設定済みなら初回同期＋定期同期で他端末の変更を取り込む
+  if (favShareEnabled()) {
+    syncFavoritesFromRemote(true);
+    setInterval(() => syncFavoritesFromRemote(false), FAV_SYNC_INTERVAL_MS);
+  }
 
   // ============================================================
   // Phase 1: 人口コロプレス + 店舗ピン（即表示）
