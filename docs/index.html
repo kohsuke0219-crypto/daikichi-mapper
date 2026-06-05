@@ -271,7 +271,7 @@
     return L.divIcon({
       className: 'shape-pin',
       html: `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`
-          + `<polygon points="${w/2},1 ${w-1},${h-1} 1,${h-1}" fill="${color}" stroke="#fff" stroke-width="1.2"/></svg>`,
+          + `<polygon points="${w/2},1 ${w-1},${h-1} 1,${h-1}" fill="${color}" stroke="#fff" stroke-width="0.9"/></svg>`,
       iconSize: [w, h], iconAnchor: [w/2, h/2], popupAnchor: [0, -h/2],
     });
   }
@@ -280,7 +280,7 @@
     return L.divIcon({
       className: 'shape-pin',
       html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
-          + `<rect x="1" y="1" width="${s-2}" height="${s-2}" fill="${color}" stroke="#fff" stroke-width="1.2"/></svg>`,
+          + `<rect x="1" y="1" width="${s-2}" height="${s-2}" fill="${color}" stroke="#fff" stroke-width="0.9"/></svg>`,
       iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
     });
   }
@@ -325,10 +325,15 @@
   // 1都7県（茨城/栃木/群馬/静岡含む）が初期表示で収まるよう中心・ズーム8に
   const map = L.map('map', { preferCanvas: true }).setView([35.85, 139.20], 8);
 
-  // 買取大吉店舗ピン専用ペイン（最前面・SVGレンダラー）
+  // 競合/生活動線などの施設ピン用ペイン（コロプレスより前面・SVGレンダラー）
   map.createPane('stores');
   map.getPane('stores').style.zIndex = 650;
   const storeRenderer = L.svg({ pane: 'stores' });
+
+  // 買取大吉 店舗ピン専用ペイン（施設ピンより上＝主役を常に見やすく）
+  map.createPane('daikichi');
+  map.getPane('daikichi').style.zIndex = 680;
+  const daikichiRenderer = L.svg({ pane: 'daikichi' });
 
   // 出店候補ランキングピン専用ペイン（全ピン中で最前面・人口色塗りに埋もれない）
   map.createPane('ranking');
@@ -833,8 +838,8 @@
       const col = PREF_COLORS[s.prefecture]||'#888';
       markers.push(
         L.circleMarker([s.lat,s.lng], {
-          pane:'stores', renderer:storeRenderer,
-          radius:5, fillColor:col, color:'#fff', weight:1.5, fillOpacity:0.9,
+          pane:'daikichi', renderer:daikichiRenderer,
+          radius:6, fillColor:col, color:'#fff', weight:2, fillOpacity:1,
         }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
       );
     });
@@ -905,7 +910,7 @@
         if (!s.lat||!s.lng) return;
         llMarkers.push(
           L.marker([s.lat,s.lng], {
-            pane:'stores', icon: sqIcon(LIFELINE_COLOR, 10), opacity: 0.9,
+            pane:'stores', icon: sqIcon(LIFELINE_COLOR, 7), opacity: 0.7,
           }).bindTooltip(`${s.name}<br><span style="color:#555">${s.category}・${s.chain}</span>`,{sticky:true})
            .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span>${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
         );
@@ -919,7 +924,7 @@
         if (!s.lat || !s.lng) return;
         wlMarkers.push(
           L.marker([s.lat, s.lng], {
-            pane:'stores', icon: triIcon(WOMEN_LIFELINE_COLOR, 15),
+            pane:'stores', icon: triIcon(WOMEN_LIFELINE_COLOR, 11), opacity: 0.8,
           }).bindTooltip(`${s.name}<br><span style="color:#555">女性向け生活動線・${s.chain}</span>`,{sticky:true})
            .bindPopup(`<b>${s.name}</b><br><span style="color:${WOMEN_LIFELINE_COLOR};font-weight:bold">女性向け生活動線施設</span>・${s.chain}<br>${s.prefecture}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
         );
