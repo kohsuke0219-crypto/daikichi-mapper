@@ -39,6 +39,21 @@
       display: inline-block; width: 18px; height: 3px;
       margin-right: 5px; vertical-align: middle; border-radius: 2px;
     }
+    /* 凡例: ▲三角 / ■四角スウォッチ */
+    .legend .tri {
+      display: inline-block; width: 0; height: 0; margin-right: 5px;
+      vertical-align: middle;
+      border-left: 6px solid transparent; border-right: 6px solid transparent;
+      border-bottom: 11px solid #000;
+      filter: drop-shadow(0 0 0.5px #999);
+    }
+    .legend .sq {
+      display: inline-block; width: 11px; height: 11px; margin-right: 5px;
+      vertical-align: middle; border-radius: 1px; box-shadow: 0 0 0 1px #fff inset;
+    }
+    /* 形状ピン（divIcon）の枠を透明に */
+    .shape-pin { background: transparent !important; border: none !important; }
+    .shape-pin svg { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
     /* ---- 凡例の折りたたみ ---- */
     .legend-header {
       font-weight: bold; font-size: 12px; cursor: pointer;
@@ -250,6 +265,26 @@
     });
   }
 
+  // 形状ピン（divIcon）: ▲三角 / ■四角（白縁・影付きで人口塗りの上でも視認）
+  function triIcon(color, size) {
+    const w = size, h = Math.round(size * 0.9);
+    return L.divIcon({
+      className: 'shape-pin',
+      html: `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`
+          + `<polygon points="${w/2},1 ${w-1},${h-1} 1,${h-1}" fill="${color}" stroke="#fff" stroke-width="1.2"/></svg>`,
+      iconSize: [w, h], iconAnchor: [w/2, h/2], popupAnchor: [0, -h/2],
+    });
+  }
+  function sqIcon(color, size) {
+    const s = size;
+    return L.divIcon({
+      className: 'shape-pin',
+      html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
+          + `<rect x="1" y="1" width="${s-2}" height="${s-2}" fill="${color}" stroke="#fff" stroke-width="1.2"/></svg>`,
+      iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
+    });
+  }
+
   // ランキングピンのポップアップHTML（スコア内訳・需要内訳・最寄り競合・商圏人口・近接スーパー）
   function rankPopup(r, strat) {
     const m = r.metrics, dd = r.demand_detail;
@@ -398,13 +433,13 @@
     if (showLifeline || showNewOpen) {
       h += '<div class="sep"></div>';
       if (showLifeline)
-        h += `<h4>生活動線（スーパー・複合施設）</h4><span class="dot" style="background:${LIFELINE_COLOR};border-color:${LIFELINE_COLOR}"></span>スーパー・複合施設<br>`;
+        h += `<h4>生活動線（スーパー・複合施設）</h4><span class="sq" style="background:${LIFELINE_COLOR}"></span>スーパー・複合施設<br>`;
       if (showNewOpen)
         h += `<h4>新規オープン予定</h4><span class="dot" style="background:${NEWOPEN_COLOR};border-color:${NEWOPEN_COLOR}"></span>出店予定店<br>`;
     }
     if (showWomenLifeline) {
       h += '<div class="sep"></div><h4>女性向け生活動線施設</h4>';
-      h += `<span class="dot" style="background:${WOMEN_LIFELINE_COLOR};border-color:${WOMEN_LIFELINE_COLOR}"></span>カーブス/LAVA/カルド/ユザワヤ/トーカイ<br>`;
+      h += `<span class="tri" style="border-bottom-color:${WOMEN_LIFELINE_COLOR}"></span>カーブス/LAVA/カルド/ユザワヤ/トーカイ<br>`;
     }
     if (showFav) {
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
@@ -869,9 +904,8 @@
       lifeline.forEach(s => {
         if (!s.lat||!s.lng) return;
         llMarkers.push(
-          L.circleMarker([s.lat,s.lng], {
-            pane:'stores', renderer:storeRenderer,
-            radius:3, fillColor:LIFELINE_COLOR, color:'#fff', weight:0.6, fillOpacity:0.65,
+          L.marker([s.lat,s.lng], {
+            pane:'stores', icon: sqIcon(LIFELINE_COLOR, 10), opacity: 0.9,
           }).bindTooltip(`${s.name}<br><span style="color:#555">${s.category}・${s.chain}</span>`,{sticky:true})
            .bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.category}・${s.chain}</span>${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
         );
@@ -884,9 +918,8 @@
       womenLL.forEach(s => {
         if (!s.lat || !s.lng) return;
         wlMarkers.push(
-          L.circleMarker([s.lat, s.lng], {
-            pane:'stores', renderer:storeRenderer,
-            radius:4, fillColor:WOMEN_LIFELINE_COLOR, color:'#fff', weight:1, fillOpacity:0.85,
+          L.marker([s.lat, s.lng], {
+            pane:'stores', icon: triIcon(WOMEN_LIFELINE_COLOR, 15),
           }).bindTooltip(`${s.name}<br><span style="color:#555">女性向け生活動線・${s.chain}</span>`,{sticky:true})
            .bindPopup(`<b>${s.name}</b><br><span style="color:${WOMEN_LIFELINE_COLOR};font-weight:bold">女性向け生活動線施設</span>・${s.chain}<br>${s.prefecture}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
         );
@@ -927,8 +960,8 @@
 
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
-      layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">●</span> 生活動線（スーパー・複合施設）`);
-      layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">●</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
+      layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
+      layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補①（スーパー近郊・エリア別）`);
       layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補②（田舎ブルーオーシャン・エリア別）`);
