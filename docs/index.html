@@ -61,19 +61,6 @@
       justify-content: space-between; gap: 10px;
     }
     .legend-toggle { font-size: 11px; color: #666; }
-    /* ---- 出店候補ランキングピン ---- */
-    .rank-pin-wrap { background: transparent !important; border: none !important; }
-    .rank-pin {
-      border-radius: 50%; color: #fff; font-weight: bold; text-align: center;
-      border: 2.5px solid #fff;
-      box-shadow: 0 2px 7px rgba(0,0,0,.55);
-      font-family: Arial, sans-serif;
-    }
-    .rank-pin.top1 { border-width: 3px; box-shadow: 0 0 0 2px #FFD700, 0 3px 9px rgba(0,0,0,.6); }
-    .rank-crown {
-      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-      font-size: 17px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4));
-    }
     .legend .legend-body { margin-top: 6px; }
     .legend.collapsed .legend-body { display: none; }
     .legend.collapsed { padding: 6px 12px; }
@@ -154,6 +141,18 @@
     .fav-item:hover { background: #f3e8ff; }
     .fav-item .fav-star { color: #6D28D9; flex: 0 0 auto; }
     .fav-item .fav-text { word-break: break-word; }
+    /* NGエリア一覧 */
+    #ng-list { max-height: 20vh; overflow: auto; }
+    .ng-item {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 4px; border-radius: 4px; cursor: pointer; line-height: 1.35;
+    }
+    .ng-item:hover { background: #eee; }
+    .ng-item .ng-box {
+      flex: 0 0 auto; width: 11px; height: 11px; border-radius: 1px;
+      background: #111111; box-shadow: 0 0 0 1px #fff inset;
+    }
+    .ng-item .ng-text { word-break: break-word; }
     /* ---- 機能3: お気に入り星ピン（最前面ペイン） ---- */
     .fav-pin-wrap { background: transparent !important; border: none !important; }
     .fav-pin {
@@ -200,9 +199,9 @@
   // 生活動線（スーパー・複合施設）= マゼンタ / 新規オープン予定 = 金/琥珀
   const LIFELINE_COLOR = '#DB2777';
   const NEWOPEN_COLOR  = '#D4A017';
-  // 出店候補ランキング: 戦略①=濃ブルー / 戦略②=濃グリーン
-  const RANK1_COLOR = '#1D4ED8';
-  const RANK2_COLOR = '#047857';
+  // ----- NGエリア（出店しない市区町村）黒塗り -----
+  const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
+  const NG_FILL_COLOR  = '#111111';                // 黒塗り色
 
   // ----- 機能1: クリック地点 半径n km圏内 人口集計 -----
   // 集計指標は「40歳以上女性人口(women_40plus)」= マップのコロプレス指標と一致。
@@ -255,20 +254,6 @@
     + `style="background:${FAV_COLOR};color:#fff;border:none;border-radius:4px;`
     + `padding:3px 9px;font-size:11px;cursor:pointer">★ お気に入り登録</button></div>`;
 
-  // 出店候補ランキング: 番号入りdivIconを生成（1位は王冠＋大きめ）
-  function rankIcon(rank, color) {
-    const top = rank === 1;
-    const size = top ? 40 : 30;
-    const crown = top ? '<div class="rank-crown">👑</div>' : '';
-    return L.divIcon({
-      className: 'rank-pin-wrap',
-      html: crown + `<div class="rank-pin${top ? ' top1' : ''}" `
-          + `style="background:${color};width:${size}px;height:${size}px;`
-          + `line-height:${size - 5}px;font-size:${top ? 18 : 14}px;">${rank}</div>`,
-      iconSize: [size, size], iconAnchor: [size/2, size/2],
-    });
-  }
-
   // 形状ピン（divIcon）: ▲三角 / ■四角（白縁・影付きで人口塗りの上でも視認）
   function triIcon(color, size) {
     const w = size, h = Math.round(size * 0.9);
@@ -289,40 +274,6 @@
     });
   }
 
-  // ランキングピンのポップアップHTML（スコア内訳・需要内訳・最寄り競合・商圏人口・近接スーパー）
-  function rankPopup(r, strat) {
-    const m = r.metrics, dd = r.demand_detail;
-    const head = strat === 1 ? '出店候補 戦略①' : '出店候補 戦略②';
-    const hcol = strat === 1 ? RANK1_COLOR : RANK2_COLOR;
-    let h = `<div style="font-size:12px;min-width:210px">`;
-    h += `<div style="color:${hcol};font-weight:bold">${head}　[${r.area_type}] 第${r.rank}位</div>`;
-    h += `<b>${r.name}</b><br><span style="color:#555">${r.chain}・${r.category}</span><br>`;
-    h += `${r.prefecture}${r.city}<br>`;
-    h += `<div style="margin:4px 0;font-weight:bold">総合スコア: <span style="color:${hcol};font-size:14px">${r.total_score}</span> /100</div>`;
-    h += `<table style="font-size:11px;border-collapse:collapse">`;
-    const rows = [
-      ['スーパー近接', m.super_proximity], ['競合の少なさ', m.competitor_scarcity],
-      ['40歳以上女性人口', m.women_pop], ['カニバリ回避', m.cannibal_avoid],
-      ['ロードサイド適性', m.roadside], ['需要の裏付け(複合)', m.demand_backing],
-    ];
-    rows.forEach(([k,v]) => { h += `<tr><td style="padding:0 6px 0 0">${k}</td><td><b>${v}</b>/10</td></tr>`; });
-    h += `</table>`;
-    h += `<div style="margin-top:4px;border-top:1px solid #ddd;padding-top:3px">`;
-    h += `需要内訳: 漁業${dd['漁業']} / 製造業${dd['製造業']} / 農業${dd['農業']} / 商業${dd['商業']}<br>`;
-    h += `<b>効いた裏付け: ${dd.top_source}</b>`;
-    if (strat === 2 && r.dead_ocean) h += ` <span style="color:#c0392b">⚠デッドオーシャン懸念</span>`;
-    h += `</div>`;
-    h += `<div style="margin-top:3px">最寄り競合: ${r.nearest_comp_km}km（2km内${r.n_comp_2km}店）<br>`;
-    h += `<b>推定商圏(メッシュ・半径2km/女性40+): ${fmtN(r.trade_women)}人</b><br>`;
-    h += `<span style="color:#777">市区町村: 総人口 ${fmtN(r.muni_pop)}人 / 女性40+ ${fmtN(r.muni_women_40plus)}人</span>`;
-    if (r.pop_sparse) h += `<br><span style="color:#c0392b">⚠周辺人口希薄（市は大きいが商圏内は薄い）</span>`;
-    h += `<br>`;
-    if (r.near_super_names && r.near_super_names.length)
-      h += `近接スーパー: ${r.near_super_names.slice(0,3).join('、')}`;
-    h += `</div>${mapsLinks(r.lat, r.lng)}${favLinkHtml(r.lat, r.lng)}</div>`;
-    return h;
-  }
-
   // ============================================================
   // 地図初期化
   // ============================================================
@@ -338,10 +289,6 @@
   map.createPane('daikichi');
   map.getPane('daikichi').style.zIndex = 680;
   const daikichiRenderer = L.svg({ pane: 'daikichi' });
-
-  // 出店候補ランキングピン専用ペイン（全ピン中で最前面・人口色塗りに埋もれない）
-  map.createPane('ranking');
-  map.getPane('ranking').style.zIndex = 700;
 
   // 機能1: 半径集計の円ペイン（コロプレス400より上・店舗ピン650より下＝ピンが円の上に見える）
   map.createPane('measure');
@@ -421,9 +368,13 @@
     }
     return this._div;
   };
-  legend.update = function(mode, showComp, showLifeline, showNewOpen, showRank1, showRank2,
-                           showWomenLifeline, showFav) {
+  legend.update = function(mode, showComp, showLifeline, showNewOpen,
+                           showWomenLifeline, showFav, hasNg) {
     let h = '';
+    if (hasNg) {
+      h += '<h4>NGエリア（出店しない）</h4>';
+      h += `<span class="sq" style="background:${NG_FILL_COLOR}"></span>出店NGの市区町村<br>`;
+    }
     if (mode==='pop') {
       h += '<h4>女性40歳以上人口</h4>';
       POP_BREAKS.forEach((lo,i) => {
@@ -454,14 +405,6 @@
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
       h += `<span style="color:${FAV_COLOR};font-size:15px;vertical-align:middle">★</span> メモ付き登録地点<br>`;
     }
-    if (showRank1 || showRank2) {
-      h += '<div class="sep"></div><h4>出店候補（エリアタイプ別 各上位3）</h4>';
-      if (showRank1)
-        h += `<span class="dot" style="background:${RANK1_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK1_COLOR}"></span>①スーパー近郊<br>`;
-      if (showRank2)
-        h += `<span class="dot" style="background:${RANK2_COLOR};border-color:#fff;box-shadow:0 0 0 1px ${RANK2_COLOR}"></span>②田舎ブルーオーシャン<br>`;
-      h += `<span style="color:#777;font-size:10px">※番号は各エリアタイプ内の順位</span><br>`;
-    }
     this._body.innerHTML = h;
   };
   legend.addTo(map);
@@ -473,10 +416,14 @@
   let choroplethLayer = null;
   let storeLayer, competitorLayer;
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
-  let ranking1Layer = null, ranking2Layer = null;   // 出店候補ランキング①/②
   let womenLifelineLayer = null;                     // 機能2: 女性向け生活動線施設
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
+
+  // NGエリア（出店しない市区町村・黒塗り）の状態
+  let ngAreas = [];             // [{code, city, pref, createdAt}]
+  let ngSet = new Set();        // code高速判定用
+  let wardLayers = {};          // code → コロプレスのlayer（NG一覧クリックでズーム用）
 
   // 機能1: 半径集計の状態
   let popPoints = null, popMeta = null;       // 人口メッシュ点群 [[lat,lng,w],...]
@@ -496,6 +443,9 @@
   // ============================================================
   function choroplethStyle(feature) {
     const p = feature.properties;
+    // NGエリアはコロプレス表示/非表示に関わらず黒塗り（出店しない市区町村）
+    if (isNg(p.code))
+      return { fillColor: NG_FILL_COLOR, color: '#000', weight: 1, opacity: 0.85, fillOpacity: 0.8 };
     // 非表示時はフィルも枠線も完全に消す→店舗ピンが見やすくなる
     if (choroplethMode === 'none')
       return { fillOpacity: 0, opacity: 0, weight: 0 };
@@ -519,10 +469,9 @@
       competitorLayer && map.hasLayer(competitorLayer),
       lifelineLayer && map.hasLayer(lifelineLayer),
       newOpeningLayer && map.hasLayer(newOpeningLayer),
-      ranking1Layer && map.hasLayer(ranking1Layer),
-      ranking2Layer && map.hasLayer(ranking2Layer),
       womenLifelineLayer && map.hasLayer(womenLifelineLayer),
       favLayer && map.hasLayer(favLayer),
+      ngAreas.length > 0,
     );
   }
 
@@ -756,7 +705,7 @@
     localStorage.setItem(FAV_API_URL_KEY, favApiUrl);
     localStorage.setItem(FAV_API_TOKEN_KEY, favApiToken);
     favUpdateShareStatus();
-    if (!favShareEnabled()) { renderFavorites(); return; }
+    if (!favShareEnabled()) { renderFavorites(); renderNg(); return; }
     try {
       // 初回有効化時: ローカルだけにあるお気に入りをスプレッドシートへ送り、消失を防ぐ
       const remote = await favRemoteList();
@@ -769,8 +718,20 @@
         finally { favPending = Math.max(0, favPending - 1); }
       }
       await syncFavoritesFromRemote(true);   // 統合後の最新を取得
+
+      // NGエリアも同様にローカル分を統合
+      const remoteNg = await ngRemoteList();
+      const remoteNgCodes = new Set(remoteNg.map(x => x.code));
+      const ngLocalOnly = ngAreas.filter(x => !remoteNgCodes.has(String(x.code).padStart(5, '0')));
+      for (const it of ngLocalOnly) {
+        favPending++;
+        try { await ngRemoteSend('add', { item: it }); }
+        catch (e) { console.error('NG統合(送信)失敗', e); }
+        finally { favPending = Math.max(0, favPending - 1); }
+      }
+      await syncNgFromRemote(true);
     } catch (e) {
-      console.error('お気に入り共有 有効化失敗', e);
+      console.error('共有 有効化失敗', e);
     }
   }
 
@@ -790,6 +751,108 @@
   };
 
   // ============================================================
+  // NGエリア（出店しない市区町村・黒塗り）— localStorage + 任意でスプレッドシート共有
+  // ============================================================
+  function isNg(code) { return ngSet.has(String(code)); }
+  function ngRebuildSet() { ngSet = new Set(ngAreas.map(x => String(x.code))); }
+
+  function loadNg() {
+    try {
+      const raw = localStorage.getItem(NG_STORAGE_KEY);
+      ngAreas = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(ngAreas)) ngAreas = [];
+    } catch (e) { ngAreas = []; }
+    ngRebuildSet();
+  }
+  function saveNg() {
+    try { localStorage.setItem(NG_STORAGE_KEY, JSON.stringify(ngAreas)); }
+    catch (e) { console.error('NG保存失敗', e); }
+  }
+
+  function renderNg() {
+    if (choroplethLayer) choroplethLayer.setStyle(choroplethStyle);  // 黒塗りを反映
+    renderNgList();
+    refreshLegend();
+  }
+
+  function renderNgList() {
+    const el  = document.getElementById('ng-list');
+    const cnt = document.getElementById('ng-count');
+    if (cnt) cnt.textContent = ngAreas.length;
+    if (!el) return;
+    if (!ngAreas.length) { el.innerHTML = '<span style="color:#999">指定なし</span>'; return; }
+    const sorted = ngAreas.slice().sort((a,b) =>
+      String(a.pref+a.city).localeCompare(String(b.pref+b.city), 'ja'));
+    el.innerHTML = sorted.map(x =>
+      `<div class="ng-item" data-code="${x.code}"><span class="ng-box"></span>`
+      + `<span class="ng-text">${escapeHtml((x.pref||'') + (x.city||x.code))}</span></div>`
+    ).join('');
+    el.querySelectorAll('.ng-item').forEach(div => {
+      div.addEventListener('click', () => {
+        const lyr = wardLayers[div.dataset.code];
+        if (lyr) map.fitBounds(lyr.getBounds(), { padding: [40, 40] });
+      });
+    });
+  }
+
+  // 市区町村プロパティを受け取りNG指定をトグル
+  function toggleNg(props) {
+    const code = String(props.code);
+    if (ngSet.has(code)) {
+      ngAreas = ngAreas.filter(x => String(x.code) !== code);
+      ngRebuildSet(); saveNg(); renderNg();
+      ngRemotePush('delete', { code });
+    } else {
+      const item = { code, city: props.city || '', pref: props.pref || '',
+                     createdAt: new Date().toISOString() };
+      ngAreas.push(item);
+      ngRebuildSet(); saveNg(); renderNg();
+      ngRemotePush('add', { item });
+    }
+  }
+
+  // ----- NG共有（お気に入りと同じWebアプリURL・kind=ng）-----
+  async function ngRemoteList() {
+    const url = favApiUrl + (favApiUrl.includes('?') ? '&' : '?') + 'kind=ng';
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.items || []);
+    return arr.map(x => ({
+      code: String(x.code).padStart(5, '0'),   // 先頭ゼロ復元（例 8201→08201）
+      city: x.city == null ? '' : String(x.city),
+      pref: x.pref == null ? '' : String(x.pref),
+    })).filter(x => x.code && x.code !== '00000');
+  }
+  async function ngRemoteSend(action, payload) {
+    const body = JSON.stringify({ kind: 'ng', action, token: favApiToken, ...payload });
+    const res = await fetch(favApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body,
+    });
+    return res.json().catch(() => ({}));
+  }
+  function ngRemotePush(action, payload) {
+    if (!favShareEnabled()) return;
+    favPending++;
+    ngRemoteSend(action, payload)
+      .catch(e => console.error('NG共有(送信)失敗', e))
+      .finally(() => { favPending = Math.max(0, favPending - 1); });
+  }
+  async function syncNgFromRemote(force) {
+    if (!favShareEnabled()) return;
+    if (!force && (favEditing || favPending > 0)) return;
+    try {
+      ngAreas = await ngRemoteList();
+      ngRebuildSet();
+      saveNg();
+      renderNg();
+    } catch (e) {
+      console.error('NG同期(取得)失敗', e);
+    }
+  }
+
+  // ============================================================
   // クリック操作モード切替 + 地図クリックの振り分け
   // ============================================================
   function setClickMode(mode) {
@@ -802,6 +865,7 @@
       hint.textContent =
         mode === 'radius'   ? '地図クリックで円の中心を指定' :
         mode === 'favorite' ? '地図クリックでお気に入り追加' :
+        mode === 'ng'       ? '市区町村クリックでNG指定/解除' :
         '通常モード（ピン/市区町村を操作）';
     }
   }
@@ -839,6 +903,7 @@
       +     '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
       +     '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
       +     '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
+      +     '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
       +   '</div>'
       +   '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
       +   '<div class="sep"></div>'
@@ -848,6 +913,10 @@
       +     '<span id="measure-radius-val" style="white-space:nowrap"></span></div>'
       +   '<div id="measure-result">地図をクリックして中心を指定</div>'
       +   '<button id="measure-clear" class="tp-btn" style="background:#64748b">クリア</button>'
+      +   '<div class="sep"></div>'
+      +   '<h4>🚫 NGエリア (<span id="ng-count">0</span>)</h4>'
+      +   '<div style="color:#888;font-size:10px;margin-bottom:3px">「NGエリア指定」モードで市区町村をクリックすると黒塗り（出店しない）</div>'
+      +   '<div id="ng-list"><span style="color:#999">指定なし</span></div>'
       +   '<div class="sep"></div>'
       +   '<h4>★ お気に入り (<span id="fav-count">0</span>)</h4>'
       +   '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
@@ -917,14 +986,20 @@
     favUpdateShareStatus();
   })();
 
-  // お気に入りレイヤーを作成（トグル可能・最前面ペイン）し、保存済みを描画
-  loadFavorites();        // まずlocalStorageキャッシュで即描画
+  // お気に入り/NGをlocalStorageキャッシュから読み込み（即描画）
+  loadFavorites();
+  loadNg();
   favLayer = L.layerGroup([]).addTo(map);
   renderFavorites();
+  renderNgList();   // コロプレスはphase1生成後にrenderNgで黒塗り反映
   // 共有設定済みなら初回同期＋定期同期で他端末の変更を取り込む
   if (favShareEnabled()) {
     syncFavoritesFromRemote(true);
-    setInterval(() => syncFavoritesFromRemote(false), FAV_SYNC_INTERVAL_MS);
+    syncNgFromRemote(true);
+    setInterval(() => {
+      syncFavoritesFromRemote(false);
+      syncNgFromRemote(false);
+    }, FAV_SYNC_INTERVAL_MS);
   }
 
   // ============================================================
@@ -942,11 +1017,13 @@
     choroplethLayer = L.geoJSON(geoData, {
       style: choroplethStyle,
       onEachFeature: (feature, layer) => {
+        wardLayers[feature.properties.code] = layer;  // NG一覧クリックでのズーム用
         layer.on({
           mouseover(e) {
             // ハイライトは「濃く塗る」のではなく「太い枠線＋やや薄いフィル」で示す
             // （従来は fillOpacity 0.85 で暗くなりピンが見えにくかった）
-            if (choroplethMode !== 'none') {
+            // NGエリアは黒塗りを維持（ハイライトしない）
+            if (choroplethMode !== 'none' && !isNg(feature.properties.code)) {
               e.target.setStyle({ weight:3, color:'#333', fillOpacity:0.3 });
               e.target.bringToFront();
             }
@@ -957,6 +1034,8 @@
             info.clear();
           },
           click(e) {
+            // NGモード: 市区町村をNG指定/解除
+            if (clickMode === 'ng') { toggleNg(feature.properties); return; }
             // Canvasコロプレスはポリゴン上のクリックで map の click を止めるため、
             // 半径集計/お気に入りモードはここで明示的に処理する。
             if (handleModeClick(e.latlng)) return;
@@ -1013,12 +1092,10 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, rank1, rank2, popPts, womenLL] = await Promise.all([
+      const [comp, lifeline, newOpen, popPts, womenLL] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
-        fetch('data/ranking_strategy1.json').then(r=>r.json()),
-        fetch('data/ranking_strategy2.json').then(r=>r.json()),
         fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
         fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
       ]);
@@ -1084,31 +1161,11 @@
       });
       newOpeningLayer = L.layerGroup(noMarkers);
 
-      // ---- 出店候補ランキング①/②（番号入り大型ピン・rankingペインz700で最前面）----
-      function buildRanking(arr, color, strat) {
-        const markers = [];
-        arr.forEach(r => {
-          if (!r.lat || !r.lng) return;
-          markers.push(
-            L.marker([r.lat, r.lng], { icon: rankIcon(r.rank, color), pane: 'ranking',
-                                       zIndexOffset: 1000 + (50 - r.rank) })
-              .bindTooltip(`[${r.area_type}] 第${r.rank}位 ${r.name}（${r.prefecture}${r.city}）総合${r.total_score}`,
-                           { direction: 'top', offset: [0, -16] })
-              .bindPopup(rankPopup(r, strat), { maxWidth: 280 })
-          );
-        });
-        return L.layerGroup(markers);
-      }
-      ranking1Layer = buildRanking(rank1, RANK1_COLOR, 1).addTo(map);
-      ranking2Layer = buildRanking(rank2, RANK2_COLOR, 2).addTo(map);
-
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
-      layerControl.addOverlay(ranking1Layer,   `<span style="color:${RANK1_COLOR};font-weight:bold">①</span> 出店候補①（スーパー近郊・エリア別）`);
-      layerControl.addOverlay(ranking2Layer,   `<span style="color:${RANK2_COLOR};font-weight:bold">②</span> 出店候補②（田舎ブルーオーシャン・エリア別）`);
 
       map.on('overlayadd overlayremove', refreshLegend);
 

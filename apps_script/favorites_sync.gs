@@ -1,65 +1,60 @@
 /**
- * 買取大吉 商圏マップ — お気に入り共有 Google Apps Script Webアプリ
+ * 買取大吉 商圏マップ — 共有バックエンド Google Apps Script Webアプリ
  *
- * スプレッドシートに "favorites" シートを作り、お気に入り地点を保存・共有する。
- *   GET  : 全件取得（JSON配列）
- *   POST : { action: 'add'|'update'|'delete', token, item|id }
+ * 1つのスプレッドシートで2種類のデータを共有する:
+ *   - お気に入り地点      → "favorites" シート
+ *   - NGエリア(出店しない) → "ng_areas" シート
  *
- * 【使い方】このコードを貼る方法は2通り（どちらでも可）:
- *   (A) コンテナバインド（推奨・簡単）:
- *       共有用スプレッドシートを開く → 拡張機能 > Apps Script → このコードを貼る。
- *       getSheet_() は getActiveSpreadsheet() を使うのでそのままでOK。
- *   (B) スタンドアロン:
- *       SHEET_ID に対象スプレッドシートIDを入れ、getSheet_() を openById に切替（下記コメント参照）。
+ *   GET  ?kind=favorites (既定) / ?kind=ng        … 一覧を返す
+ *   POST { kind:'favorites'|'ng', action, token, ... } … 追加/更新/削除
+ *     favorites: action='add'|'update'|'delete'（itemまたはid）
+ *     ng:        action='add'|'delete'（itemまたはcode）
  *
- * 【デプロイ】デプロイ > 新しいデプロイ > 種類「ウェブアプリ」
- *   - 実行するユーザー : 自分
- *   - アクセスできるユーザー : 全員（Anyone）  ← ログイン無しの fetch に必要
- *   デプロイ後に表示される「ウェブアプリのURL（.../exec）」を地図の ⚙共有設定 に貼る。
+ * 【貼り方】共有用スプレッドシートを開く → 拡張機能 > Apps Script → 全文を貼り付け。
+ * 【デプロイ】デプロイ > 新しいデプロイ > ウェブアプリ
+ *     実行ユーザー=自分 / アクセス=全員。表示URL(.../exec)を地図の⚙共有設定へ。
+ *   ※コード更新後は「デプロイを管理 > 編集 > 新バージョン > デプロイ」で反映（URL不変）。
  *
- * 【セキュリティ注意】
- *   - 「全員」公開なのでURLを知っていれば誰でも読み書き可能。URLはチーム内のみで共有すること。
- *   - 簡易的な書き込み保護として TOKEN を設定可能（地図側「トークン」と一致させる）。
- *     ※TOKENもURLと一緒に共有する前提なので強固な認証ではない（内部利用向けの抑止）。
+ * 【注意】「全員」公開のためURLを知れば誰でも読み書き可能。URLはチーム内のみで共有。
+ *         TOKEN を設定すると書き込み時に合言葉照合（地図のトークン欄と一致させる）。
  */
 
-const SHEET_NAME = 'favorites';
 const TOKEN = '';   // 任意。設定したら地図の「トークン」欄にも同じ値を入れる。空なら無認証。
-const HEADERS = ['id', 'lat', 'lng', 'comment', 'author', 'createdAt', 'updatedAt'];
 
-// (B)スタンドアロンにする場合のみ使用
-// const SHEET_ID = 'ここにスプレッドシートIDを入れる';
+const FAV_SHEET   = 'favorites';
+const FAV_HEADERS = ['id', 'lat', 'lng', 'comment', 'author', 'createdAt', 'updatedAt'];
+const NG_SHEET    = 'ng_areas';
+const NG_HEADERS  = ['code', 'city', 'pref', 'author', 'createdAt'];
 
-function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();        // (A)コンテナバインド
-  // const ss = SpreadsheetApp.openById(SHEET_ID);          // (B)スタンドアロンはこちらに切替
-  let sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) { sh = ss.insertSheet(SHEET_NAME); sh.appendRow(HEADERS); }
-  if (sh.getLastRow() === 0) sh.appendRow(HEADERS);
+function sheet_(name, headers) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();        // コンテナバインド(推奨)
+  // const ss = SpreadsheetApp.openById('スプレッドシートID'); // スタンドアロンはこちら
+  let sh = ss.getSheetByName(name);
+  if (!sh) { sh = ss.insertSheet(name); sh.appendRow(headers); }
+  if (sh.getLastRow() === 0) sh.appendRow(headers);
   return sh;
 }
 
 function readAll_(sh) {
   const values = sh.getDataRange().getValues();
-  const head = values.shift() || HEADERS;
+  const head = values.shift() || [];
   return values
     .filter(function (r) { return r[0] !== '' && r[0] != null; })
     .map(function (r) {
       const o = {};
       head.forEach(function (h, i) { o[h] = r[i]; });
-      o.id = String(o.id);
-      o.lat = Number(o.lat);
-      o.lng = Number(o.lng);
-      o.comment = o.comment == null ? '' : String(o.comment);
       return o;
     });
 }
 
-function findRow_(sh, id) {
+// 1列目(キー)で行番号を探す。numeric=trueなら数値比較(市区町村コードの先頭ゼロ対策)。
+function findRow_(sh, key, numeric) {
   const last = Math.max(sh.getLastRow(), 1);
-  const ids = sh.getRange(1, 1, last, 1).getValues();
-  for (let i = 1; i < ids.length; i++) {
-    if (String(ids[i][0]) === String(id)) return i + 1;  // 1始まりの行番号
+  const col = sh.getRange(1, 1, last, 1).getValues();
+  for (let i = 1; i < col.length; i++) {
+    const cell = col[i][0];
+    const hit = numeric ? (Number(cell) === Number(key)) : (String(cell) === String(key));
+    if (hit) return i + 1;
   }
   return -1;
 }
@@ -70,8 +65,10 @@ function json_(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function doGet() {
-  return json_(readAll_(getSheet_()));
+function doGet(e) {
+  const kind = (e && e.parameter && e.parameter.kind) || 'favorites';
+  if (kind === 'ng') return json_(readAll_(sheet_(NG_SHEET, NG_HEADERS)));
+  return json_(readAll_(sheet_(FAV_SHEET, FAV_HEADERS)));
 }
 
 function doPost(e) {
@@ -82,10 +79,28 @@ function doPost(e) {
     if (TOKEN && body.token !== TOKEN) {
       return json_({ ok: false, error: 'unauthorized' });
     }
-    const sh = getSheet_();
+    const kind = body.kind || 'favorites';
     const action = body.action;
     const now = new Date().toISOString();
 
+    if (kind === 'ng') {
+      const sh = sheet_(NG_SHEET, NG_HEADERS);
+      if (action === 'add') {
+        const it = body.item || {};
+        if (findRow_(sh, it.code, true) < 0) {  // 重複コードは追加しない
+          sh.appendRow([String(it.code), it.city || '', it.pref || '', it.author || '', it.createdAt || now]);
+        }
+      } else if (action === 'delete') {
+        const row = findRow_(sh, body.code, true);
+        if (row > 0) sh.deleteRow(row);
+      } else {
+        return json_({ ok: false, error: 'unknown ng action' });
+      }
+      return json_({ ok: true, items: readAll_(sh) });
+    }
+
+    // ----- favorites -----
+    const sh = sheet_(FAV_SHEET, FAV_HEADERS);
     if (action === 'add') {
       const it = body.item || {};
       sh.appendRow([
@@ -95,13 +110,13 @@ function doPost(e) {
       ]);
     } else if (action === 'update') {
       const it = body.item || {};
-      const row = findRow_(sh, it.id);
+      const row = findRow_(sh, it.id, false);
       if (row > 0) {
-        sh.getRange(row, 4).setValue(it.comment || '');          // comment列
-        sh.getRange(row, 7).setValue(it.updatedAt || now);       // updatedAt列
+        sh.getRange(row, 4).setValue(it.comment || '');     // comment列
+        sh.getRange(row, 7).setValue(it.updatedAt || now);  // updatedAt列
       }
     } else if (action === 'delete') {
-      const row = findRow_(sh, body.id);
+      const row = findRow_(sh, body.id, false);
       if (row > 0) sh.deleteRow(row);
     } else {
       return json_({ ok: false, error: 'unknown action' });
