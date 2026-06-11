@@ -33,6 +33,39 @@
     "detail_url": "https://buysell-kaitori.com/store_post/%e8%a1%a8%e5%8f%82%e9%81%93%e9%9d%92%e5%b1%b1%e9%80%9a%e3%82%8a%e5%ba%97/"
   },
   {
+    "name": "豊橋佐藤町店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.74680532411571,
+    "longitude": 137.4034061945869,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e8%b1%8a%e6%a9%8b%e4%bd%90%e8%97%a4%e7%94%ba%e5%ba%97/"
+  },
+  {
+    "name": "栄セントラルパーク 2号店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.1731756,
+    "longitude": 136.9083075,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a0%84%e3%82%bb%e3%83%b3%e3%83%88%e3%83%a9%e3%83%ab%e3%83%91%e3%83%bc%e3%82%af-2%e5%8f%b7%e5%ba%97/"
+  },
+  {
+    "name": "名古屋御器所店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.1495501,
+    "longitude": 136.9336499,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%8d%e5%8f%a4%e5%b1%8b%e5%be%a1%e5%99%a8%e6%89%80%e5%ba%97/"
+  },
+  {
     "name": "ベイシア磐田豊岡店",
     "brand": "バイセル",
     "address": "",
@@ -121,6 +154,17 @@
     "detail_url": "https://buysell-kaitori.com/store_post/odakyu-ox-%e8%aa%ad%e5%a3%b2%e3%83%a9%e3%83%b3%e3%83%89%e5%ba%97/"
   },
   {
+    "name": "MEGAドン・キホーテUNY武豊店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.8480299,
+    "longitude": 136.9160274,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e6%ad%a6%e8%b1%8a%e5%ba%97/"
+  },
+  {
     "name": "福田屋鹿沼店",
     "brand": "バイセル",
     "address": "",
@@ -143,6 +187,50 @@
     "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%b3%e3%82%b9%e8%8d%89%e5%8a%a0%e5%ba%97/"
   },
   {
+    "name": "イオン金山店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.144924200000005,
+    "longitude": 136.9007911,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e9%87%91%e5%b1%b1%e5%ba%97/"
+  },
+  {
+    "name": "MEGAドン・キホーテUNY吉良店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.80104778523156,
+    "longitude": 137.0632802657455,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e5%90%89%e8%89%af%e5%ba%97/"
+  },
+  {
+    "name": "イオンタウン有松店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.0677841,
+    "longitude": 136.9723186,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%bf%e3%82%a6%e3%83%b3%e6%9c%89%e6%9d%be%e5%ba%97/"
+  },
+  {
+    "name": "イオン南陽店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.11659309999999,
+    "longitude": 136.816207,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e5%8d%97%e9%99%bd%e5%ba%97/"
+  },
+  {
     "name": "静岡駅北口店",
     "brand": "バイセル",
     "address": "",
@@ -152,6 +240,28 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e9%9d%99%e5%b2%a1%e9%a7%85%e5%8c%97%e5%8f%a3%e5%ba%97/"
+  },
+  {
+    "name": "ららぽーと安城店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.96544720000001,
+    "longitude": 137.0802649,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%89%e3%82%89%e3%81%bd%e3%83%bc%e3%81%a8%e5%ae%89%e5%9f%8e%e5%ba%97/"
+  },
+  {
+    "name": "イオン春日井店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.23809010000001,
+    "longitude": 136.96244679999998,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e6%98%a5%e6%97%a5%e4%ba%95%e5%ba%97/"
   },
   {
     "name": "小田急マルシェ相武台店",
@@ -174,6 +284,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/licopa%e6%9d%b1%e5%a4%a7%e5%92%8c%e5%ba%97/"
+  },
+  {
+    "name": "バロー瀬戸西店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.206175,
+    "longitude": 137.0558222,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%90%e3%83%ad%e3%83%bc%e7%80%ac%e6%88%b8%e8%a5%bf%e5%ba%97/"
   },
   {
     "name": "ゆめが丘ソラトス店",
@@ -341,6 +462,17 @@
     "detail_url": "https://buysell-kaitori.com/store_post/%e5%b7%a3%e9%b4%a8%e5%9c%b0%e8%94%b5%e9%80%9a%e3%82%8a%e5%ba%97/"
   },
   {
+    "name": "イオン豊川開運通店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.8271553,
+    "longitude": 137.3844254,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e8%b1%8a%e5%b7%9d%e9%96%8b%e9%81%8b%e9%80%9a%e5%ba%97/"
+  },
+  {
     "name": "MEGAドン・キホーテ蓮田店",
     "brand": "バイセル",
     "address": "",
@@ -372,6 +504,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%bb%e3%83%96%e3%83%b3%e3%83%91%e3%83%bc%e3%82%af%e3%82%a2%e3%83%aa%e3%82%aa%e6%9f%8f%e5%ba%97/"
+  },
+  {
+    "name": "イオンスタイル岡崎店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.9386323,
+    "longitude": 137.16478809999998,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e5%b2%a1%e5%b4%8e%e5%ba%97/"
   },
   {
     "name": "ノースポートモール店",
@@ -462,6 +605,17 @@
     "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e6%98%a5%e6%97%a5%e9%83%a8%e5%ba%97/"
   },
   {
+    "name": "イオン半田店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 34.86933679999999,
+    "longitude": 136.9179426,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e5%8d%8a%e7%94%b0%e5%ba%97/"
+  },
+  {
     "name": "MEGAドン・キホーテ八千代16号バイパス店",
     "brand": "バイセル",
     "address": "",
@@ -537,6 +691,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e5%a4%a7%e6%a3%ae%e8%a5%bf%e5%8f%a3%e9%a7%85%e5%89%8d%e5%ba%97/"
+  },
+  {
+    "name": "イオンモール土岐店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.346769,
+    "longitude": 137.154191,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%83%a2%e3%83%bc%e3%83%ab%e5%9c%9f%e5%b2%90%e5%ba%97/"
   },
   {
     "name": "イトーヨーカドー昭島店",
@@ -709,7 +874,7 @@
     "address": "",
     "latitude": 34.720103,
     "longitude": 137.4914195,
-    "prefecture": "静岡県",
+    "prefecture": "愛知県",
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%91%e3%83%ac%e3%83%9e%e3%83%ab%e3%82%b7%e3%82%a7%e6%96%b0%e6%89%80%e5%8e%9f%e5%ba%97/"
@@ -979,6 +1144,17 @@
     "detail_url": "https://buysell-kaitori.com/store_post/odakyu-ox-%e4%bc%8a%e5%8b%a2%e5%8e%9f%e5%ba%97/"
   },
   {
+    "name": "名鉄一宮イチ＊ビル店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.30208326375623,
+    "longitude": 136.7963213410744,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%8d%e9%89%84%e4%b8%80%e5%ae%ae%e3%82%a4%e3%83%81%ef%bc%8a%e3%83%93%e3%83%ab%e5%ba%97/"
+  },
+  {
     "name": "アリオ西新井店",
     "brand": "バイセル",
     "address": "",
@@ -1065,6 +1241,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e6%a8%aa%e6%b5%9c%e3%83%a2%e3%82%a2%e3%83%bc%e3%82%ba%e5%ba%97/"
+  },
+  {
+    "name": "アスナル金山店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.144320311000094,
+    "longitude": 136.90100372443618,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%b9%e3%83%8a%e3%83%ab%e9%87%91%e5%b1%b1%e5%ba%97/"
   },
   {
     "name": "恵比寿駅前店",
@@ -1177,6 +1364,17 @@
     "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%89%e7%a5%a5%e5%af%ba%e3%83%ac%e3%83%b3%e3%82%ac%e9%a4%a8%e3%83%a2%e3%83%bc%e3%83%ab%e5%ba%97/"
   },
   {
+    "name": "ＫＩＴＴＥ名古屋店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.173054690243816,
+    "longitude": 136.882376999736,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/kitte%e5%90%8d%e5%8f%a4%e5%b1%8b%e5%ba%97/"
+  },
+  {
     "name": "ザザシティ浜松店",
     "brand": "バイセル",
     "address": "",
@@ -1230,6 +1428,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store_post/%e5%a4%a7%e5%ae%aedom%e5%ba%97/"
+  },
+  {
+    "name": "名古屋栄セントラルパーク店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.17313491859824,
+    "longitude": 136.90818690285363,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a0%84%e3%82%bb%e3%83%b3%e3%83%88%e3%83%a9%e3%83%ab%e3%83%91%e3%83%bc%e3%82%af%e5%ba%97/"
   },
   {
     "name": "横浜元町店",

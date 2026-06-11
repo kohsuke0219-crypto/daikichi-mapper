@@ -223,8 +223,8 @@
     "name": "二子玉川ライズ・バーズモール店",
     "brand": "なんぼや",
     "address": "〒158-0094 東京都世田谷区玉川2-2-1 二子玉川ライズ・バーズモール＆レジデンス 1F",
-    "latitude": 35.611993,
-    "longitude": 139.630091,
+    "latitude": 35.6121292,
+    "longitude": 139.6298464,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
@@ -572,11 +572,11 @@
     "detail_url": "https://nanboya.com/shop/kohokutokyu-brandshop/"
   },
   {
-    "name": "日吉東急アベニュー店",
+    "name": "東急百貨店 日吉店",
     "brand": "なんぼや",
-    "address": "〒223-0061 神奈川県横浜市港北区日吉2-1-1 日吉東急アベニュー 2F",
-    "latitude": 35.55406869999999,
-    "longitude": 139.6471071,
+    "address": "〒223-0061 神奈川県横浜市港北区日吉2-1-1 東急百貨店 日吉店 2F",
+    "latitude": 35.5538388,
+    "longitude": 139.6471375,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
@@ -966,5 +966,60 @@
     "city": "",
     "phone": "",
     "detail_url": "https://nanboya.com/shop/hamamatsu-brandshop/"
+  },
+  {
+    "name": "名古屋サカエチカ店",
+    "brand": "なんぼや",
+    "address": "〒460-0008 愛知県名古屋市中区栄3-4-6号先路下　地下街路サカエチカ",
+    "latitude": 35.168909,
+    "longitude": 136.906537,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/nagoya-sakaechika-brandshop/"
+  },
+  {
+    "name": "名古屋大須店",
+    "brand": "なんぼや",
+    "address": "〒460-0011 愛知県名古屋市中区大須2-30-6 プレサンスTHE大須観音1F",
+    "latitude": 35.1586473,
+    "longitude": 136.9010713,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/nagoya-osu-brandshop/"
+  },
+  {
+    "name": "名古屋エスカ店",
+    "brand": "なんぼや",
+    "address": "〒453-0015 愛知県名古屋市中村区椿町6-9 エスカ地下街",
+    "latitude": 35.1702144,
+    "longitude": 136.880332,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/nagoya-esca-brandshop/"
+  },
+  {
+    "name": "メルサ栄店",
+    "brand": "なんぼや",
+    "address": "〒460-0008 愛知県名古屋市中区栄3-4-5 メルサ栄本店 4F",
+    "latitude": 35.1684405,
+    "longitude": 136.9063556,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/melsa-sakae-brandshop/"
+  },
+  {
+    "name": "名古屋サンロード店",
+    "brand": "なんぼや",
+    "address": "〒450-0002 愛知県名古屋市中村区 名駅4-7-25 先名駅 ナゴヤ地下街サンロード",
+    "latitude": 35.1692742,
+    "longitude": 136.8849154,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/nagoya-brandshop/"
   }
 ]

@@ -25,6 +25,8 @@ PREF_SLUGS = {
     "栃木県":   "tochigi",
     "群馬県":   "gunma",
     "静岡県":   "shizuoka",
+    "愛知県":   "aichi",
+    "山梨県":   "yamanashi",
 }
 
 BASE_URL = "https://nanboya.com/shop"
@@ -62,7 +64,12 @@ class NanboyaScraper(CompetitorScraper):
             url = f"{BASE_URL}/{slug}/"
             log.info(f"  [{pref}] {url}")
 
-            r = self.get(url)
+            try:
+                r = self.get(url)
+            except Exception as e:
+                # 県別ページが無い(404)等はスキップ（例: 山梨はなんぼや店舗ページ無し）
+                log.warning(f"    スキップ {pref}: {type(e).__name__} {e}")
+                continue
             soup = BeautifulSoup(r.text, "html.parser")
 
             sections = soup.find_all("section", class_="store-detail")
