@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-PREF_CODES = ["08", "09", "10", "11", "12", "13", "14", "22"]
+PREF_CODES = ["08", "09", "10", "11", "12", "13", "14", "19", "22", "23"]
 URL = ("https://www.e-stat.go.jp/gis/statmap-search/data"
        "?dlserveyId=A002005212020&code={code}&coordSys=1&format=shape&downloadType=5&datum=2000")
 
