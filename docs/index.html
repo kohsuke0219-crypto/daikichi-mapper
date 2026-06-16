@@ -54,6 +54,13 @@
     /* 形状ピン（divIcon）の枠を透明に */
     .shape-pin { background: transparent !important; border: none !important; }
     .shape-pin svg { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+    /* 市区町村の役所ピン（🏛） */
+    .townhall-pin-wrap { background: transparent !important; border: none !important; }
+    .townhall-pin {
+      width: 20px; height: 20px; line-height: 18px; text-align: center;
+      font-size: 12px; background: #fff; border: 1.5px solid #475569;
+      border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
     /* ---- 凡例の折りたたみ ---- */
     .legend-header {
       font-weight: bold; font-size: 12px; cursor: pointer;
@@ -202,6 +209,8 @@
   // 生活動線（スーパー・複合施設）= マゼンタ / 新規オープン予定 = 金/琥珀
   const LIFELINE_COLOR = '#DB2777';
   const NEWOPEN_COLOR  = '#D4A017';
+  // 市区町村の役所（市役所/区役所/町村役場）= スレートグレー（🏛アイコン）
+  const TOWNHALL_COLOR = '#475569';
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -274,6 +283,14 @@
       html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
           + `<rect x="1" y="1" width="${s-2}" height="${s-2}" fill="${color}" stroke="#fff" stroke-width="0.9"/></svg>`,
       iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
+    });
+  }
+  // 市区町村の役所アイコン（🏛・白丸地）
+  function townhallIcon() {
+    return L.divIcon({
+      className: 'townhall-pin-wrap',
+      html: '<div class="townhall-pin">🏛</div>',
+      iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10],
     });
   }
 
@@ -372,7 +389,7 @@
     return this._div;
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen,
-                           showWomenLifeline, showFav, hasNg) {
+                           showWomenLifeline, showFav, hasNg, showTownhall) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -404,6 +421,10 @@
       h += '<div class="sep"></div><h4>女性向け生活動線施設</h4>';
       h += `<span class="tri" style="border-bottom-color:${WOMEN_LIFELINE_COLOR}"></span>カーブス/LAVA/カルド/ユザワヤ/トーカイ<br>`;
     }
+    if (showTownhall) {
+      h += '<div class="sep"></div><h4>市区町村の役所</h4>';
+      h += `<span style="font-size:13px;vertical-align:middle">🏛</span> 市役所/区役所/町村役場<br>`;
+    }
     if (showFav) {
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
       h += `<span style="color:${FAV_COLOR};font-size:15px;vertical-align:middle">★</span> メモ付き登録地点<br>`;
@@ -420,6 +441,7 @@
   let storeLayer, competitorLayer;
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
   let womenLifelineLayer = null;                     // 機能2: 女性向け生活動線施設
+  let townhallLayer = null;                          // 市区町村の役所
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -475,6 +497,7 @@
       womenLifelineLayer && map.hasLayer(womenLifelineLayer),
       favLayer && map.hasLayer(favLayer),
       ngAreas.length > 0,
+      townhallLayer && map.hasLayer(townhallLayer),
     );
   }
 
@@ -1111,12 +1134,13 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, popPts, womenLL] = await Promise.all([
+      const [comp, lifeline, newOpen, popPts, womenLL, townhalls] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
         fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
         fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
+        fetch('data/townhalls.json').then(r=>r.json()),             // 市区町村の役所
       ]);
 
       // ---- 機能1: 人口メッシュ点群をセット（半径集計が使えるように）----
@@ -1180,11 +1204,24 @@
       });
       newOpeningLayer = L.layerGroup(noMarkers);
 
+      // ---- 市区町村の役所（🏛・市役所/区役所/町村役場）----
+      const thMarkers = [];
+      townhalls.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        thMarkers.push(
+          L.marker([s.lat, s.lng], { pane:'stores', icon: townhallIcon() })
+            .bindTooltip(`<b>${s.name}</b><br><span style="color:#555">${s.pref}</span>`, {sticky:true})
+            .bindPopup(`<b>${s.name}</b><br><span style="color:${TOWNHALL_COLOR};font-weight:bold">市区町村の役所</span><br>${s.pref}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
+        );
+      });
+      townhallLayer = L.layerGroup(thMarkers);
+
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
+      layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
 
       map.on('overlayadd overlayremove', refreshLegend);
 
