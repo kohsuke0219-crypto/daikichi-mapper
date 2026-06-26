@@ -211,6 +211,8 @@
   const NEWOPEN_COLOR  = '#D4A017';
   // 市区町村の役所（市役所/区役所/町村役場）= スレートグレー（🏛アイコン）
   const TOWNHALL_COLOR = '#475569';
+  // 買取いくらや = 大吉と同等の目立つピン。ただし大吉は〇・いくらやは□（色=インディゴ）
+  const IKURAYA_COLOR  = '#3949AB';
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -285,6 +287,18 @@
       iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
     });
   }
+  // 買取いくらや: 大吉と同等サイズの□（白縁太め・影）。daikichiペインで主役級に表示
+  function ikurayaIcon() {
+    const s = 15;
+    return L.divIcon({
+      className: 'shape-pin',
+      html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
+          + `<rect x="1.5" y="1.5" width="${s-3}" height="${s-3}" rx="1" `
+          + `fill="${IKURAYA_COLOR}" stroke="#fff" stroke-width="2"/></svg>`,
+      iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
+    });
+  }
+
   // 市区町村の役所アイコン（🏛・白丸地）
   function townhallIcon() {
     return L.divIcon({
@@ -389,7 +403,7 @@
     return this._div;
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen,
-                           showWomenLifeline, showFav, hasNg, showTownhall) {
+                           showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -405,6 +419,10 @@
     h += (h?'<div class="sep"></div>':'') + '<h4>買取大吉</h4>';
     for (const [k,v] of Object.entries(PREF_COLORS))
       h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
+    if (showIkuraya) {
+      h += '<div class="sep"></div><h4>買取いくらや</h4>';
+      h += `<span class="sq" style="background:${IKURAYA_COLOR}"></span>いくらや 店舗<br>`;
+    }
     if (showComp) {
       h += '<div class="sep"></div><h4>競合店</h4>';
       for (const [k,v] of Object.entries(BRAND_COLORS))
@@ -442,6 +460,7 @@
   let lifelineLayer = null, newOpeningLayer = null; // 生活動線 / 新規オープン予定
   let womenLifelineLayer = null;                     // 機能2: 女性向け生活動線施設
   let townhallLayer = null;                          // 市区町村の役所
+  let ikurayaLayer = null;                           // 買取いくらや（□）
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -498,6 +517,7 @@
       favLayer && map.hasLayer(favLayer),
       ngAreas.length > 0,
       townhallLayer && map.hasLayer(townhallLayer),
+      ikurayaLayer && map.hasLayer(ikurayaLayer),
     );
   }
 
@@ -1134,13 +1154,14 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, popPts, womenLL, townhalls] = await Promise.all([
+      const [comp, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
         fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
         fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
         fetch('data/townhalls.json').then(r=>r.json()),             // 市区町村の役所
+        fetch('data/ikuraya_stores.json').then(r=>r.json()),        // 買取いくらや
       ]);
 
       // ---- 機能1: 人口メッシュ点群をセット（半径集計が使えるように）----
@@ -1216,14 +1237,28 @@
       });
       townhallLayer = L.layerGroup(thMarkers);
 
+      // ---- 買取いくらや（□・大吉と同等の主役級ピン / daichichiペインz680）----
+      const ikMarkers = [];
+      ikuraya.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        ikMarkers.push(
+          L.marker([s.lat, s.lng], { pane:'daikichi', icon: ikurayaIcon() })
+            .bindTooltip(`<b>${s.name}</b><br><span style="color:${IKURAYA_COLOR};font-weight:bold">買取いくらや</span>`, {sticky:true})
+            .bindPopup(`<b>${s.name}</b><br><span style="color:${IKURAYA_COLOR};font-weight:bold">買取いくらや</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
+        );
+      });
+      ikurayaLayer = L.layerGroup(ikMarkers).addTo(map);   // 大吉と並べて見られるよう初期ON
+
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
+      layerControl.addOverlay(ikurayaLayer,    `<span style="color:${IKURAYA_COLOR}">■</span> 買取いくらや`);
 
       map.on('overlayadd overlayremove', refreshLegend);
+      refreshLegend();   // いくらやは初期ONなので凡例へ即反映
 
       bgEl.style.display = 'none';
     } catch(err) {
