@@ -213,6 +213,8 @@
   const TOWNHALL_COLOR = '#475569';
   // 買取いくらや = 大吉と同等の目立つピン。ただし大吉は〇・いくらやは□（色=インディゴ）
   const IKURAYA_COLOR  = '#3949AB';
+  // 駅（クリックで1日乗降客数を表示）= スレート系の小さめ丸
+  const STATION_COLOR  = '#334155';
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -267,6 +269,26 @@
     + `<button onclick="favAddFromPoint(${lat},${lng})" `
     + `style="background:${FAV_COLOR};color:#fff;border:none;border-radius:4px;`
     + `padding:3px 9px;font-size:11px;cursor:pointer">★ お気に入り登録</button></div>`;
+
+  // 駅ポップアップ（1日乗降客数を大きく表示＋事業者別内訳）
+  function stationPopup(s) {
+    let h = `<div style="font-size:12px;min-width:190px">`;
+    h += `<b>🚉 ${s.name}駅</b><br>`;
+    if (s.total > 0) {
+      h += `<div style="margin:5px 0 3px">1日乗降客数（${s.year}年度）</div>`;
+      h += `<div><span style="font-size:22px;font-weight:bold;color:${STATION_COLOR}">${fmtN(s.total)}</span> 人/日</div>`;
+      if (s.ops && s.ops.length) {
+        h += `<div style="border-top:1px solid #ddd;margin-top:4px;padding-top:3px;color:#555">事業者別内訳</div>`;
+        s.ops.forEach(o => { h += `<div>${o.op}・${o.line}: <b>${fmtN(o.val)}</b>人</div>`; });
+      }
+    } else {
+      h += `<div style="color:#c0392b;margin:4px 0">乗降客数データなし（${s.year}年度）</div>`;
+    }
+    h += `<div style="color:#999;font-size:10px;margin-top:4px">出典: 国土数値情報 S12（1日平均乗降人員）</div>`;
+    h += mapsLinks(s.lat, s.lng);
+    h += `</div>`;
+    return h;
+  }
 
   // 形状ピン（divIcon）: ▲三角 / ■四角（白縁・影付きで人口塗りの上でも視認）
   function triIcon(color, size) {
@@ -403,7 +425,8 @@
     return this._div;
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen,
-                           showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya) {
+                           showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya,
+                           showStation) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -443,6 +466,10 @@
       h += '<div class="sep"></div><h4>市区町村の役所</h4>';
       h += `<span style="font-size:13px;vertical-align:middle">🏛</span> 市役所/区役所/町村役場<br>`;
     }
+    if (showStation) {
+      h += '<div class="sep"></div><h4>駅（1日乗降客数）</h4>';
+      h += `<span class="dot" style="background:${STATION_COLOR};border-color:${STATION_COLOR}"></span>クリックで乗降客数表示<br>`;
+    }
     if (showFav) {
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
       h += `<span style="color:${FAV_COLOR};font-size:15px;vertical-align:middle">★</span> メモ付き登録地点<br>`;
@@ -461,6 +488,7 @@
   let womenLifelineLayer = null;                     // 機能2: 女性向け生活動線施設
   let townhallLayer = null;                          // 市区町村の役所
   let ikurayaLayer = null;                           // 買取いくらや（□）
+  let stationLayer = null;                            // 駅（1日乗降客数）
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -518,6 +546,7 @@
       ngAreas.length > 0,
       townhallLayer && map.hasLayer(townhallLayer),
       ikurayaLayer && map.hasLayer(ikurayaLayer),
+      stationLayer && map.hasLayer(stationLayer),
     );
   }
 
@@ -1154,7 +1183,7 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya] = await Promise.all([
+      const [comp, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
@@ -1162,6 +1191,7 @@
         fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
         fetch('data/townhalls.json').then(r=>r.json()),             // 市区町村の役所
         fetch('data/ikuraya_stores.json').then(r=>r.json()),        // 買取いくらや
+        fetch('data/stations_ridership.json').then(r=>r.json()),    // 駅（1日乗降客数）
       ]);
 
       // ---- 機能1: 人口メッシュ点群をセット（半径集計が使えるように）----
@@ -1249,6 +1279,20 @@
       });
       ikurayaLayer = L.layerGroup(ikMarkers).addTo(map);   // 大吉と並べて見られるよう初期ON
 
+      // ---- 駅（クリックで1日乗降客数）小さめ丸・初期OFF ----
+      const stMarkers = [];
+      stations.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        stMarkers.push(
+          L.circleMarker([s.lat, s.lng], {
+            pane:'stores', renderer:storeRenderer,
+            radius:3.5, fillColor:STATION_COLOR, color:'#fff', weight:1, fillOpacity:0.9,
+          }).bindTooltip(`🚉 ${s.name}駅` + (s.total>0 ? `<br>${fmtN(s.total)}人/日` : ''), {sticky:true})
+           .bindPopup(stationPopup(s), { maxWidth: 260 })
+        );
+      });
+      stationLayer = L.layerGroup(stMarkers);   // 初期OFF（トグルで表示）
+
       // レイヤーコントロールに追加
       layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
@@ -1256,6 +1300,7 @@
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
       layerControl.addOverlay(ikurayaLayer,    `<span style="color:${IKURAYA_COLOR}">■</span> 買取いくらや`);
+      layerControl.addOverlay(stationLayer,    `<span style="color:${STATION_COLOR}">●</span> 駅（1日乗降客数）`);
 
       map.on('overlayadd overlayremove', refreshLegend);
       refreshLegend();   // いくらやは初期ONなので凡例へ即反映
