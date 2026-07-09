@@ -61,6 +61,13 @@
       font-size: 12px; background: #fff; border: 1.5px solid #475569;
       border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.4);
     }
+    /* 駅ピン（🚉・競合の黒丸と区別） */
+    .station-pin-wrap { background: transparent !important; border: none !important; }
+    .station-pin {
+      width: 18px; height: 18px; line-height: 16px; text-align: center;
+      font-size: 11px; background: #fff; border: 1.5px solid #334155;
+      border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.35);
+    }
     /* ---- 凡例の折りたたみ ---- */
     .legend-header {
       font-weight: bold; font-size: 12px; cursor: pointer;
@@ -329,6 +336,14 @@
       iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10],
     });
   }
+  // 駅アイコン（🚉・競合の黒丸と区別）
+  function stationIcon() {
+    return L.divIcon({
+      className: 'station-pin-wrap',
+      html: '<div class="station-pin">🚉</div>',
+      iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -9],
+    });
+  }
 
   // ============================================================
   // 地図初期化
@@ -468,7 +483,7 @@
     }
     if (showStation) {
       h += '<div class="sep"></div><h4>駅（1日乗降客数）</h4>';
-      h += `<span class="dot" style="background:${STATION_COLOR};border-color:${STATION_COLOR}"></span>クリックで乗降客数表示<br>`;
+      h += `<span style="font-size:13px;vertical-align:middle">🚉</span> クリックで乗降客数表示<br>`;
     }
     if (showFav) {
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
@@ -1284,11 +1299,9 @@
       stations.forEach(s => {
         if (!s.lat || !s.lng) return;
         stMarkers.push(
-          L.circleMarker([s.lat, s.lng], {
-            pane:'stores', renderer:storeRenderer,
-            radius:3.5, fillColor:STATION_COLOR, color:'#fff', weight:1, fillOpacity:0.9,
-          }).bindTooltip(`🚉 ${s.name}駅` + (s.total>0 ? `<br>${fmtN(s.total)}人/日` : ''), {sticky:true})
-           .bindPopup(stationPopup(s), { maxWidth: 260 })
+          L.marker([s.lat, s.lng], { pane:'stores', icon: stationIcon() })
+            .bindTooltip(`🚉 ${s.name}駅` + (s.total>0 ? `<br>${fmtN(s.total)}人/日` : ''), {sticky:true})
+            .bindPopup(stationPopup(s), { maxWidth: 260 })
         );
       });
       stationLayer = L.layerGroup(stMarkers);   // 初期OFF（トグルで表示）
@@ -1300,7 +1313,7 @@
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
       layerControl.addOverlay(ikurayaLayer,    `<span style="color:${IKURAYA_COLOR}">■</span> 買取いくらや`);
-      layerControl.addOverlay(stationLayer,    `<span style="color:${STATION_COLOR}">●</span> 駅（1日乗降客数）`);
+      layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
 
       map.on('overlayadd overlayremove', refreshLegend);
       refreshLegend();   // いくらやは初期ONなので凡例へ即反映
