@@ -1008,7 +1008,10 @@
     const res = await fetch(url, { method: 'GET' });
     const data = await res.json();
     const arr = Array.isArray(data) ? data : (data.items || []);
-    return arr.map(x => ({
+    // 旧GAS(物件未対応)は kind=property でもお気に入りを返す。
+    // お気に入り行は 'comment' 列を持つので除外し、物件へ混入させない。
+    const propOnly = arr.filter(x => !('comment' in x));
+    return propOnly.map(x => ({
       id: String(x.id), lat: Number(x.lat), lng: Number(x.lng),
       url: x.url == null ? '' : String(x.url),
       photo: x.photo == null ? '' : String(x.photo),
