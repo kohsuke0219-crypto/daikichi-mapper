@@ -177,6 +177,23 @@
       text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 4px #fff, 0 1px 2px rgba(0,0,0,.5);
       cursor: pointer;
     }
+    /* ---- 物件お気に入り（🏠ピン） ---- */
+    .prop-pin-wrap { background: transparent !important; border: none !important; }
+    .prop-pin {
+      width: 26px; height: 26px; line-height: 23px; text-align: center; font-size: 15px;
+      background: #fff; border: 2px solid #B45309; border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); cursor: pointer;
+    }
+    .prop-form label { display:block; font-size:10px; color:#666; margin-top:5px; }
+    .prop-form input, .prop-form textarea {
+      width:100%; box-sizing:border-box; font-size:12px; margin-top:1px;
+    }
+    .prop-thumb { max-width:100%; max-height:120px; margin-top:5px; border-radius:4px; display:block; }
+    .prop-item { display:flex; gap:5px; padding:4px; border-radius:4px; cursor:pointer; line-height:1.35; }
+    .prop-item:hover { background:#fff7ed; }
+    .prop-item .prop-home { flex:0 0 auto; }
+    .prop-item .prop-text { word-break:break-word; }
+    #prop-list { max-height:26vh; overflow:auto; }
     @media (max-width: 768px) {
       .toolpanel { width: 175px; font-size: 11px; }
     }
@@ -245,6 +262,10 @@
   const FAV_API_URL_KEY   = 'daikichi_fav_api_url';
   const FAV_API_TOKEN_KEY = 'daikichi_fav_api_token';
   const FAV_SYNC_INTERVAL_MS = 60000;  // 他端末の変更を取り込む自動同期間隔
+
+  // ----- 物件お気に入り（🏠・物件URL/写真URL/家賃(税込)/備考。お気に入りと同じ仕組みで共有） -----
+  const PROP_STORAGE_KEY = 'daikichi_properties_v1';  // localStorageキャッシュ
+  const PROP_COLOR       = '#B45309';                 // 物件ピン色（家マーク・既存色と非重複）
 
   const fmtN = n => (n||0).toLocaleString('ja-JP');
   const escapeHtml = s => String(s==null?'':s)
@@ -441,7 +462,7 @@
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya,
-                           showStation) {
+                           showStation, showProp) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -489,6 +510,10 @@
       h += '<div class="sep"></div><h4>お気に入り地点</h4>';
       h += `<span style="color:${FAV_COLOR};font-size:15px;vertical-align:middle">★</span> メモ付き登録地点<br>`;
     }
+    if (showProp) {
+      h += '<div class="sep"></div><h4>物件</h4>';
+      h += `<span style="font-size:13px;vertical-align:middle">🏠</span> 物件URL/写真/家賃/備考<br>`;
+    }
     this._body.innerHTML = h;
   };
   legend.addTo(map);
@@ -518,6 +543,9 @@
   let MEASURE_RADIUS_KM = MEASURE_RADIUS_DEFAULT_KM;
   // 機能3: お気に入りの状態
   let favorites = [], favLayer = null, favMarkers = {};
+  // 物件お気に入りの状態
+  let properties = [], propLayer = null, propMarkers = {};
+  let propEditing = false;  // 物件ポップアップ編集中は自動同期で再描画しない
   // 共有(リモート)状態
   let favApiUrl = '', favApiToken = '';
   let favEditing = false;   // お気に入りポップアップ編集中は自動同期で再描画しない
@@ -562,6 +590,7 @@
       townhallLayer && map.hasLayer(townhallLayer),
       ikurayaLayer && map.hasLayer(ikurayaLayer),
       stationLayer && map.hasLayer(stationLayer),
+      propLayer && map.hasLayer(propLayer),
     );
   }
 
@@ -795,7 +824,7 @@
     localStorage.setItem(FAV_API_URL_KEY, favApiUrl);
     localStorage.setItem(FAV_API_TOKEN_KEY, favApiToken);
     favUpdateShareStatus();
-    if (!favShareEnabled()) { renderFavorites(); renderNg(); return; }
+    if (!favShareEnabled()) { renderFavorites(); renderProperties(); renderNg(); return; }
     try {
       // 初回有効化時: ローカルだけにあるお気に入りをスプレッドシートへ送り、消失を防ぐ
       const remote = await favRemoteList();
@@ -808,6 +837,18 @@
         finally { favPending = Math.max(0, favPending - 1); }
       }
       await syncFavoritesFromRemote(true);   // 統合後の最新を取得
+
+      // 物件も同様にローカル分を統合
+      const remoteProp = await propRemoteList();
+      const remotePropIds = new Set(remoteProp.map(x => x.id));
+      const propLocalOnly = properties.filter(p => !remotePropIds.has(String(p.id)));
+      for (const p of propLocalOnly) {
+        favPending++;
+        try { await propRemoteSend('add', { item: p }); }
+        catch (e) { console.error('物件統合(送信)失敗', e); }
+        finally { favPending = Math.max(0, favPending - 1); }
+      }
+      await syncPropFromRemote(true);
 
       // NGエリアも同様にローカル分を統合
       const remoteNg = await ngRemoteList();
@@ -839,6 +880,167 @@
     const m = favMarkers[f.id];
     if (m) m.openPopup();
   };
+
+  // ============================================================
+  // 物件お気に入り（🏠・物件URL/写真URL/家賃(税込)/備考）— お気に入りと同じ共有基盤
+  // ============================================================
+  function loadProperties() {
+    try {
+      const raw = localStorage.getItem(PROP_STORAGE_KEY);
+      properties = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(properties)) properties = [];
+    } catch (e) { properties = []; }
+  }
+  function saveProperties() {
+    try { localStorage.setItem(PROP_STORAGE_KEY, JSON.stringify(properties)); }
+    catch (e) { console.error('物件保存失敗', e); }
+  }
+
+  function propIcon() {
+    return L.divIcon({
+      className: 'prop-pin-wrap',
+      html: '<div class="prop-pin">🏠</div>',
+      iconSize: [26, 26], iconAnchor: [13, 24], popupAnchor: [0, -22],
+    });
+  }
+
+  function propPopupHtml(p) {
+    const url = escapeHtml(p.url), photo = escapeHtml(p.photo);
+    let h = `<div class="prop-form" style="font-size:12px;min-width:220px">`;
+    h += `<div style="font-weight:bold;color:${PROP_COLOR}">🏠 物件</div>`;
+    if (p.photo)
+      h += `<img class="prop-thumb" src="${photo}" onerror="this.style.display='none'">`;
+    h += `<label>物件URL（リンク）</label>`
+       + `<input id="prop-url-${p.id}" type="text" value="${url}" placeholder="https://…（物件ページ）">`;
+    h += `<label>写真URL（画像直リンク→サムネイル）</label>`
+       + `<input id="prop-photo-${p.id}" type="text" value="${photo}" placeholder="https://…/photo.jpg">`;
+    h += `<label>家賃（税込）</label>`
+       + `<input id="prop-rent-${p.id}" type="text" value="${escapeHtml(p.rent)}" placeholder="例: 8.5万円 / 85,000円">`;
+    h += `<label>備考</label>`
+       + `<textarea id="prop-note-${p.id}" rows="2" placeholder="設備・競合距離・駐車場など">${escapeHtml(p.note)}</textarea>`;
+    h += `<div style="display:flex;gap:6px;margin-top:5px">`
+       + `<button onclick="propSaveFromPopup('${p.id}')" class="tp-btn" style="background:${PROP_COLOR}">保存</button>`
+       + `<button onclick="propDeleteFromPopup('${p.id}')" class="tp-btn" style="background:#b91c1c">削除</button>`
+       + `</div>`;
+    if (p.url)
+      h += `<div style="margin-top:4px"><a href="${url}" target="_blank" rel="noopener" style="color:#1a73e8;font-weight:bold">🔗 物件ページを開く</a></div>`;
+    h += `<div style="color:#888;font-size:10px;margin-top:3px">${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</div>`;
+    h += mapsLinks(p.lat, p.lng);
+    h += `</div>`;
+    return h;
+  }
+
+  function renderProperties() {
+    if (!propLayer) return;
+    propLayer.clearLayers();
+    propMarkers = {};
+    properties.forEach(p => {
+      const m = L.marker([p.lat, p.lng], { icon: propIcon(), pane: 'favorites', zIndexOffset: 2800 })
+        .bindPopup(propPopupHtml(p), { maxWidth: 280 });
+      m.on('popupopen',  () => { propEditing = true;  });
+      m.on('popupclose', () => { propEditing = false; });
+      m.addTo(propLayer);
+      propMarkers[p.id] = m;
+    });
+    renderPropList();
+    refreshLegend();
+  }
+
+  function renderPropList() {
+    const el = document.getElementById('prop-list');
+    const cnt = document.getElementById('prop-count');
+    if (cnt) cnt.textContent = properties.length;
+    if (!el) return;
+    if (!properties.length) { el.innerHTML = '<span style="color:#999">登録なし</span>'; return; }
+    el.innerHTML = properties.map(p => {
+      const rent = p.rent ? escapeHtml(p.rent) : '家賃未入力';
+      const note = p.note ? '｜' + escapeHtml(p.note) : '';
+      return `<div class="prop-item" data-id="${p.id}"><span class="prop-home">🏠</span>`
+           + `<span class="prop-text"><b>${rent}</b>${note}</span></div>`;
+    }).join('');
+    el.querySelectorAll('.prop-item').forEach(div => {
+      div.addEventListener('click', () => {
+        const p = properties.find(x => x.id === div.dataset.id);
+        if (!p) return;
+        map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), 14));
+        const m = propMarkers[p.id];
+        if (m) m.openPopup();
+      });
+    });
+  }
+
+  function addProperty(lat, lng) {
+    const now = new Date().toISOString();
+    const p = { id: genFavId(), lat: +lat, lng: +lng, url: '', photo: '', rent: '', note: '',
+                createdAt: now, updatedAt: now };
+    properties.push(p);
+    saveProperties();
+    renderProperties();
+    propRemotePush('add', { item: p });
+    return p;
+  }
+  function updateProperty(id, fields) {
+    const p = properties.find(x => x.id === id);
+    if (!p) return;
+    Object.assign(p, fields);
+    p.updatedAt = new Date().toISOString();
+    saveProperties();
+    renderProperties();
+    propRemotePush('update', { item: p });
+  }
+  function deleteProperty(id) {
+    properties = properties.filter(x => x.id !== id);
+    saveProperties();
+    renderProperties();
+    propRemotePush('delete', { id });
+  }
+
+  window.propSaveFromPopup = function(id) {
+    const g = k => { const el = document.getElementById('prop-' + k + '-' + id); return el ? el.value.trim() : ''; };
+    updateProperty(id, { url: g('url'), photo: g('photo'), rent: g('rent'), note: g('note') });
+    map.closePopup();
+  };
+  window.propDeleteFromPopup = function(id) { deleteProperty(id); map.closePopup(); };
+
+  // ----- 物件共有（お気に入りと同じWebアプリURL・kind=property）-----
+  async function propRemoteList() {
+    const url = favApiUrl + (favApiUrl.includes('?') ? '&' : '?') + 'kind=property';
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.items || []);
+    return arr.map(x => ({
+      id: String(x.id), lat: Number(x.lat), lng: Number(x.lng),
+      url: x.url == null ? '' : String(x.url),
+      photo: x.photo == null ? '' : String(x.photo),
+      rent: x.rent == null ? '' : String(x.rent),
+      note: x.note == null ? '' : String(x.note),
+    })).filter(x => isFinite(x.lat) && isFinite(x.lng));
+  }
+  async function propRemoteSend(action, payload) {
+    const body = JSON.stringify({ kind: 'property', action, token: favApiToken, ...payload });
+    const res = await fetch(favApiUrl, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body,
+    });
+    return res.json().catch(() => ({}));
+  }
+  function propRemotePush(action, payload) {
+    if (!favShareEnabled()) return;
+    favPending++;
+    propRemoteSend(action, payload)
+      .catch(e => console.error('物件共有(送信)失敗', e))
+      .finally(() => { favPending = Math.max(0, favPending - 1); });
+  }
+  async function syncPropFromRemote(force) {
+    if (!favShareEnabled()) return;
+    if (!force && (propEditing || favPending > 0)) return;
+    try {
+      properties = await propRemoteList();
+      saveProperties();
+      if (!propEditing) renderProperties();
+    } catch (e) {
+      console.error('物件同期(取得)失敗', e);
+    }
+  }
 
   // ============================================================
   // NGエリア（出店しない市区町村・黒塗り）— localStorage + 任意でスプレッドシート共有
@@ -955,6 +1157,7 @@
       hint.textContent =
         mode === 'radius'   ? '地図クリックで円の中心を指定' :
         mode === 'favorite' ? '地図クリックでお気に入り追加' :
+        mode === 'property' ? '地図クリックで物件を追加' :
         mode === 'ng'       ? '市区町村クリックでNG指定/解除' :
         '通常モード（ピン/市区町村を操作）';
     }
@@ -972,6 +1175,12 @@
     if (clickMode === 'favorite') {
       const f = addFavorite(latlng.lat, latlng.lng, '');
       const m = favMarkers[f.id];
+      if (m) m.openPopup();
+      return true;
+    }
+    if (clickMode === 'property') {
+      const p = addProperty(latlng.lat, latlng.lng);
+      const m = propMarkers[p.id];
       if (m) m.openPopup();
       return true;
     }
@@ -995,6 +1204,7 @@
       +       '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
       +       '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
       +       '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
+      +       '<label><input type="radio" name="clickmode" value="property"> 物件追加</label>'
       +       '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
       +     '</div>'
       +     '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
@@ -1030,6 +1240,14 @@
       +         '<button id="fav-sync" class="tp-btn" style="background:#64748b">今すぐ同期</button>'
       +       '</div>'
       +     '</details>'
+      +   '</div>'
+      + '</div>'
+      // ===== セクション4: 物件 =====
+      + '<div class="tp-section">'
+      +   '<div class="tp-sec-header" data-sec="prop"><span>🏠 物件 (<span id="prop-count">0</span>)</span><span class="tp-toggle">▶</span></div>'
+      +   '<div class="tp-sec-body collapsed" id="sec-prop">'
+      +     '<div style="color:#888;font-size:10px;margin-bottom:3px">「物件追加」モードで地図をクリック→物件URL/写真URL/家賃(税込)/備考を入力</div>'
+      +     '<div id="prop-list"><span style="color:#999">登録なし</span></div>'
       +   '</div>'
       + '</div>';
 
@@ -1092,18 +1310,23 @@
     favUpdateShareStatus();
   })();
 
-  // お気に入り/NGをlocalStorageキャッシュから読み込み（即描画）
+  // お気に入り/物件/NGをlocalStorageキャッシュから読み込み（即描画）
   loadFavorites();
+  loadProperties();
   loadNg();
   favLayer = L.layerGroup([]).addTo(map);
+  propLayer = L.layerGroup([]).addTo(map);
   renderFavorites();
+  renderProperties();
   renderNgList();   // コロプレスはphase1生成後にrenderNgで黒塗り反映
   // 共有設定済みなら初回同期＋定期同期で他端末の変更を取り込む
   if (favShareEnabled()) {
     syncFavoritesFromRemote(true);
+    syncPropFromRemote(true);
     syncNgFromRemote(true);
     setInterval(() => {
       syncFavoritesFromRemote(false);
+      syncPropFromRemote(false);
       syncNgFromRemote(false);
     }, FAV_SYNC_INTERVAL_MS);
   }
@@ -1177,8 +1400,9 @@
       { collapsed: window.innerWidth < 768, position: 'topleft' }
     ).addTo(map);
 
-    // 機能3: お気に入りレイヤーをトグル対象に追加
+    // 機能3: お気に入り／物件レイヤーをトグル対象に追加
     layerControl.addOverlay(favLayer, `<span style="color:${FAV_COLOR}">★</span> お気に入り地点`);
+    layerControl.addOverlay(propLayer, `🏠 物件`);
 
     // ---- コロプレス切替セレクタのイベント ----
     document.getElementById('choropleth-select').addEventListener('change', e => {

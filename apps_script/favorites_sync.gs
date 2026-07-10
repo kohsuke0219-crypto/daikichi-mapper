@@ -25,6 +25,8 @@ const FAV_SHEET   = 'favorites';
 const FAV_HEADERS = ['id', 'lat', 'lng', 'comment', 'author', 'createdAt', 'updatedAt'];
 const NG_SHEET    = 'ng_areas';
 const NG_HEADERS  = ['code', 'city', 'pref', 'author', 'createdAt'];
+const PROP_SHEET   = 'properties';
+const PROP_HEADERS = ['id', 'lat', 'lng', 'url', 'photo', 'rent', 'note', 'author', 'createdAt', 'updatedAt'];
 
 function sheet_(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();        // コンテナバインド(推奨)
@@ -68,6 +70,7 @@ function json_(obj) {
 function doGet(e) {
   const kind = (e && e.parameter && e.parameter.kind) || 'favorites';
   if (kind === 'ng') return json_(readAll_(sheet_(NG_SHEET, NG_HEADERS)));
+  if (kind === 'property') return json_(readAll_(sheet_(PROP_SHEET, PROP_HEADERS)));
   return json_(readAll_(sheet_(FAV_SHEET, FAV_HEADERS)));
 }
 
@@ -95,6 +98,34 @@ function doPost(e) {
         if (row > 0) sh.deleteRow(row);
       } else {
         return json_({ ok: false, error: 'unknown ng action' });
+      }
+      return json_({ ok: true, items: readAll_(sh) });
+    }
+
+    if (kind === 'property') {
+      const sh = sheet_(PROP_SHEET, PROP_HEADERS);
+      if (action === 'add') {
+        const it = body.item || {};
+        sh.appendRow([
+          String(it.id), Number(it.lat), Number(it.lng),
+          it.url || '', it.photo || '', it.rent || '', it.note || '',
+          it.author || '', it.createdAt || now, it.updatedAt || now,
+        ]);
+      } else if (action === 'update') {
+        const it = body.item || {};
+        const row = findRow_(sh, it.id, false);
+        if (row > 0) {
+          sh.getRange(row, 4).setValue(it.url || '');     // url
+          sh.getRange(row, 5).setValue(it.photo || '');   // photo
+          sh.getRange(row, 6).setValue(it.rent || '');    // rent
+          sh.getRange(row, 7).setValue(it.note || '');    // note
+          sh.getRange(row, 10).setValue(it.updatedAt || now);
+        }
+      } else if (action === 'delete') {
+        const row = findRow_(sh, body.id, false);
+        if (row > 0) sh.deleteRow(row);
+      } else {
+        return json_({ ok: false, error: 'unknown property action' });
       }
       return json_({ ok: true, items: readAll_(sh) });
     }
