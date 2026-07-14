@@ -546,6 +546,7 @@
   // 物件お気に入りの状態
   let properties = [], propLayer = null, propMarkers = {};
   let propEditing = false;  // 物件ポップアップ編集中は自動同期で再描画しない
+  let propBackendOld = false;  // 共有先GASが物件未対応(旧コード)を検知したフラグ
   // 共有(リモート)状態
   let favApiUrl = '', favApiToken = '';
   let favEditing = false;   // お気に入りポップアップ編集中は自動同期で再描画しない
@@ -967,6 +968,20 @@
         if (m) m.openPopup();
       });
     });
+    updatePropShareStatus();
+  }
+
+  function updatePropShareStatus() {
+    const el = document.getElementById('prop-share-status');
+    if (!el) return;
+    if (!favShareEnabled()) {
+      el.textContent = '⚪ この端末のみ（共有未設定）'; el.style.color = '#888';
+    } else if (propBackendOld) {
+      el.innerHTML = '⚠ 物件が共有されていません。Apps Scriptを最新コードに<b>再デプロイ</b>してください（物件用シート未対応）。';
+      el.style.color = '#c0392b';
+    } else {
+      el.textContent = '🟢 共有中（物件シート同期）'; el.style.color = '#047857';
+    }
   }
 
   function addProperty(lat, lng) {
@@ -1009,7 +1024,8 @@
     const data = await res.json();
     const arr = Array.isArray(data) ? data : (data.items || []);
     // 旧GAS(物件未対応)は kind=property でもお気に入りを返す。
-    // お気に入り行は 'comment' 列を持つので除外し、物件へ混入させない。
+    // お気に入り行は 'comment' 列を持つので、それを検知して警告＆除外（物件へ混入させない）。
+    propBackendOld = arr.length > 0 && arr.every(x => 'comment' in x);
     const propOnly = arr.filter(x => !('comment' in x));
     return propOnly.map(x => ({
       id: String(x.id), lat: Number(x.lat), lng: Number(x.lng),
@@ -1251,6 +1267,7 @@
       +   '<div class="tp-sec-body collapsed" id="sec-prop">'
       +     '<div style="color:#888;font-size:10px;margin-bottom:3px">「物件追加」モードで地図をクリック→物件URL/写真URL/家賃(税込)/備考を入力</div>'
       +     '<div id="prop-list"><span style="color:#999">登録なし</span></div>'
+      +     '<div id="prop-share-status" style="font-size:10px;margin-top:5px;color:#888"></div>'
       +   '</div>'
       + '</div>';
 
