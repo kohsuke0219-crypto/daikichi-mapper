@@ -72,12 +72,15 @@ class NanboyaScraper(CompetitorScraper):
                 continue
             soup = BeautifulSoup(r.text, "html.parser")
 
-            sections = soup.find_all("section", class_="store-detail")
-            log.info(f"    {len(sections)} 店舗")
+            # 2026-08時点の新構造: li.shop-list__item に店舗1件
+            #   店名 = h3.shop-list__heading-sub
+            #   住所 = 「住所」ヘッダ直後の div.shop-list__detail-text（<p>〒…</p><p>住所</p>）
+            #   詳細URL = div.shop-list__link a[href]
+            items = soup.select("li.shop-list__item")
+            log.info(f"    {len(items)} 店舗")
 
-            for sec in sections:
-                # 店舗名
-                h3 = sec.find("h3", class_="shopname-heading")
+            for it in items:
+                h3 = it.find("h3", class_="shop-list__heading-sub")
                 if not h3:
                     continue
                 name_raw = h3.get_text(strip=True)
@@ -86,16 +89,22 @@ class NanboyaScraper(CompetitorScraper):
                 if not name:
                     name = name_raw
 
-                # 住所
-                tab = sec.find("div", class_="tab-content")
-                tab_text = tab.get_text(separator="\n", strip=True) if tab else ""
-                address = extract_address(tab_text)
+                # 住所（「住所」見出し直後の detail-text）
+                address = ""
+                for hdr in it.find_all("div", class_="shop-list__detail-header"):
+                    if "住所" in hdr.get_text():
+                        txt = hdr.find_next_sibling("div", class_="shop-list__detail-text")
+                        if txt:
+                            address = extract_address(txt.get_text(separator="\n", strip=True))
+                        break
 
                 # 詳細URL
-                detail_link = sec.find("a", href=lambda h: h and "/shop/" in h and
-                                       "/customer-review/" not in h and
-                                       h != f"/shop/{slug}/")
-                detail_url = detail_link["href"] if detail_link else ""
+                detail_url = ""
+                link = it.find("div", class_="shop-list__link")
+                if link:
+                    a = link.find("a", href=True)
+                    if a:
+                        detail_url = a["href"]
 
                 store = self.make_record(
                     name=name,

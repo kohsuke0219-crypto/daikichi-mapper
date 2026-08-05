@@ -1,25 +1,36 @@
 [
   {
-    "name": "飯田橋ラムラ店",
+    "name": "三鷹店",
     "brand": "なんぼや",
-    "address": "〒102-0072 東京都千代田区飯田橋4-10-1 ラムラ1F",
-    "latitude": 35.7009012,
-    "longitude": 139.7436045,
+    "address": "〒181-0013 東京都三鷹市下連雀3-44-5",
+    "latitude": 35.7016925,
+    "longitude": 139.5596873,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/iidabashi-ramla-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/mitaka-brandshop/"
   },
   {
-    "name": "神田駅東口店",
+    "name": "二子玉川ライズ・バーズモール店",
     "brand": "なんぼや",
-    "address": "〒101-0044 東京都千代田区鍛治町2-7-4 ヨウコービル1F",
-    "latitude": 35.69257,
-    "longitude": 139.771772,
+    "address": "〒158-0094 東京都世田谷区玉川2-2-1 二子玉川ライズ・バーズモール＆レジデンス 1F",
+    "latitude": 35.6121292,
+    "longitude": 139.6298464,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kanda-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/futakotamagawa-rise-brandshop/"
+  },
+  {
+    "name": "成城学園店",
+    "brand": "なんぼや",
+    "address": "〒157-0066 東京都世田谷区成城2-40-9",
+    "latitude": 35.6393914,
+    "longitude": 139.5978633,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/seijogakuen-brandshop/"
   },
   {
     "name": "銀座本店",
@@ -33,31 +44,9 @@
     "detail_url": "https://nanboya.com/shop/tokyo/ginza-brandshop/"
   },
   {
-    "name": "銀座レンガ通り店",
-    "brand": "なんぼや",
-    "address": "〒104-0061 東京都中央区銀座4-3-7 銀座猿谷ビル 2F",
-    "latitude": 35.6721287,
-    "longitude": 139.7645153,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/ginza2-brandshop/"
-  },
-  {
-    "name": "ALLU GINZA",
-    "brand": "なんぼや",
-    "address": "〒104-0061 東京都中央区銀座5-3-14 銀座ジュンビル",
-    "latitude": 35.6099926,
-    "longitude": 139.6700286,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/allu-ginza/"
-  },
-  {
     "name": "東京駅前店",
     "brand": "なんぼや",
-    "address": "〒103-0028 東京都中央区八重洲1-6-17 大久保ビル 1F",
+    "address": "〒103-0028 東京都中央区八重洲1-6-17大久保ビル1F",
     "latitude": 35.6814189,
     "longitude": 139.7699814,
     "prefecture": "東京都",
@@ -66,42 +55,141 @@
     "detail_url": "https://nanboya.com/shop/tokyo/tokyo-ekimae-brandshop/"
   },
   {
-    "name": "新橋店",
+    "name": "銀座レンガ通り店",
     "brand": "なんぼや",
-    "address": "〒105-0004 東京都港区新橋1-16-6 新橋柳屋ビル 1F",
-    "latitude": 35.6680649,
-    "longitude": 139.7570421,
+    "address": "〒104-0061 東京都中央区銀座4-3-7銀座猿谷ビル2F",
+    "latitude": 35.6721287,
+    "longitude": 139.7645153,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/shinbashi-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/ginza2-brandshop/"
   },
   {
-    "name": "ALLU SHINJUKU",
+    "name": "中野ブロードウェイ店",
     "brand": "なんぼや",
-    "address": "〒160-0022 東京都新宿区新宿3丁目1-20",
-    "latitude": 35.690538,
-    "longitude": 139.7049648,
+    "address": "〒164-0001 東京都中野区中野5-52-15 中野ブロードウェイ1F 165号室",
+    "latitude": 35.7089299,
+    "longitude": 139.6657768,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/allu-shinjuku/"
+    "detail_url": "https://nanboya.com/shop/tokyo/nakano-brandshop/"
   },
   {
-    "name": "新宿東口駅前店",
+    "name": "八王子オクトーレ店",
     "brand": "なんぼや",
-    "address": "〒160-0022 新宿区新宿3-23-4 第3大谷ビル1F",
-    "latitude": 35.6930573,
-    "longitude": 139.7005827,
+    "address": "〒192-0083 東京都八王子市旭町9-1八王子オクトーレ 8Ｆ",
+    "latitude": 35.65734450000001,
+    "longitude": 139.3387961,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/shinjuku-higashiguchi-ekimae-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/hachioji-tokyu-brandshop/"
+  },
+  {
+    "name": "神田駅東口店",
+    "brand": "なんぼや",
+    "address": "〒101-0044 東京都千代田区鍛治町2-7-4 ヨウコービル1F",
+    "latitude": 35.69257,
+    "longitude": 139.771772,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/kanda-brandshop/"
+  },
+  {
+    "name": "飯田橋ラムラ店",
+    "brand": "なんぼや",
+    "address": "〒102-0072 東京都千代田区飯田橋4-10-1 ラムラ1F",
+    "latitude": 35.7009012,
+    "longitude": 139.7436045,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/iidabashi-ramla-brandshop/"
+  },
+  {
+    "name": "上野店",
+    "brand": "なんぼや",
+    "address": "〒110-0005 東京都台東区上野6-8-7内藤ビル1F",
+    "latitude": 35.7095123,
+    "longitude": 139.7756167,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/ueno-brandshop/"
+  },
+  {
+    "name": "松坂屋上野店",
+    "brand": "なんぼや",
+    "address": "〒110-8503 東京都台東区上野3-29-5 松坂屋上野店 本館6F",
+    "latitude": 35.707472,
+    "longitude": 139.773395,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/matsuzakaya-ueno-brandshop/"
+  },
+  {
+    "name": "ミーツ国分寺店",
+    "brand": "なんぼや",
+    "address": "〒185-0012 東京都国分寺市本町3-1-1 ミーツ国分寺 3F",
+    "latitude": 35.7006592,
+    "longitude": 139.4808189,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/kokubunji-brandshop/"
+  },
+  {
+    "name": "錦糸町店",
+    "brand": "なんぼや",
+    "address": "〒130-0013 東京都墨田区錦糸3-3-1太田ビル2F",
+    "latitude": 35.6979706,
+    "longitude": 139.813606,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/kinshicho-brandshop/"
+  },
+  {
+    "name": "東急プラザ蒲田店",
+    "brand": "なんぼや",
+    "address": "〒144-0051 東京都大田区西蒲田7-69-1 東急プラザ蒲田 4F",
+    "latitude": 35.5620254,
+    "longitude": 139.7153695,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/kamata-brandshop/"
+  },
+  {
+    "name": "府中ル・シーニュ店",
+    "brand": "なんぼや",
+    "address": "〒183-0023 東京都府中市宮町1-100 ル・シーニュ 1F",
+    "latitude": 35.6715958,
+    "longitude": 139.4795359,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/fuchu-brandshop/"
+  },
+  {
+    "name": "文京白山店 ※パートナー運営店舗本店舗は、株式会社ZAIDANが運営するパートナー店舗です",
+    "brand": "なんぼや",
+    "address": "〒113-0023 東京都文京区向丘1-10-2",
+    "latitude": 35.7228983,
+    "longitude": 139.7539043,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/hakusan-brandshop/"
   },
   {
     "name": "新宿東口店",
     "brand": "なんぼや",
-    "address": "〒160-0022 東京都新宿区新宿3-17-2 アカネビル7F",
+    "address": "〒160-0022 東京都新宿区新宿3-17-2アカネビル7F",
     "latitude": 35.69163169999999,
     "longitude": 139.7035782,
     "prefecture": "東京都",
@@ -121,48 +209,48 @@
     "detail_url": "https://nanboya.com/shop/tokyo/shinjuku-nishiguchi-brandshop/"
   },
   {
-    "name": "文京白山店 ※パートナー運営店舗※本店舗は株式会社ZAIDANが運営するパートナー店舗です",
+    "name": "西武新宿駅前店",
     "brand": "なんぼや",
-    "address": "〒113-0023 東京都文京区向丘1-10-2",
-    "latitude": 35.7228983,
-    "longitude": 139.7539043,
+    "address": "〒160-0022 東京都新宿区新宿3-23-4第3大谷ビル１F",
+    "latitude": 35.6930573,
+    "longitude": 139.7005827,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/hakusan-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/seibu-shinjuku-ekimae-brandshop/"
   },
   {
-    "name": "松坂屋上野店",
+    "name": "阿佐ヶ谷店",
     "brand": "なんぼや",
-    "address": "〒110-8503 東京都台東区上野3-29-5 松坂屋上野店 本館6F",
-    "latitude": 35.707472,
-    "longitude": 139.773395,
+    "address": "〒166-0004 東京都杉並区阿佐谷南1-35-22",
+    "latitude": 35.7022482,
+    "longitude": 139.6363503,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/matsuzakaya-ueno-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/asagaya-brandshop/"
   },
   {
-    "name": "上野店",
+    "name": "キラリナ京王吉祥寺店",
     "brand": "なんぼや",
-    "address": "〒110-0005 東京都台東区上野6-8-7 内藤ビル 1F",
-    "latitude": 35.7095123,
-    "longitude": 139.7756167,
+    "address": "〒180-0003 東京都武蔵野市吉祥寺南町2-1-25 キラリナ京王吉祥寺7F",
+    "latitude": 35.7027824,
+    "longitude": 139.5799666,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/ueno-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/kirarina-keio-kichijoji-brandshop/"
   },
   {
-    "name": "錦糸町店",
+    "name": "吉祥寺店",
     "brand": "なんぼや",
-    "address": "〒130-0013 東京都墨田区錦糸3-3-1 太田ビル2F",
-    "latitude": 35.6979116,
-    "longitude": 139.8135628,
+    "address": "〒180-0004 東京都武蔵野市吉祥寺本町1-2-5",
+    "latitude": 35.70408159999999,
+    "longitude": 139.5786842,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kinshicho-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/kitijouji-brandshop/"
   },
   {
     "name": "アトレ亀戸店",
@@ -174,6 +262,83 @@
     "city": "",
     "phone": "",
     "detail_url": "https://nanboya.com/shop/tokyo/kameido-brandshop/"
+  },
+  {
+    "name": "渋谷店",
+    "brand": "なんぼや",
+    "address": "〒150-0002 東京都渋谷区渋谷2-22-13マイアミビル3F",
+    "latitude": 35.6585083,
+    "longitude": 139.7031736,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/shibuya-brandshop/"
+  },
+  {
+    "name": "東急プラザ渋谷店",
+    "brand": "なんぼや",
+    "address": "〒150-0043 東京都渋谷区道玄坂1-2-3東急プラザ渋谷5F",
+    "latitude": 35.6575904,
+    "longitude": 139.7001518,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/tokyu-plaza-shibuya-brandshop/"
+  },
+  {
+    "name": "恵比寿店",
+    "brand": "なんぼや",
+    "address": "〒150-0022 東京都渋谷区恵比寿南1-4-17 GINZA K2ビル 2F",
+    "latitude": 35.6465546,
+    "longitude": 139.709054,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/ebisu-brandshop/"
+  },
+  {
+    "name": "渋谷マークシティ店",
+    "brand": "なんぼや",
+    "address": "〒150-0043 東京都渋谷区道玄坂1-12-1 渋谷マークシティ ウエスト 2F",
+    "latitude": 35.658168,
+    "longitude": 139.6986062,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/shibuya-markcity-brandshop/"
+  },
+  {
+    "name": "広尾店",
+    "brand": "なんぼや",
+    "address": "〒150-0012 東京都渋谷区広尾5-17-11",
+    "latitude": 35.6497479,
+    "longitude": 139.7202099,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/hiroo-brandshop/"
+  },
+  {
+    "name": "新橋店",
+    "brand": "なんぼや",
+    "address": "〒105-0004 東京都港区新橋1-16-6新橋柳屋ビル1F",
+    "latitude": 35.6680649,
+    "longitude": 139.7570421,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/shinbashi-brandshop/"
+  },
+  {
+    "name": "町田東急ツインズ店",
+    "brand": "なんぼや",
+    "address": "〒194-0013 東京都町田市原町田6-4-1 町田東急ツインズ イーストB1",
+    "latitude": 35.5424335,
+    "longitude": 139.4466132,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/machida-tokyu-brandshop/"
   },
   {
     "name": "自由が丘店",
@@ -198,143 +363,44 @@
     "detail_url": "https://nanboya.com/shop/tokyo/toritsudaigaku-brandshop/"
   },
   {
-    "name": "東急プラザ蒲田店",
+    "name": "グランデュオ立川店",
     "brand": "なんぼや",
-    "address": "〒144-0051 東京都大田区西蒲田7-69-1 東急プラザ蒲田 4F",
-    "latitude": 35.5620254,
-    "longitude": 139.7153695,
+    "address": "〒190-8554 東京都立川市柴崎町3-2-1 グランデュオ立川 6F",
+    "latitude": 35.6973431,
+    "longitude": 139.4145787,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kamata-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/granduo-tachikawa-brandshop/"
   },
   {
-    "name": "成城学園店",
+    "name": "立川北口店",
     "brand": "なんぼや",
-    "address": "〒157-0066 東京都世田谷区成城2-40-9",
-    "latitude": 35.6393914,
-    "longitude": 139.5978633,
+    "address": "〒190-0012 東京都立川市曙町2-7-18MISUMI Bldg.3F",
+    "latitude": 35.6997478,
+    "longitude": 139.4138424,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/seijogakuen-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/tachikawa-brandshop/"
   },
   {
-    "name": "二子玉川ライズ・バーズモール店",
+    "name": "調布駅前店",
     "brand": "なんぼや",
-    "address": "〒158-0094 東京都世田谷区玉川2-2-1 二子玉川ライズ・バーズモール＆レジデンス 1F",
-    "latitude": 35.6121292,
-    "longitude": 139.6298464,
+    "address": "〒182-0026 東京都調布市小島町1丁目35-5 調布アミックスビル3F",
+    "latitude": 35.6526246,
+    "longitude": 139.5425084,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/futakotamagawa-rise-brandshop/"
-  },
-  {
-    "name": "恵比寿店",
-    "brand": "なんぼや",
-    "address": "〒150-0022 東京都渋谷区恵比寿南1-4-17 GINZA K2ビル 2F",
-    "latitude": 35.6465546,
-    "longitude": 139.709054,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/ebisu-brandshop/"
-  },
-  {
-    "name": "渋谷店",
-    "brand": "なんぼや",
-    "address": "〒150-0002 東京都渋谷区渋谷2-22-13 マイアミビル 3F",
-    "latitude": 35.6585083,
-    "longitude": 139.7031736,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/shibuya-brandshop/"
-  },
-  {
-    "name": "東急プラザ渋谷店",
-    "brand": "なんぼや",
-    "address": "〒150-0043 東京都渋谷区道玄坂1-2-3 東急プラザ渋谷 5F",
-    "latitude": 35.6575904,
-    "longitude": 139.7001518,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/tokyu-plaza-shibuya-brandshop/"
-  },
-  {
-    "name": "渋谷マークシティ店",
-    "brand": "なんぼや",
-    "address": "〒150-0043 東京都渋谷区道玄坂1-12-1 渋谷マークシティ ウエスト 2F",
-    "latitude": 35.658168,
-    "longitude": 139.6986062,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/shibuya-markcity-brandshop/"
-  },
-  {
-    "name": "ALLU OMOTESANDO",
-    "brand": "なんぼや",
-    "address": "〒150-0001 東京都渋谷区神宮前5丁目46-14 Jinguumae546",
-    "latitude": 35.6640976,
-    "longitude": 139.7082529,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/allu-omotesando/"
-  },
-  {
-    "name": "広尾店",
-    "brand": "なんぼや",
-    "address": "〒150-0012 東京都渋谷区広尾5-17-11",
-    "latitude": 35.6497479,
-    "longitude": 139.7202099,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/hiroo-brandshop/"
-  },
-  {
-    "name": "中野ブロードウェイ店",
-    "brand": "なんぼや",
-    "address": "〒164-0001 東京都中野区中野5-52-15 中野ブロードウェイ1F 165号室",
-    "latitude": 35.7089299,
-    "longitude": 139.6657768,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/nakano-brandshop/"
-  },
-  {
-    "name": "阿佐ヶ谷店",
-    "brand": "なんぼや",
-    "address": "〒166-0004 東京都杉並区阿佐谷南1-35-22",
-    "latitude": 35.7022482,
-    "longitude": 139.6363503,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/asagaya-brandshop/"
-  },
-  {
-    "name": "池袋東口明治通り店",
-    "brand": "なんぼや",
-    "address": "〒171-0022 東京都豊島区南池袋一丁目22-2 池袋1222ビル",
-    "latitude": 35.7295028,
-    "longitude": 139.7109001,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/ikebukuro-higashiguchi-meijidori-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/chofu-brandshop/"
   },
   {
     "name": "池袋店",
     "brand": "なんぼや",
-    "address": "〒170-0013 東京都豊島区東池袋1-2-7 OKビル",
-    "latitude": 35.7301638,
-    "longitude": 139.7137306,
+    "address": "〒170-0013 東京都豊島区東池袋1-2-7OKビル",
+    "latitude": 35.7297761,
+    "longitude": 139.7138755,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
@@ -352,15 +418,15 @@
     "detail_url": "https://nanboya.com/shop/tokyo/tobu-hope-brandshop/"
   },
   {
-    "name": "赤羽スズラン通り店",
+    "name": "池袋東口明治通り店",
     "brand": "なんぼや",
-    "address": "〒115-0045 東京都北区赤羽2-13-2 かのやビル1F",
-    "latitude": 35.7795188,
-    "longitude": 139.7239509,
+    "address": "〒171-0022 東京都豊島区南池袋一丁目22-2 池袋1222ビル",
+    "latitude": 35.7295028,
+    "longitude": 139.7109001,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/akabane-suzurandori-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tokyo/ikebukuro-higashiguchi-meijidori-brandshop/"
   },
   {
     "name": "北千住マルイ店",
@@ -374,6 +440,17 @@
     "detail_url": "https://nanboya.com/shop/tokyo/kitasenju-brandshop/"
   },
   {
+    "name": "赤羽スズラン通り店",
+    "brand": "なんぼや",
+    "address": "〒115-0045 東京都北区赤羽2-13-2 かのやビル1F",
+    "latitude": 35.7795188,
+    "longitude": 139.7239509,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/tokyo/akabane-suzurandori-brandshop/"
+  },
+  {
     "name": "マークイズ葛飾かなまち店",
     "brand": "なんぼや",
     "address": "〒125-0041 東京都葛飾区東金町1-10-1 MARK IS 葛飾かなまち2F",
@@ -385,235 +462,15 @@
     "detail_url": "https://nanboya.com/shop/tokyo/markis-katsushika-kanamachi-brandshop/"
   },
   {
-    "name": "八王子オクトーレ店",
+    "name": "本厚木店",
     "brand": "なんぼや",
-    "address": "〒192-0083 東京都八王子市旭町9-1 八王子オクトーレ8F",
-    "latitude": 35.65734450000001,
-    "longitude": 139.3387961,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/hachioji-tokyu-brandshop/"
-  },
-  {
-    "name": "立川北口店",
-    "brand": "なんぼや",
-    "address": "〒190-0012 東京都立川市曙町2-7-18 MISUMI Bldg. 3F",
-    "latitude": 35.6997257,
-    "longitude": 139.4140888,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/tachikawa-brandshop/"
-  },
-  {
-    "name": "グランデュオ立川店",
-    "brand": "なんぼや",
-    "address": "〒190-8554 東京都立川市柴崎町3-2-1 グランデュオ立川",
-    "latitude": 35.6974313,
-    "longitude": 139.4145454,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/granduo-tachikawa-brandshop/"
-  },
-  {
-    "name": "吉祥寺店",
-    "brand": "なんぼや",
-    "address": "〒180-0004 東京都武蔵野市吉祥寺本町1-2-5",
-    "latitude": 35.70408159999999,
-    "longitude": 139.5786842,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kitijouji-brandshop/"
-  },
-  {
-    "name": "キラリナ京王吉祥寺店",
-    "brand": "なんぼや",
-    "address": "〒180-0003 東京都武蔵野市吉祥寺南町2-1-25 キラリナ京王吉祥寺7F",
-    "latitude": 35.7027824,
-    "longitude": 139.5799666,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kirarina-keio-kichijoji-brandshop/"
-  },
-  {
-    "name": "三鷹店",
-    "brand": "なんぼや",
-    "address": "〒181-0013 東京都三鷹市下連雀3-44-5",
-    "latitude": 35.7016925,
-    "longitude": 139.5596873,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/mitaka-brandshop/"
-  },
-  {
-    "name": "府中ル・シーニュ店",
-    "brand": "なんぼや",
-    "address": "〒183-0023 東京都府中市宮町1-100 ル・シーニュ 1F",
-    "latitude": 35.6715958,
-    "longitude": 139.4795359,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/fuchu-brandshop/"
-  },
-  {
-    "name": "調布駅前店",
-    "brand": "なんぼや",
-    "address": "〒182-0026 東京都調布市小島町1丁目35-5 調布アミックスビル3F",
-    "latitude": 35.6526246,
-    "longitude": 139.5425084,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/chofu-brandshop/"
-  },
-  {
-    "name": "町田東急ツインズ店",
-    "brand": "なんぼや",
-    "address": "〒194-0013 東京都町田市原町田6-4-1 町田東急ツインズ イーストB1",
-    "latitude": 35.5424335,
-    "longitude": 139.4466132,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/machida-tokyu-brandshop/"
-  },
-  {
-    "name": "ミーツ国分寺店",
-    "brand": "なんぼや",
-    "address": "〒185-0012 東京都国分寺市本町3-1-1 ミーツ国分寺 3F",
-    "latitude": 35.7006592,
-    "longitude": 139.4808189,
-    "prefecture": "東京都",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokyo/kokubunji-brandshop/"
-  },
-  {
-    "name": "東急プラザ戸塚店",
-    "brand": "なんぼや",
-    "address": "〒244-0003 神奈川県横浜市戸塚区戸塚町16-1 東急プラザ戸塚1F",
-    "latitude": 35.4009676,
-    "longitude": 139.5332226,
+    "address": "〒243-0018 神奈川県厚木市中町3-11-15",
+    "latitude": 35.4421667,
+    "longitude": 139.3613899,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/totsuka-brandshop/"
-  },
-  {
-    "name": "ウィング上大岡店",
-    "brand": "なんぼや",
-    "address": "〒233-0002 神奈川県横浜市港南区上大岡西1-6-1 ウィング上大岡3F",
-    "latitude": 35.4082636,
-    "longitude": 139.5962984,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/wing-kamiooka-brandshop/"
-  },
-  {
-    "name": "横浜元町プラザ店",
-    "brand": "なんぼや",
-    "address": "〒231-0861 神奈川県横浜市中区元町1-13 元町プラザ1F",
-    "latitude": 35.4413447,
-    "longitude": 139.6508746,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/yokohama-motomachi-plaza-brandshop/"
-  },
-  {
-    "name": "横浜店",
-    "brand": "なんぼや",
-    "address": "〒220-0005 神奈川県横浜市西区南幸（みなみさいわい）2-18-2",
-    "latitude": 35.4639074,
-    "longitude": 139.6157299,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/yokohama-brandshop/"
-  },
-  {
-    "name": "青葉台東急スクエア店",
-    "brand": "なんぼや",
-    "address": "〒227-0062 神奈川県横浜市青葉区青葉台1-7-1 青葉台東急スクエア South-2 3F",
-    "latitude": 35.5426648,
-    "longitude": 139.5169469,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/aobadai-tokyu-brandshop/"
-  },
-  {
-    "name": "大船店",
-    "brand": "なんぼや",
-    "address": "〒247-0006 神奈川県横浜市栄区笠間2-2-1 FOOD & TIME ISETAN OFUNA 2F",
-    "latitude": 35.3550222,
-    "longitude": 139.5332504,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/foodtime-ofuna-brandshop/"
-  },
-  {
-    "name": "港北東急SC店",
-    "brand": "なんぼや",
-    "address": "〒224-0032 神奈川県横浜市都筑区茅ケ崎中央5-1 港北東急SC A館2F",
-    "latitude": 35.5442223,
-    "longitude": 139.5722386,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/kohokutokyu-brandshop/"
-  },
-  {
-    "name": "東急百貨店 日吉店",
-    "brand": "なんぼや",
-    "address": "〒223-0061 神奈川県横浜市港北区日吉2-1-1 東急百貨店 日吉店 2F",
-    "latitude": 35.5538388,
-    "longitude": 139.6471375,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/hiyoshi-tokyu-brandshop/"
-  },
-  {
-    "name": "ららテラス 武蔵小杉店",
-    "brand": "なんぼや",
-    "address": "〒211-0004 神奈川県川崎市中原区新丸子東3−1302 ららテラス 武蔵小杉4F",
-    "latitude": 35.5752361,
-    "longitude": 139.6599656,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/musashikosugi-brandshop/"
-  },
-  {
-    "name": "新百合丘オーパ店",
-    "brand": "なんぼや",
-    "address": "〒215-0021 神奈川県川崎市麻生区上麻生1-1-1 新百合丘オーパ 5F",
-    "latitude": 35.6036813,
-    "longitude": 139.5086115,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/shinyurigaoka-opa-brandshop/"
-  },
-  {
-    "name": "川崎店",
-    "brand": "なんぼや",
-    "address": "〒210-0007 神奈川県川崎市川崎区駅前本町3-6 ホリウチ第一ビル 2F",
-    "latitude": 35.52953890000001,
-    "longitude": 139.6991144,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/kawasaki-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/honatsugi-brandshop/"
   },
   {
     "name": "アトレ川崎店",
@@ -624,29 +481,18 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/atre-kawasaki-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/atre-kawasaki-brandshop/"
   },
   {
-    "name": "マルイファミリー溝口店",
+    "name": "川崎店",
     "brand": "なんぼや",
-    "address": "〒213-0001 神奈川県川崎市高津区溝口1-4-1 マルイファミリー溝口店 6F",
-    "latitude": 35.599264,
-    "longitude": 139.612605,
+    "address": "〒210-0007 神奈川県川崎市川崎区駅前本町3-6 ホリウチ第一ビル 2F",
+    "latitude": 35.52953890000001,
+    "longitude": 139.6991144,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/mizonokuchi-brandshop/"
-  },
-  {
-    "name": "相模大野店",
-    "brand": "なんぼや",
-    "address": "〒252-0303 神奈川県相模原市南区相模大野3-19-10",
-    "latitude": 35.5336771,
-    "longitude": 139.4363084,
-    "prefecture": "神奈川県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/sagamiono-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/kawasaki-brandshop/"
   },
   {
     "name": "平塚店",
@@ -657,7 +503,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/hiratsuka-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/hiratsuka-brandshop/"
   },
   {
     "name": "藤沢 ODAKYU 湘南 GATE店",
@@ -668,18 +514,150 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/shonan-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/shonan-brandshop/"
   },
   {
-    "name": "本厚木店",
+    "name": "横浜店",
     "brand": "なんぼや",
-    "address": "〒243-0018 神奈川県厚木市中町3-11-15",
-    "latitude": 35.4421667,
-    "longitude": 139.3613899,
+    "address": "〒220-0005 神奈川県横浜市西区南幸（みなみさいわい）2-18-2",
+    "latitude": 35.4639074,
+    "longitude": 139.6157299,
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/honatsugi-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/yokohama-brandshop/"
+  },
+  {
+    "name": "横浜西口駅前店",
+    "brand": "なんぼや",
+    "address": "〒220-0005 神奈川県横浜市西区南幸1-2-4 濱角HAMAKADO 3F",
+    "latitude": 35.4672183,
+    "longitude": 139.6224902,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/yokohama-nishiguchi-brandshop/"
+  },
+  {
+    "name": "横浜元町プラザ店",
+    "brand": "なんぼや",
+    "address": "〒231-0861 神奈川県横浜市中区元町1-13 元町プラザ1F",
+    "latitude": 35.4413447,
+    "longitude": 139.6508746,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/yokohama-motomachi-plaza-brandshop/"
+  },
+  {
+    "name": "東急百貨店 日吉店",
+    "brand": "なんぼや",
+    "address": "〒223-0061 神奈川県横浜市港北区日吉2-1-1東急百貨店日吉店2F",
+    "latitude": 35.55406869999999,
+    "longitude": 139.6471071,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/hiyoshi-tokyu-brandshop/"
+  },
+  {
+    "name": "東急プラザ戸塚店",
+    "brand": "なんぼや",
+    "address": "〒244-0003 神奈川県横浜市戸塚区戸塚町16-1 東急プラザ戸塚1F",
+    "latitude": 35.4009676,
+    "longitude": 139.5332226,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/totsuka-brandshop/"
+  },
+  {
+    "name": "ウィング上大岡店",
+    "brand": "なんぼや",
+    "address": "〒233-0002 神奈川県横浜市港南区上大岡西1-6-1 ウィング上大岡3F",
+    "latitude": 35.4082636,
+    "longitude": 139.5962984,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/wing-kamiooka-brandshop/"
+  },
+  {
+    "name": "大船店",
+    "brand": "なんぼや",
+    "address": "〒247-0006 神奈川県横浜市栄区笠間2-2-1 FOOD & TIME ISETAN OFUNA 2F",
+    "latitude": 35.3550222,
+    "longitude": 139.5332504,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/foodtime-ofuna-brandshop/"
+  },
+  {
+    "name": "青葉台東急スクエア店",
+    "brand": "なんぼや",
+    "address": "〒227-0062 神奈川県横浜市青葉区青葉台1-7-1 青葉台東急スクエア South-2 3F",
+    "latitude": 35.5426648,
+    "longitude": 139.5169469,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/aobadai-tokyu-brandshop/"
+  },
+  {
+    "name": "港北東急SC店",
+    "brand": "なんぼや",
+    "address": "〒224-0032 神奈川県横浜市都筑区茅ケ崎中央5-1 港北東急SC A館2F",
+    "latitude": 35.5442223,
+    "longitude": 139.5722386,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/kohokutokyu-brandshop/"
+  },
+  {
+    "name": "ららテラス 武蔵小杉店",
+    "brand": "なんぼや",
+    "address": "〒211-0004 神奈川県川崎市中原区新丸子東3−1302 ららテラス 武蔵小杉4F",
+    "latitude": 35.5752361,
+    "longitude": 139.6599656,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/musashikosugi-brandshop/"
+  },
+  {
+    "name": "マルイファミリー溝口店",
+    "brand": "なんぼや",
+    "address": "〒213-0001 神奈川県川崎市高津区溝口1-4-1 マルイファミリー溝口店 6F",
+    "latitude": 35.599264,
+    "longitude": 139.612605,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/mizonokuchi-brandshop/"
+  },
+  {
+    "name": "新百合丘オーパ店",
+    "brand": "なんぼや",
+    "address": "〒215-0021 神奈川県川崎市麻生区上麻生1-1-1 新百合丘オーパ 5F",
+    "latitude": 35.6036813,
+    "longitude": 139.5086115,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/shinyurigaoka-opa-brandshop/"
+  },
+  {
+    "name": "相模大野店",
+    "brand": "なんぼや",
+    "address": "〒252-0303 神奈川県相模原市南区相模大野3-19-10",
+    "latitude": 35.5336771,
+    "longitude": 139.4363084,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/kanagawa/sagamiono-brandshop/"
   },
   {
     "name": "中央林間東急スクエア店",
@@ -690,84 +668,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/chuorinkan-tokyu-brandshop/"
-  },
-  {
-    "name": "所沢駅西口店",
-    "brand": "なんぼや",
-    "address": "〒359-1123 埼玉県所沢市日吉町2-2 キノシタビルⅡ 1F",
-    "latitude": 35.7886047,
-    "longitude": 139.4718784,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/tokorozawa-nishiguchi-brandshop/"
-  },
-  {
-    "name": "大宮店",
-    "brand": "なんぼや",
-    "address": "〒330-0846 埼玉県さいたま市大宮区 大門町1-21 町田ビル 2F",
-    "latitude": 35.9066975,
-    "longitude": 139.6255053,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/omiya-brandshop/"
-  },
-  {
-    "name": "浦和CORSO店",
-    "brand": "なんぼや",
-    "address": "〒330-0063 埼玉県さいたま市浦和区高砂1-12-1 浦和CORSO 4F",
-    "latitude": 35.8583566,
-    "longitude": 139.655874,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/urawa-brandshop/"
-  },
-  {
-    "name": "アトレ川越店",
-    "brand": "なんぼや",
-    "address": "〒350-1122 埼玉県川越市脇田町105 アトレ 6F",
-    "latitude": 35.9083085,
-    "longitude": 139.4831317,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/atre-kawagoe-brandshop/"
-  },
-  {
-    "name": "川口樹モールプラザ店",
-    "brand": "なんぼや",
-    "address": "〒332-0017 埼玉県川口市栄町3-13-1 樹モールプラザ 1F",
-    "latitude": 35.8029723,
-    "longitude": 139.7204493,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/kawaguchi-ju-mall-plaza-brandshop/"
-  },
-  {
-    "name": "春日部店",
-    "brand": "なんぼや",
-    "address": "〒344-0067 埼玉県春日部市中央1-43-18 大串ビル 1F",
-    "latitude": 35.9789472,
-    "longitude": 139.7534851,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/kasukabe-brandshop/"
-  },
-  {
-    "name": "蕨店",
-    "brand": "なんぼや",
-    "address": "〒335-0004 埼玉県蕨市中央1-29-2　蕨セントラルビル 1F",
-    "latitude": 35.8284812,
-    "longitude": 139.6886384,
-    "prefecture": "埼玉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/warabi-brandshop/"
+    "detail_url": "https://nanboya.com/shop/kanagawa/chuorinkan-tokyu-brandshop/"
   },
   {
     "name": "和光市駅北口店",
@@ -778,7 +679,29 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/wako-brandshop/"
+    "detail_url": "https://nanboya.com/shop/saitama/wako-brandshop/"
+  },
+  {
+    "name": "川口樹モールプラザ店",
+    "brand": "なんぼや",
+    "address": "〒332-0017 埼玉県川口市栄町3-13-1 樹モールプラザ 1F",
+    "latitude": 35.8029723,
+    "longitude": 139.7204493,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/kawaguchi-ju-mall-plaza-brandshop/"
+  },
+  {
+    "name": "アトレ川越店",
+    "brand": "なんぼや",
+    "address": "〒350-1122 埼玉県川越市脇田町105アトレ6F",
+    "latitude": 35.9083085,
+    "longitude": 139.4831317,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/atre-kawagoe-brandshop/"
   },
   {
     "name": "志木店",
@@ -789,18 +712,73 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/shiki-brandshop/"
+    "detail_url": "https://nanboya.com/shop/saitama/shiki-brandshop/"
+  },
+  {
+    "name": "春日部店",
+    "brand": "なんぼや",
+    "address": "〒344-0067 埼玉県春日部市中央1-43-18 大串ビル 1F",
+    "latitude": 35.9789472,
+    "longitude": 139.7534851,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/kasukabe-brandshop/"
+  },
+  {
+    "name": "蕨店",
+    "brand": "なんぼや",
+    "address": "〒335-0004 埼玉県蕨市中央1-29-2 蕨セントラルビル 1F",
+    "latitude": 35.8284812,
+    "longitude": 139.6886384,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/warabi-brandshop/"
+  },
+  {
+    "name": "所沢駅西口店",
+    "brand": "なんぼや",
+    "address": "〒359-1123 埼玉県所沢市日吉町2-2 キノシタビルⅡ 1F",
+    "latitude": 35.7886047,
+    "longitude": 139.4718784,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/tokorozawa-nishiguchi-brandshop/"
+  },
+  {
+    "name": "大宮店",
+    "brand": "なんぼや",
+    "address": "〒330-0846 埼玉県さいたま市大宮区大門町1-21町田ビル2F",
+    "latitude": 35.9066975,
+    "longitude": 139.6255053,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/omiya-brandshop/"
+  },
+  {
+    "name": "浦和CORSO店",
+    "brand": "なんぼや",
+    "address": "〒330-0063 埼玉県さいたま市浦和区高砂1-12-1 浦和CORSO 4F",
+    "latitude": 35.8583566,
+    "longitude": 139.655874,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/saitama/urawa-brandshop/"
   },
   {
     "name": "草加ヴァリエ店",
     "brand": "なんぼや",
-    "address": "〒340-0015 埼玉県草加市高砂2-5-25 東武草加ヴァリエ「VARIE-1」2F",
+    "address": "〒340-0015 埼玉県草加市高砂2-5-25東武草加ヴァリエ「VARIE-1」2F",
     "latitude": 35.8283858,
     "longitude": 139.8035406,
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/soka-varie-brandshop/"
+    "detail_url": "https://nanboya.com/shop/saitama/soka-varie-brandshop/"
   },
   {
     "name": "ペリエ千葉店",
@@ -811,29 +789,18 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/perie-chiba-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/perie-chiba-brandshop/"
   },
   {
     "name": "千葉店",
     "brand": "なんぼや",
-    "address": "〒260-0015 千葉県千葉市中央区富士見2-7-15 榎本ビル 3F",
+    "address": "〒260-0015 千葉県千葉市中央区富士見2-7-15榎本ビル3F",
     "latitude": 35.61011269999999,
     "longitude": 140.1174191,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/chiba-chuo-brandshop/"
-  },
-  {
-    "name": "南行徳店",
-    "brand": "なんぼや",
-    "address": "〒272-0144 千葉県市川市新井3-3-9",
-    "latitude": 35.6727552,
-    "longitude": 139.899498,
-    "prefecture": "千葉県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/minamigyotoku-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/chiba-chuo-brandshop/"
   },
   {
     "name": "市川店",
@@ -844,40 +811,40 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/ichikawa-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/ichikawa-brandshop/"
   },
   {
-    "name": "船橋フェイス店",
+    "name": "南行徳店",
     "brand": "なんぼや",
-    "address": "〒273-0005 千葉県船橋市本町1-3-1 船橋フェイスビル 2F",
-    "latitude": 35.7007039,
-    "longitude": 139.9855394,
+    "address": "〒272-0144 千葉県市川市新井3-3-9",
+    "latitude": 35.6727552,
+    "longitude": 139.899498,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/funabashi-face-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/minamigyotoku-brandshop/"
   },
   {
     "name": "アトレ松戸店",
     "brand": "なんぼや",
-    "address": "",
-    "latitude": null,
-    "longitude": null,
+    "address": "〒271-0092 千葉県松戸市松戸1181 アトレ松戸 5F",
+    "latitude": 35.7851307,
+    "longitude": 139.9005633,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/matsudo-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/matsudo-brandshop/"
   },
   {
     "name": "柏東口店",
     "brand": "なんぼや",
-    "address": "〒277-0005 千葉県柏市柏1-1-11 ファミリかしわ 1F",
+    "address": "〒277-0005 千葉県柏市柏1-1-11ファミリかしわ１F",
     "latitude": 35.8617921,
     "longitude": 139.9708973,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/chiba-kashiwa-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/chiba-kashiwa-brandshop/"
   },
   {
     "name": "柏西口店",
@@ -888,18 +855,29 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/kashiwa-nishiguchi-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/kashiwa-nishiguchi-brandshop/"
   },
   {
     "name": "流山おおたかの森S.C.店",
     "brand": "なんぼや",
-    "address": "〒270-0139 千葉県流山市おおたかの森南1-2-1",
-    "latitude": 35.8710371,
-    "longitude": 139.9248185,
+    "address": "〒270-0139 千葉県流山市おおたかの森南1-2-1流山おおたかの森S.C.FLAPS5F",
+    "latitude": 35.87102,
+    "longitude": 139.924687,
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/nagareyama-otakanomori-sc-brandshop/"
+    "detail_url": "https://nanboya.com/shop/chiba/nagareyama-otakanomori-sc-brandshop/"
+  },
+  {
+    "name": "船橋フェイス店",
+    "brand": "なんぼや",
+    "address": "〒273-0005 千葉県船橋市本町1-3-1 船橋フェイスビル 2F",
+    "latitude": 35.7007039,
+    "longitude": 139.9855394,
+    "prefecture": "千葉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/chiba/funabashi-face-brandshop/"
   },
   {
     "name": "水戸エクセルみなみ店",
@@ -910,7 +888,7 @@
     "prefecture": "茨城県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/mito-excel-minami-brandshop/"
+    "detail_url": "https://nanboya.com/shop/ibaraki/mito-excel-minami-brandshop/"
   },
   {
     "name": "宇都宮パセオ店",
@@ -921,7 +899,7 @@
     "prefecture": "栃木県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/utsunomiya-paseo-brandshop/"
+    "detail_url": "https://nanboya.com/shop/tochigi/utsunomiya-paseo-brandshop/"
   },
   {
     "name": "高崎オーパ店",
@@ -932,7 +910,7 @@
     "prefecture": "群馬県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/takasaki-opa-brandshop/"
+    "detail_url": "https://nanboya.com/shop/gunma/takasaki-opa-brandshop/"
   },
   {
     "name": "静岡店",
@@ -943,18 +921,18 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/shizuoka-brandshop/"
+    "detail_url": "https://nanboya.com/shop/shizuoka/shizuoka-brandshop/"
   },
   {
     "name": "ブランド コンシェル松坂屋静岡店",
     "brand": "なんぼや",
-    "address": "〒420-8560 静岡県静岡市葵区御幸町10-2 松坂屋静岡店 本館 2F",
+    "address": "〒420-8560 静岡県静岡市葵区御幸町10-2松坂屋静岡店本館2F",
     "latitude": 34.973196,
     "longitude": 138.388145,
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/brand-concier-matsuzakaya-shizuoka/"
+    "detail_url": "https://nanboya.com/shop/shizuoka/brand-concier-matsuzakaya-shizuoka/"
   },
   {
     "name": "浜松店",
@@ -965,29 +943,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/hamamatsu-brandshop/"
-  },
-  {
-    "name": "名古屋サカエチカ店",
-    "brand": "なんぼや",
-    "address": "〒460-0008 愛知県名古屋市中区栄3-4-6号先路下　地下街路サカエチカ",
-    "latitude": 35.168909,
-    "longitude": 136.906537,
-    "prefecture": "愛知県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/nagoya-sakaechika-brandshop/"
-  },
-  {
-    "name": "名古屋大須店",
-    "brand": "なんぼや",
-    "address": "〒460-0011 愛知県名古屋市中区大須2-30-6 プレサンスTHE大須観音1F",
-    "latitude": 35.1586473,
-    "longitude": 136.9010713,
-    "prefecture": "愛知県",
-    "city": "",
-    "phone": "",
-    "detail_url": "https://nanboya.com/shop/nagoya-osu-brandshop/"
+    "detail_url": "https://nanboya.com/shop/shizuoka/hamamatsu-brandshop/"
   },
   {
     "name": "名古屋エスカ店",
@@ -998,7 +954,18 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/nagoya-esca-brandshop/"
+    "detail_url": "https://nanboya.com/shop/aichi/nagoya-esca-brandshop/"
+  },
+  {
+    "name": "名古屋サンロード店",
+    "brand": "なんぼや",
+    "address": "〒450-0002 愛知県名古屋市中村区名駅4-7-25 先名駅 ナゴヤ地下街サンロード",
+    "latitude": 35.1692742,
+    "longitude": 136.8849154,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/aichi/nagoya-brandshop/"
   },
   {
     "name": "メルサ栄店",
@@ -1009,17 +976,28 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/melsa-sakae-brandshop/"
+    "detail_url": "https://nanboya.com/shop/aichi/melsa-sakae-brandshop/"
   },
   {
-    "name": "名古屋サンロード店",
+    "name": "名古屋大須店",
     "brand": "なんぼや",
-    "address": "〒450-0002 愛知県名古屋市中村区 名駅4-7-25 先名駅 ナゴヤ地下街サンロード",
-    "latitude": 35.1692742,
-    "longitude": 136.8849154,
+    "address": "〒460-0011 愛知県名古屋市中区大須2-30-6　プレサンスTHE大須観音1F",
+    "latitude": 35.1586473,
+    "longitude": 136.9010713,
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://nanboya.com/shop/nagoya-brandshop/"
+    "detail_url": "https://nanboya.com/shop/aichi/nagoya-osu-brandshop/"
+  },
+  {
+    "name": "名古屋サカエチカ店",
+    "brand": "なんぼや",
+    "address": "〒460-0008 愛知県名古屋市中区栄3-4-6号先路下地下街路サカエチカ",
+    "latitude": 35.168909,
+    "longitude": 136.906537,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/aichi/nagoya-sakaechika-brandshop/"
   }
 ]

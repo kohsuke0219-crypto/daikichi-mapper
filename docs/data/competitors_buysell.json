@@ -1,5 +1,60 @@
 [
   {
+    "name": "阿佐ヶ谷パールセンター商店街店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.69943971717973,
+    "longitude": 139.63709284761418,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/asagaya-pearl-center/"
+  },
+  {
+    "name": "あらたま橋店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.11747434099553,
+    "longitude": 136.93672558174842,
+    "prefecture": "愛知県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/aratamabashi/"
+  },
+  {
+    "name": "井土ヶ谷駅前店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.43274377266845,
+    "longitude": 139.59920777577673,
+    "prefecture": "神奈川県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/idogaya-ekimae/"
+  },
+  {
+    "name": "イオン八王子滝山店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 35.67965042109023,
+    "longitude": 139.33708615399547,
+    "prefecture": "東京都",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/aeon-hachiojitakiyama/"
+  },
+  {
+    "name": "ニットーモール熊谷店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 36.1388412,
+    "longitude": 139.39377919999998,
+    "prefecture": "埼玉県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/nittohmall-kumagaya/"
+  },
+  {
     "name": "高尾名店街店",
     "brand": "バイセル",
     "address": "",
@@ -8,7 +63,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%ab%98%e5%b0%be%e5%90%8d%e5%ba%97%e8%a1%97%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/takao-meitengai/"
   },
   {
     "name": "イオンタウン松ヶ崎店",
@@ -19,7 +74,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%bf%e3%82%a6%e3%83%b3%e6%9d%be%e3%83%b6%e5%b4%8e%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-matsugasaki/"
   },
   {
     "name": "表参道青山通り店",
@@ -30,7 +85,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%a1%a8%e5%8f%82%e9%81%93%e9%9d%92%e5%b1%b1%e9%80%9a%e3%82%8a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/omotesando-aoyamadori/"
   },
   {
     "name": "豊橋佐藤町店",
@@ -41,7 +96,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%b1%8a%e6%a9%8b%e4%bd%90%e8%97%a4%e7%94%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/toyohashi-satocho/"
   },
   {
     "name": "栄セントラルパーク 2号店",
@@ -52,7 +107,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a0%84%e3%82%bb%e3%83%b3%e3%83%88%e3%83%a9%e3%83%ab%e3%83%91%e3%83%bc%e3%82%af-2%e5%8f%b7%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/nagoya-centralpark/"
   },
   {
     "name": "名古屋御器所店",
@@ -63,7 +118,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%8d%e5%8f%a4%e5%b1%8b%e5%be%a1%e5%99%a8%e6%89%80%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/nagoya-gokiso/"
   },
   {
     "name": "ベイシア磐田豊岡店",
@@ -74,7 +129,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%99%e3%82%a4%e3%82%b7%e3%82%a2%e7%a3%90%e7%94%b0%e8%b1%8a%e5%b2%a1%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/beisia-iwata/"
   },
   {
     "name": "イオン金沢八景店",
@@ -85,7 +140,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e9%87%91%e6%b2%a2%e5%85%ab%e6%99%af%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-kanazawahakkei/"
   },
   {
     "name": "MEGAドン･キホーテUNY掛川店",
@@ -96,7 +151,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%ef%bd%a5%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e6%8e%9b%e5%b7%9d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-kakegawa/"
   },
   {
     "name": "新宿東口モア街店",
@@ -107,7 +162,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%96%b0%e5%ae%bf%e6%9d%b1%e5%8f%a3%e3%83%a2%e3%82%a2%e8%a1%97%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shinjuku-higashiguchi/"
   },
   {
     "name": "鶴見フーガ店",
@@ -118,7 +173,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%b6%b4%e8%a6%8b%e3%83%95%e3%83%bc%e3%82%ac%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama-tsurumifuga/"
   },
   {
     "name": "MEGAドン・キホーテUNY榛原店",
@@ -129,7 +184,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e6%a6%9b%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-makinohara/"
   },
   {
     "name": "Odakyu OX 相模原店",
@@ -140,7 +195,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/odakyu-ox-%e7%9b%b8%e6%a8%a1%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/odakyu-sagamihara/"
   },
   {
     "name": "Odakyu OX 読売ランド店",
@@ -151,7 +206,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/odakyu-ox-%e8%aa%ad%e5%a3%b2%e3%83%a9%e3%83%b3%e3%83%89%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/odakyuyomiuriland-kawasaki/"
   },
   {
     "name": "MEGAドン・キホーテUNY武豊店",
@@ -162,7 +217,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e6%ad%a6%e8%b1%8a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-taketoyo/"
   },
   {
     "name": "福田屋鹿沼店",
@@ -173,7 +228,7 @@
     "prefecture": "栃木県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%a6%8f%e7%94%b0%e5%b1%8b%e9%b9%bf%e6%b2%bc%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/fukudaya-kanuma/"
   },
   {
     "name": "アコス草加店",
@@ -184,7 +239,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%b3%e3%82%b9%e8%8d%89%e5%8a%a0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/akos-souka/"
   },
   {
     "name": "イオン金山店",
@@ -195,7 +250,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e9%87%91%e5%b1%b1%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-kanayama/"
   },
   {
     "name": "MEGAドン・キホーテUNY吉良店",
@@ -206,7 +261,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86uny%e5%90%89%e8%89%af%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-aichikira/"
   },
   {
     "name": "イオンタウン有松店",
@@ -217,7 +272,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%bf%e3%82%a6%e3%83%b3%e6%9c%89%e6%9d%be%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeontown-arimatsu/"
   },
   {
     "name": "イオン南陽店",
@@ -228,7 +283,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e5%8d%97%e9%99%bd%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-nagoyananyo/"
   },
   {
     "name": "静岡駅北口店",
@@ -239,7 +294,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%9d%99%e5%b2%a1%e9%a7%85%e5%8c%97%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shizuoka-kitaguchi/"
   },
   {
     "name": "ららぽーと安城店",
@@ -250,7 +305,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%89%e3%82%89%e3%81%bd%e3%83%bc%e3%81%a8%e5%ae%89%e5%9f%8e%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/lalaport-anjo/"
   },
   {
     "name": "イオン春日井店",
@@ -261,7 +316,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e6%98%a5%e6%97%a5%e4%ba%95%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-kasugai/"
   },
   {
     "name": "小田急マルシェ相武台店",
@@ -272,7 +327,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%b0%8f%e7%94%b0%e6%80%a5%e3%83%9e%e3%83%ab%e3%82%b7%e3%82%a7%e7%9b%b8%e6%ad%a6%e5%8f%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/odakyu-sobudai/"
   },
   {
     "name": "LICOPA東大和店",
@@ -283,7 +338,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/licopa%e6%9d%b1%e5%a4%a7%e5%92%8c%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/licopa-higashiyamato/"
   },
   {
     "name": "バロー瀬戸西店",
@@ -294,7 +349,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%90%e3%83%ad%e3%83%bc%e7%80%ac%e6%88%b8%e8%a5%bf%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/valor-setonishi/"
   },
   {
     "name": "ゆめが丘ソラトス店",
@@ -305,7 +360,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%86%e3%82%81%e3%81%8c%e4%b8%98%e3%82%bd%e3%83%a9%e3%83%88%e3%82%b9%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yumegaoka-soratos/"
   },
   {
     "name": "マルイファミリー溝口店",
@@ -316,7 +371,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%9e%e3%83%ab%e3%82%a4%e3%83%95%e3%82%a1%e3%83%9f%e3%83%aa%e3%83%bc%e6%ba%9d%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/mizonokuchi-marui/"
   },
   {
     "name": "イオンタウン蕨店",
@@ -327,7 +382,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%bf%e3%82%a6%e3%83%b3%e8%95%a8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-warabi/"
   },
   {
     "name": "日吉西口駅前店",
@@ -338,7 +393,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%97%a5%e5%90%89%e8%a5%bf%e5%8f%a3%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/hiyoshi-nishiguchi/"
   },
   {
     "name": "グルメシティ相模原光が丘店",
@@ -349,7 +404,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%b0%e3%83%ab%e3%83%a1%e3%82%b7%e3%83%86%e3%82%a3%e7%9b%b8%e6%a8%a1%e5%8e%9f%e5%85%89%e3%81%8c%e4%b8%98%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/gourmetcity-hikarigaoka/"
   },
   {
     "name": "MEGAドン・キホーテ浦和原山店",
@@ -360,7 +415,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e6%b5%a6%e5%92%8c%e5%8e%9f%e5%b1%b1%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-urawaharayama/"
   },
   {
     "name": "ドン・キホーテ二俣川店",
@@ -371,7 +426,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e4%ba%8c%e4%bf%a3%e5%b7%9d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-futamatagawa/"
   },
   {
     "name": "マーケットスクエア川崎イースト店",
@@ -382,7 +437,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%9e%e3%83%bc%e3%82%b1%e3%83%83%e3%83%88%e3%82%b9%e3%82%af%e3%82%a8%e3%82%a2%e5%b7%9d%e5%b4%8e%e3%82%a4%e3%83%bc%e3%82%b9%e3%83%88%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/marketsquare-kawasaki/"
   },
   {
     "name": "大宮マルイ店",
@@ -393,7 +448,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%a4%a7%e5%ae%ae%e3%83%9e%e3%83%ab%e3%82%a4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/omiya-marui/"
   },
   {
     "name": "マルイファミリー志木店",
@@ -404,7 +459,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%9e%e3%83%ab%e3%82%a4%e3%83%95%e3%82%a1%e3%83%9f%e3%83%aa%e3%83%bc%e5%bf%97%e6%9c%a8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shiki-marui/"
   },
   {
     "name": "伊勢原coma店",
@@ -415,7 +470,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e4%bc%8a%e5%8b%a2%e5%8e%9fcoma%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/isehara-coma/"
   },
   {
     "name": "有楽町マルイ店",
@@ -426,7 +481,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%9c%89%e6%a5%bd%e7%94%ba%e3%83%9e%e3%83%ab%e3%82%a4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yurakucho-marui/"
   },
   {
     "name": "経堂農大通り店",
@@ -437,7 +492,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%b5%8c%e5%a0%82%e8%be%b2%e5%a4%a7%e9%80%9a%e3%82%8a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/setagaya-nodaistreet/"
   },
   {
     "name": "ドン・キホーテ溝ノ口駅前店",
@@ -448,7 +503,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e6%ba%9d%e3%83%8e%e5%8f%a3%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-mizonokuchi/"
   },
   {
     "name": "巣鴨地蔵通り店",
@@ -459,7 +514,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%b7%a3%e9%b4%a8%e5%9c%b0%e8%94%b5%e9%80%9a%e3%82%8a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/sugamo-jizodori/"
   },
   {
     "name": "イオン豊川開運通店",
@@ -470,7 +525,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e8%b1%8a%e5%b7%9d%e9%96%8b%e9%81%8b%e9%80%9a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-toyokawa/"
   },
   {
     "name": "MEGAドン・キホーテ蓮田店",
@@ -481,7 +536,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e8%93%ae%e7%94%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-hasuda/"
   },
   {
     "name": "MEGAドン・キホーテ港山下総本店",
@@ -492,7 +547,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e6%b8%af%e5%b1%b1%e4%b8%8b%e7%b7%8f%e6%9c%ac%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-yokohama/"
   },
   {
     "name": "セブンパークアリオ柏店",
@@ -503,7 +558,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%bb%e3%83%96%e3%83%b3%e3%83%91%e3%83%bc%e3%82%af%e3%82%a2%e3%83%aa%e3%82%aa%e6%9f%8f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/sevenpark-kashiwa/"
   },
   {
     "name": "イオンスタイル岡崎店",
@@ -514,7 +569,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e5%b2%a1%e5%b4%8e%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-okazaki/"
   },
   {
     "name": "ノースポートモール店",
@@ -525,7 +580,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%8e%e3%83%bc%e3%82%b9%e3%83%9d%e3%83%bc%e3%83%88%e3%83%a2%e3%83%bc%e3%83%ab%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama-northport/"
   },
   {
     "name": "吉祥寺駅北口店",
@@ -536,7 +591,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%89%e7%a5%a5%e5%af%ba%e9%a7%85%e5%8c%97%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kichijoji-sunroad/"
   },
   {
     "name": "MEGAドン・キホーテ大森山王店",
@@ -547,7 +602,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e5%a4%a7%e6%a3%ae%e5%b1%b1%e7%8e%8b%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-omorisanno/"
   },
   {
     "name": "イオン袋井店",
@@ -558,7 +613,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e8%a2%8b%e4%ba%95%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-fukuroi/"
   },
   {
     "name": "そよら湘南茅ケ崎店",
@@ -569,7 +624,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%81%9d%e3%82%88%e3%82%89%e6%b9%98%e5%8d%97%e8%8c%85%e3%82%b1%e5%b4%8e%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/soyora-chigasaki/"
   },
   {
     "name": "イトーヨーカドー南大沢店",
@@ -580,7 +635,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%83%88%e3%83%bc%e3%83%a8%e3%83%bc%e3%82%ab%e3%83%89%e3%83%bc%e5%8d%97%e5%a4%a7%e6%b2%a2%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/itoyokado-minamiosawa/"
   },
   {
     "name": "町田駅北口店",
@@ -591,7 +646,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%94%ba%e7%94%b0%e9%a7%85%e5%8c%97%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/machida-kitaguchi/"
   },
   {
     "name": "MEGAドン・キホーテ春日部店",
@@ -602,7 +657,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e6%98%a5%e6%97%a5%e9%83%a8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-kasukabe/"
   },
   {
     "name": "イオン半田店",
@@ -613,7 +668,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e5%8d%8a%e7%94%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-handa/"
   },
   {
     "name": "MEGAドン・キホーテ八千代16号バイパス店",
@@ -624,7 +679,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e5%85%ab%e5%8d%83%e4%bb%a316%e5%8f%b7%e3%83%90%e3%82%a4%e3%83%91%e3%82%b9%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-yachiyo/"
   },
   {
     "name": "トレアージュ白旗店",
@@ -635,7 +690,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%88%e3%83%ac%e3%82%a2%e3%83%bc%e3%82%b8%e3%83%a5%e7%99%bd%e6%97%97%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/treage-fujisawa/"
   },
   {
     "name": "イオン東雲店",
@@ -646,7 +701,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e6%9d%b1%e9%9b%b2%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-shinonome/"
   },
   {
     "name": "ベイシア藤枝店",
@@ -657,7 +712,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%99%e3%82%a4%e3%82%b7%e3%82%a2%e8%97%a4%e6%9e%9d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/beisia-fujieda/"
   },
   {
     "name": "イオンスタイル南砂店",
@@ -668,7 +723,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e5%8d%97%e7%a0%82%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-minamisuna/"
   },
   {
     "name": "自由が丘デパート店",
@@ -679,7 +734,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%87%aa%e7%94%b1%e3%81%8c%e4%b8%98%e3%83%87%e3%83%91%e3%83%bc%e3%83%88%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/jiyugaoka-depart/"
   },
   {
     "name": "大森西口駅前店",
@@ -690,7 +745,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%a4%a7%e6%a3%ae%e8%a5%bf%e5%8f%a3%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/omori-nishiguti/"
   },
   {
     "name": "イオンモール土岐店",
@@ -701,7 +756,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%83%a2%e3%83%bc%e3%83%ab%e5%9c%9f%e5%b2%90%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-toki/"
   },
   {
     "name": "イトーヨーカドー昭島店",
@@ -712,7 +767,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%83%88%e3%83%bc%e3%83%a8%e3%83%bc%e3%82%ab%e3%83%89%e3%83%bc%e6%98%ad%e5%b3%b6%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/itoyokado-akishima/"
   },
   {
     "name": "イオンスタイル碑文谷店",
@@ -723,7 +778,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e7%a2%91%e6%96%87%e8%b0%b7%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-himonya/"
   },
   {
     "name": "マックスバリュグランリバー焼津大井川店",
@@ -734,7 +789,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%9e%e3%83%83%e3%82%af%e3%82%b9%e3%83%90%e3%83%aa%e3%83%a5%e3%82%b0%e3%83%a9%e3%83%b3%e3%83%aa%e3%83%90%e3%83%bc%e7%84%bc%e6%b4%a5%e5%a4%a7%e4%ba%95%e5%b7%9d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/maxvalu-oigawa/"
   },
   {
     "name": "八王子駅北口店",
@@ -745,7 +800,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%85%ab%e7%8e%8b%e5%ad%90%e9%a7%85%e5%8c%97%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/hachioji-kitaguchi/"
   },
   {
     "name": "MEGAドン･キホーテ北鴻巣店",
@@ -756,7 +811,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/mega%e3%83%89%e3%83%b3%ef%bd%a5%e3%82%ad%e3%83%9b%e3%83%bc%e3%83%86%e5%8c%97%e9%b4%bb%e5%b7%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/donki-kitakounosu/"
   },
   {
     "name": "アピタ島田店",
@@ -767,7 +822,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%83%94%e3%82%bf%e5%b3%b6%e7%94%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/apita-shimada/"
   },
   {
     "name": "イオン茅ヶ崎中央店",
@@ -778,7 +833,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e8%8c%85%e3%83%b6%e5%b4%8e%e4%b8%ad%e5%a4%ae%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-chigasaki/"
   },
   {
     "name": "イトーヨーカドー横浜別所店",
@@ -789,7 +844,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%83%88%e3%83%bc%e3%83%a8%e3%83%bc%e3%82%ab%e3%83%89%e3%83%bc%e6%a8%aa%e6%b5%9c%e5%88%a5%e6%89%80%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/itoyokado-yokohamabesho/"
   },
   {
     "name": "藤沢駅南口店",
@@ -800,7 +855,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%97%a4%e6%b2%a2%e9%a7%85%e5%8d%97%e5%8f%a3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/fujisawa-minamiguchi/"
   },
   {
     "name": "イトーヨーカドー上永谷店",
@@ -811,7 +866,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%83%88%e3%83%bc%e3%83%a8%e3%83%bc%e3%82%ab%e3%83%89%e3%83%bc%e4%b8%8a%e6%b0%b8%e8%b0%b7%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/itoyokado-kaminagaya/"
   },
   {
     "name": "イオンフードスタイル港南台店",
@@ -822,7 +877,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%83%95%e3%83%bc%e3%83%89%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e6%b8%af%e5%8d%97%e5%8f%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-konandai/"
   },
   {
     "name": "上大岡駅前店",
@@ -833,7 +888,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e4%b8%8a%e5%a4%a7%e5%b2%a1%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kamiooka-ekimae/"
   },
   {
     "name": "鎌ヶ谷大仏駅店",
@@ -844,7 +899,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%8e%8c%e3%83%b6%e8%b0%b7%e5%a4%a7%e4%bb%8f%e9%a7%85%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kamagaya-daibutsueki/"
   },
   {
     "name": "ピアゴ上岡田店",
@@ -855,7 +910,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%94%e3%82%a2%e3%82%b4%e4%b8%8a%e5%b2%a1%e7%94%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/piago-kamiokata/"
   },
   {
     "name": "アクロスプラザ富士厚原店",
@@ -866,7 +921,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%af%e3%83%ad%e3%82%b9%e3%83%97%e3%83%a9%e3%82%b6%e5%af%8c%e5%a3%ab%e5%8e%9a%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/acrossplaza-fujiatsuhara/"
   },
   {
     "name": "パレマルシェ新所原店",
@@ -877,7 +932,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%91%e3%83%ac%e3%83%9e%e3%83%ab%e3%82%b7%e3%82%a7%e6%96%b0%e6%89%80%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/paremarche-shinjyohara/"
   },
   {
     "name": "バロー掛川店",
@@ -888,7 +943,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%90%e3%83%ad%e3%83%bc%e6%8e%9b%e5%b7%9d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/valor-kakegawa/"
   },
   {
     "name": "おやまゆうえんハーヴェストウォーク店",
@@ -899,7 +954,7 @@
     "prefecture": "栃木県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%81%8a%e3%82%84%e3%81%be%e3%82%86%e3%81%86%e3%81%88%e3%82%93%e3%83%8f%e3%83%bc%e3%83%b4%e3%82%a7%e3%82%b9%e3%83%88%e3%82%a6%e3%82%a9%e3%83%bc%e3%82%af%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/oyama-harvestwalk/"
   },
   {
     "name": "ららぽーと沼津店",
@@ -910,7 +965,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%89%e3%82%89%e3%81%bd%e3%83%bc%e3%81%a8%e6%b2%bc%e6%b4%a5%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/lalaport-numazu/"
   },
   {
     "name": "イオン清水店",
@@ -921,7 +976,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e6%b8%85%e6%b0%b4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-shimizu/"
   },
   {
     "name": "エポカ高根台店",
@@ -932,7 +987,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a8%e3%83%9d%e3%82%ab%e9%ab%98%e6%a0%b9%e5%8f%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/epoca-takanedai/"
   },
   {
     "name": "旭サンモール店",
@@ -943,7 +998,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%97%ad%e3%82%b5%e3%83%b3%e3%83%a2%e3%83%bc%e3%83%ab%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/asahi-sunmall/"
   },
   {
     "name": "イオン浜松西店",
@@ -954,7 +1009,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e6%b5%9c%e6%9d%be%e8%a5%bf%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-hamamatsunishi/"
   },
   {
     "name": "アリオ蘇我店",
@@ -965,7 +1020,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%83%aa%e3%82%aa%e8%98%87%e6%88%91%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ario-soga/"
   },
   {
     "name": "ワンズモール稲毛店",
@@ -976,7 +1031,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%af%e3%83%b3%e3%82%ba%e3%83%a2%e3%83%bc%e3%83%ab%e7%a8%b2%e6%af%9b%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/onesmore-inage/"
   },
   {
     "name": "上野御徒町店",
@@ -987,7 +1042,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e4%b8%8a%e9%87%8e%e5%be%a1%e5%be%92%e7%94%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ueno-okachimachi/"
   },
   {
     "name": "関内伊勢佐木モール店",
@@ -998,7 +1053,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%96%a2%e5%86%85%e4%bc%8a%e5%8b%a2%e4%bd%90%e6%9c%a8%e3%83%a2%e3%83%bc%e3%83%ab%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama-isezakimall/"
   },
   {
     "name": "イオンスタイル品川シーサイド店",
@@ -1009,7 +1064,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a4%e3%82%aa%e3%83%b3%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e5%93%81%e5%b7%9d%e3%82%b7%e3%83%bc%e3%82%b5%e3%82%a4%e3%83%89%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aeon-shinagawa/"
   },
   {
     "name": "西武飯能ペペ店",
@@ -1020,7 +1075,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%a5%bf%e6%ad%a6%e9%a3%af%e8%83%bd%e3%83%9a%e3%83%9a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/seibu-hannou/"
   },
   {
     "name": "町田マルイ店",
@@ -1031,7 +1086,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%94%ba%e7%94%b0%e3%83%9e%e3%83%ab%e3%82%a4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/machida-marui/"
   },
   {
     "name": "アスモ茂原店",
@@ -1042,7 +1097,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%b9%e3%83%a2%e8%8c%82%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/asmo-mobara/"
   },
   {
     "name": "神奈川新町店",
@@ -1053,7 +1108,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%a5%9e%e5%a5%88%e5%b7%9d%e6%96%b0%e7%94%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kanagawa-shinmachi/"
   },
   {
     "name": "立川北口大通り店",
@@ -1064,7 +1119,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%ab%8b%e5%b7%9d%e5%8c%97%e5%8f%a3%e5%a4%a7%e9%80%9a%e3%82%8a%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/tachikawa-kitaguchiodori/"
   },
   {
     "name": "そよら成田ニュータウン店",
@@ -1075,7 +1130,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%81%9d%e3%82%88%e3%82%89%e6%88%90%e7%94%b0%e3%83%8b%e3%83%a5%e3%83%bc%e3%82%bf%e3%82%a6%e3%83%b3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/soyora-naritanewtown/"
   },
   {
     "name": "ユアエルム八千代台店",
@@ -1086,7 +1141,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%a6%e3%82%a2%e3%82%a8%e3%83%ab%e3%83%a0%e5%85%ab%e5%8d%83%e4%bb%a3%e5%8f%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yourelm-yachiyodai/"
   },
   {
     "name": "新静岡セノバ店",
@@ -1097,7 +1152,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%96%b0%e9%9d%99%e5%b2%a1%e3%82%bb%e3%83%8e%e3%83%90%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shizuoka-cenova/"
   },
   {
     "name": "サンピア東金店",
@@ -1108,7 +1163,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%b5%e3%83%b3%e3%83%94%e3%82%a2%e6%9d%b1%e9%87%91%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/sunpia-togane/"
   },
   {
     "name": "プレナ幕張店",
@@ -1119,7 +1174,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%83%97%e3%83%ac%e3%83%8a%e5%b9%95%e5%bc%b5%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/plena-makuhari/"
   },
   {
     "name": "ふじみ野西口駅前店",
@@ -1130,7 +1185,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%81%b5%e3%81%98%e3%81%bf%e9%87%8e%e8%a5%bf%e5%8f%a3%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/fujimino-nishiguti/"
   },
   {
     "name": "Odakyu OX 伊勢原店",
@@ -1141,7 +1196,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/odakyu-ox-%e4%bc%8a%e5%8b%a2%e5%8e%9f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/odakyuox-isehara/"
   },
   {
     "name": "名鉄一宮イチ＊ビル店",
@@ -1152,7 +1207,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%8d%e9%89%84%e4%b8%80%e5%ae%ae%e3%82%a4%e3%83%81%ef%bc%8a%e3%83%93%e3%83%ab%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/aichi-ichibiru/"
   },
   {
     "name": "アリオ西新井店",
@@ -1163,7 +1218,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%83%aa%e3%82%aa%e8%a5%bf%e6%96%b0%e4%ba%95%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ario-nishiarai/"
   },
   {
     "name": "東急ストア金町店",
@@ -1174,7 +1229,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%9d%b1%e6%80%a5%e3%82%b9%e3%83%88%e3%82%a2%e9%87%91%e7%94%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/tokyustore-kanamachi/"
   },
   {
     "name": "セレオ八王子店",
@@ -1185,7 +1240,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%bb%e3%83%ac%e3%82%aa%e5%85%ab%e7%8e%8b%e5%ad%90%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/celeo-hachioji/"
   },
   {
     "name": "上野マルイ店",
@@ -1196,7 +1251,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e4%b8%8a%e9%87%8e%e3%83%9e%e3%83%ab%e3%82%a4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ueno-marui/"
   },
   {
     "name": "スマーク伊勢崎店",
@@ -1207,7 +1262,7 @@
     "prefecture": "群馬県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%b9%e3%83%9e%e3%83%bc%e3%82%af%e4%bc%8a%e5%8b%a2%e5%b4%8e%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/smark-isesaki/"
   },
   {
     "name": "新百合ヶ丘エルミロード店",
@@ -1218,7 +1273,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%96%b0%e7%99%be%e5%90%88%e3%83%b6%e4%b8%98%e3%82%a8%e3%83%ab%e3%83%9f%e3%83%ad%e3%83%bc%e3%83%89%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shinyurigaoka-lmylord/"
   },
   {
     "name": "北千住マルイ店",
@@ -1229,7 +1284,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%8c%97%e5%8d%83%e4%bd%8f%e3%83%9e%e3%83%ab%e3%82%a4%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kitasenju-marui/"
   },
   {
     "name": "横浜モアーズ店",
@@ -1240,7 +1295,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a8%aa%e6%b5%9c%e3%83%a2%e3%82%a2%e3%83%bc%e3%82%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama-mores/"
   },
   {
     "name": "アスナル金山店",
@@ -1251,7 +1306,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%a2%e3%82%b9%e3%83%8a%e3%83%ab%e9%87%91%e5%b1%b1%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/asunal-kanayama/"
   },
   {
     "name": "恵比寿駅前店",
@@ -1262,7 +1317,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%81%b5%e6%af%94%e5%af%bf%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ebisu-ekimae/"
   },
   {
     "name": "渋谷サクラステージ店",
@@ -1273,7 +1328,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%b8%8b%e8%b0%b7%e3%82%b5%e3%82%af%e3%83%a9%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shibuya-sakurastage/"
   },
   {
     "name": "キテミテ松戸店",
@@ -1284,7 +1339,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%ad%e3%83%86%e3%83%9f%e3%83%86%e6%9d%be%e6%88%b8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kitemite-matsudo/"
   },
   {
     "name": "錦糸町パルコ店",
@@ -1295,7 +1350,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e9%8c%a6%e7%b3%b8%e7%94%ba%e3%83%91%e3%83%ab%e3%82%b3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kinshicho-parco/"
   },
   {
     "name": "センター南サウスウッド店",
@@ -1306,7 +1361,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%bb%e3%83%b3%e3%82%bf%e3%83%bc%e5%8d%97%e3%82%b5%e3%82%a6%e3%82%b9%e3%82%a6%e3%83%83%e3%83%89%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama-southwood/"
   },
   {
     "name": "自由が丘駅前店",
@@ -1317,7 +1372,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e8%87%aa%e7%94%b1%e3%81%8c%e4%b8%98%e9%a7%85%e5%89%8d%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/jiyugaoka-ekimae/"
   },
   {
     "name": "町田東急ツインズ店",
@@ -1328,7 +1383,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%94%ba%e7%94%b0%e6%9d%b1%e6%80%a5%e3%83%84%e3%82%a4%e3%83%b3%e3%82%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/machida-twins/"
   },
   {
     "name": "グランデュオ蒲田店",
@@ -1339,7 +1394,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e3%82%b0%e3%83%a9%e3%83%b3%e3%83%87%e3%83%a5%e3%82%aa%e8%92%b2%e7%94%b0%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/granduo-kamata/"
   },
   {
     "name": "池袋パルコ店",
@@ -1350,7 +1405,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%b1%a0%e8%a2%8b%e3%83%91%e3%83%ab%e3%82%b3%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/ikebukuro-parco/"
   },
   {
     "name": "吉祥寺レンガ館モール店",
@@ -1361,7 +1416,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%90%89%e7%a5%a5%e5%af%ba%e3%83%ac%e3%83%b3%e3%82%ac%e9%a4%a8%e3%83%a2%e3%83%bc%e3%83%ab%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kichijoji-rengakan/"
   },
   {
     "name": "ＫＩＴＴＥ名古屋店",
@@ -1372,7 +1427,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/kitte%e5%90%8d%e5%8f%a4%e5%b1%8b%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kitte-nagoya/"
   },
   {
     "name": "ザザシティ浜松店",
@@ -1383,7 +1438,7 @@
     "prefecture": "静岡県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%b5%9c%e6%9d%be-%e3%82%b6%e3%82%b6%e3%82%b7%e3%83%86%e3%82%a3%e6%b5%9c%e6%9d%be%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/hamamatsu/"
   },
   {
     "name": "日比谷シャンテ店",
@@ -1394,7 +1449,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%97%a5%e6%af%94%e8%b0%b7-%e3%82%b7%e3%83%a3%e3%83%b3%e3%83%86%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/hibiya/"
   },
   {
     "name": "スカイプラザ柏店",
@@ -1405,7 +1460,7 @@
     "prefecture": "千葉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%9f%8f-%e3%82%b9%e3%82%ab%e3%82%a4%e3%83%97%e3%83%a9%e3%82%b6%e6%9f%8f%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/kashiwa/"
   },
   {
     "name": "立川フロム中武店",
@@ -1416,7 +1471,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e7%ab%8b%e5%b7%9d-%e3%83%95%e3%83%ad%e3%83%a0%e4%b8%ad%e6%ad%a6%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/tachikawa/"
   },
   {
     "name": "大宮DOM店",
@@ -1427,7 +1482,7 @@
     "prefecture": "埼玉県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e5%a4%a7%e5%ae%aedom%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/omiya/"
   },
   {
     "name": "名古屋栄セントラルパーク店",
@@ -1438,7 +1493,7 @@
     "prefecture": "愛知県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a0%84%e3%82%bb%e3%83%b3%e3%83%88%e3%83%a9%e3%83%ab%e3%83%91%e3%83%bc%e3%82%af%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/nagoya/"
   },
   {
     "name": "横浜元町店",
@@ -1449,7 +1504,7 @@
     "prefecture": "神奈川県",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%a8%aa%e6%b5%9c%e5%85%83%e7%94%ba%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yokohama/"
   },
   {
     "name": "新宿サブナード店",
@@ -1460,7 +1515,7 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%96%b0%e5%ae%bf%e3%82%b5%e3%83%96%e3%83%8a%e3%83%bc%e3%83%89%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/shinjuku/"
   },
   {
     "name": "有楽町交通会館店",
@@ -1471,6 +1526,6 @@
     "prefecture": "東京都",
     "city": "",
     "phone": "",
-    "detail_url": "https://buysell-kaitori.com/store_post/%e6%9c%89%e6%a5%bd%e7%94%ba%e4%ba%a4%e9%80%9a%e4%bc%9a%e9%a4%a8%e5%ba%97/"
+    "detail_url": "https://buysell-kaitori.com/store/yurakucho/"
   }
 ]
