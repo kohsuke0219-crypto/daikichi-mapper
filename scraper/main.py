@@ -12,10 +12,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import sys
 from dataclasses import asdict
+from pathlib import Path
 
 from scraper.geocoder import GeocodeResult, Geocoder
 from scraper.scraper import REGIONS, Store, scrape_all
@@ -25,6 +27,43 @@ from scraper.sheets_writer import (
     open_sheet,
     write_stores,
 )
+
+# 都道府県名ゆれの正規化（境界データは「神奈川」等で格納されている）
+_PREF_NORMALIZE = {
+    "神奈川": "神奈川県", "東京": "東京都", "埼玉": "埼玉県", "千葉": "千葉県",
+    "茨城": "茨城県", "栃木": "栃木県", "群馬": "群馬県", "静岡": "静岡県",
+    "愛知": "愛知県", "山梨": "山梨県",
+}
+
+
+def _load_city_pref_map() -> dict[str, str]:
+    """docs/data/ward_population.geojson から 市区町村名 → 都道府県 のマップを作る。
+
+    住所頭に都道府県が省略された店舗（例:「世田谷区成城…」）の都道府県を
+    市区町村名から補完するために使う。
+    """
+    path = Path(__file__).parents[1] / "docs" / "data" / "ward_population.geojson"
+    m: dict[str, str] = {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return m
+    for feat in data.get("features", []):
+        p = feat.get("properties", {})
+        city, pref = p.get("city"), p.get("pref")
+        if city and pref:
+            m[city] = _PREF_NORMALIZE.get(pref, pref)
+    return m
+
+
+def _infer_prefecture(address: str, city_pref_map: dict[str, str]) -> str:
+    """住所の先頭にある市区町村名（最長一致）から都道府県を推定する。"""
+    a = (address or "").lstrip()
+    best = ""
+    for city in city_pref_map:
+        if len(city) > len(best) and a.startswith(city):
+            best = city
+    return city_pref_map.get(best, "") if best else ""
 
 
 def setup_logging() -> None:
@@ -96,6 +135,19 @@ def run(
     # 1) サイトをスクレイプ
     logger.info("Step 1/3: Scraping kaitori-daikichi.jp store pages")
     all_stores: list[Store] = list(scrape_all(region_slugs=region_slugs))
+
+    # 住所頭に都道府県が無い店舗（例:「世田谷区成城…」）は市区町村名から補完
+    city_pref_map = _load_city_pref_map()
+    filled = 0
+    for s in all_stores:
+        if not s.prefecture:
+            inferred = _infer_prefecture(s.address, city_pref_map)
+            if inferred:
+                s.prefecture = inferred
+                filled += 1
+    if filled:
+        logger.info("Filled %d stores' prefecture from address (missing pref prefix)", filled)
+
     stores = (
         [s for s in all_stores if s.prefecture in prefectures]
         if prefectures
