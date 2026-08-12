@@ -399,8 +399,8 @@
     "name": "池袋店",
     "brand": "なんぼや",
     "address": "〒170-0013 東京都豊島区東池袋1-2-7OKビル",
-    "latitude": 35.7297761,
-    "longitude": 139.7138755,
+    "latitude": 35.72984539999999,
+    "longitude": 139.7137359,
     "prefecture": "東京都",
     "city": "",
     "phone": "",
@@ -999,5 +999,16 @@
     "city": "",
     "phone": "",
     "detail_url": "https://nanboya.com/shop/aichi/nagoya-sakaechika-brandshop/"
+  },
+  {
+    "name": "ながの東急百貨店",
+    "brand": "なんぼや",
+    "address": "〒380-0823 長野県長野市南千歳1-1-1 ながの東急百貨店 本館5F",
+    "latitude": 36.6450515,
+    "longitude": 138.1886757,
+    "prefecture": "長野県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://nanboya.com/shop/nagano/nagano-tokyu-brandshop/"
   }
 ]

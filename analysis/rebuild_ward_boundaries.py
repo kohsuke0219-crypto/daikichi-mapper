@@ -39,7 +39,8 @@ log = logging.getLogger(__name__)
 
 MLIT_BASE = "https://nlftp.mlit.go.jp/ksj/gml/data/N03/N03-2023/N03-20230101_{pref_code}_GML.zip"
 PREF_CODES = {"東京都": "13", "神奈川県": "14", "埼玉県": "11", "千葉県": "12", "茨城県": "08",
-              "栃木県": "09", "群馬県": "10", "静岡県": "22", "愛知県": "23", "山梨県": "19"}
+              "栃木県": "09", "群馬県": "10", "静岡県": "22", "愛知県": "23", "山梨県": "19",
+              "長野県": "20"}
 
 WARD_GEOJSON = DOCS_DATA / "ward_population.geojson"
 AREA_CSV     = BASE_DIR / "ward_area.csv"

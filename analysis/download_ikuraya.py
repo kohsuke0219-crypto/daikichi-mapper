@@ -46,6 +46,7 @@ PREF_REGION = {
     "静岡県":   ("tyubu", "shizuoka"),
     "愛知県":   ("tyubu", "aichi"),
     "山梨県":   ("tyubu", "yamanashi"),   # 現状404（店舗なし）
+    "長野県":   ("tyubu", "nagano"),
 }
 
 

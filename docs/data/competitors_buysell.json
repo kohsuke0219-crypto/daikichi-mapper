@@ -22,6 +22,17 @@
     "detail_url": "https://buysell-kaitori.com/store/aratamabashi/"
   },
   {
+    "name": "綿半スーパーセンター中野店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 36.7233411,
+    "longitude": 138.33774839999998,
+    "prefecture": "長野県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/watahan-nakano/"
+  },
+  {
     "name": "井土ヶ谷駅前店",
     "brand": "バイセル",
     "address": "",
@@ -1241,6 +1252,17 @@
     "city": "",
     "phone": "",
     "detail_url": "https://buysell-kaitori.com/store/celeo-hachioji/"
+  },
+  {
+    "name": "イオンモール須坂店",
+    "brand": "バイセル",
+    "address": "",
+    "latitude": 36.63944013857415,
+    "longitude": 138.27290593123203,
+    "prefecture": "長野県",
+    "city": "",
+    "phone": "",
+    "detail_url": "https://buysell-kaitori.com/store/aeon-suzaka/"
   },
   {
     "name": "上野マルイ店",

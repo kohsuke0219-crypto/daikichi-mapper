@@ -23,7 +23,7 @@ HEADERS = {
 }
 
 TARGET_PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県",
-                "栃木県", "群馬県", "静岡県", "愛知県", "山梨県"]
+                "栃木県", "群馬県", "静岡県", "愛知県", "山梨県", "長野県"]
 
 DOCS_DATA = Path(__file__).parents[2] / "docs" / "data"
 DOCS_DATA.mkdir(parents=True, exist_ok=True)
