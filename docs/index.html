@@ -269,10 +269,11 @@
   const IKURAYA_COLOR  = '#3949AB';
   // 駅（クリックで1日乗降客数を表示）= スレート系の小さめ丸
   const STATION_COLOR  = '#334155';
-  // 自社ブランド（既存店）設定：選んだブランド=既存店(〇県別色)、他=競合(黒丸)
+  // 自社ブランド（既存店）設定：選んだブランド=既存店(◆オレンジ)、他=競合(黒丸)
   const OWN_BRAND_KEY = 'daikichi_own_brand';
   const OWN_BRAND_DEFAULT = 'バイセル';
   const BRANDS = ['買取大吉', 'バイセル', 'おたからや', 'なんぼや', 'いくらや'];
+  const OWN_COLOR = '#E8590C';   // 既存店ピン色（◆オレンジ）
   // 道路の通行量（t24 5段階：〜5千/〜1万/〜2万/〜4万/4万超）色＋太さ
   const ROAD_BREAKS  = [0, 5000, 10000, 20000, 40000];
   const ROAD_PAL     = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
@@ -444,17 +445,26 @@
       + `<span style="color:#888;font-size:10px">2021年 12か月平均・1kmメッシュ</span></div>`;
   }
 
-  // ---- 既存店/競合 レイヤー（自社ブランド選択に追従。選択=〇県別色/他=黒丸）----
+  // 既存店アイコン：◆オレンジ（daikichiペインで主役級）
+  function ownIcon() {
+    const s = 16;
+    return L.divIcon({
+      className: 'shape-pin',
+      html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
+          + `<polygon points="${s/2},1 ${s-1},${s/2} ${s/2},${s-1} 1,${s/2}" `
+          + `fill="${OWN_COLOR}" stroke="#fff" stroke-width="2"/></svg>`,
+      iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
+    });
+  }
+  // ---- 既存店/競合 レイヤー（自社ブランド選択に追従。既存店=◆オレンジ/他=黒丸）----
   function buildOwnMarkers(brand) {
     const out = [];
     (brandData[brand] || []).forEach(s => {
       if (!s.lat || !s.lng) return;
-      const col = PREF_COLORS[s.pref] || '#888';
       out.push(
-        L.circleMarker([s.lat, s.lng], {
-          pane: 'daikichi', renderer: daikichiRenderer,
-          radius: 6, fillColor: col, color: '#fff', weight: 2, fillOpacity: 1,
-        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${brand}（既存店）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
+        L.marker([s.lat, s.lng], { pane: 'daikichi', icon: ownIcon() })
+          .bindTooltip(`<b>${s.name}</b><br><span style="color:${OWN_COLOR};font-weight:bold">${brand}（既存店）</span>`, {sticky:true})
+          .bindPopup(`<b>${s.name}</b><br><span style="color:${OWN_COLOR};font-weight:bold">${brand}（既存店）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
       );
     });
     return out;
@@ -478,7 +488,7 @@
   // レイヤーコントロールの「既存店（◯◯）」ラベルを差し替え
   function updateOwnLayerLabel(brand) {
     document.querySelectorAll('.leaflet-control-layers-overlays label span').forEach(sp => {
-      if (sp.textContent.includes('既存店')) sp.innerHTML = ` 🏪 既存店（${brand}）`;
+      if (sp.textContent.includes('既存店')) sp.innerHTML = ` <span style="color:${OWN_COLOR}">◆</span> 既存店（${brand}）`;
     });
   }
   // 自社ブランド切替：ピン・凡例・競合除外を再読込なしで更新（localStorage保存）
@@ -611,8 +621,7 @@
     }
     if (showOwn) {
       h += (h?'<div class="sep"></div>':'') + `<h4>既存店（${ownBrand}）</h4>`;
-      for (const [k,v] of Object.entries(PREF_COLORS))
-        h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
+      h += `<span style="color:${OWN_COLOR};font-size:15px;vertical-align:middle">◆</span> ${ownBrand} 店舗<br>`;
     }
     if (showRival) {
       h += (h?'<div class="sep"></div>':'') + '<h4>競合店</h4>';
@@ -1694,7 +1703,7 @@
       flowLayer = L.layerGroup();
 
       // レイヤーコントロールに追加（既存店/競合を先頭に）
-      layerControl.addOverlay(ownLayer,        `🏪 既存店（${ownBrand}）`);
+      layerControl.addOverlay(ownLayer,        `<span style="color:${OWN_COLOR}">◆</span> 既存店（${ownBrand}）`);
       layerControl.addOverlay(rivalLayer,      '<span style="color:#222">●</span> 競合店（他ブランド）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
