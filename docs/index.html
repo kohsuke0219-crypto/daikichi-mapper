@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>バイセル 商圏マップ</title>
+  <title>買取店商圏マップ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
   <style>
@@ -93,6 +93,14 @@
       padding: 5px 8px; font-size: 13px;
       box-shadow: 0 2px 6px rgba(0,0,0,.2);
       cursor: pointer;
+    }
+    /* ---- 自社ブランド（既存店）切替 ---- */
+    #own-brand {
+      position: absolute; top: 48px; left: 55px; z-index: 800;
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #e74c3c; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer;
     }
     /* ---- 人流の指標切替（人流レイヤーON時のみ表示） ---- */
     #flow-metric {
@@ -211,6 +219,13 @@
 <body>
   <div id="loading">地図を読み込み中…<div id="loading-sub"></div></div>
   <div id="map"></div>
+  <select id="own-brand" title="自社ブランド（既存店）を選択">
+    <option value="買取大吉">自社: 買取大吉</option>
+    <option value="バイセル">自社: バイセル</option>
+    <option value="おたからや">自社: おたからや</option>
+    <option value="なんぼや">自社: なんぼや</option>
+    <option value="いくらや">自社: いくらや</option>
+  </select>
   <select id="flow-metric" title="人流の指標切替">
     <option value="wd_day">人流: 平日昼</option>
     <option value="hd_day">人流: 休日昼</option>
@@ -254,8 +269,10 @@
   const IKURAYA_COLOR  = '#3949AB';
   // 駅（クリックで1日乗降客数を表示）= スレート系の小さめ丸
   const STATION_COLOR  = '#334155';
-  // 買取バイセル = 出店ブランド（自社）。他競合と別色・別レイヤー。◆ダイヤ・オレンジ
-  const BUYSELL_COLOR  = '#E8590C';
+  // 自社ブランド（既存店）設定：選んだブランド=既存店(〇県別色)、他=競合(黒丸)
+  const OWN_BRAND_KEY = 'daikichi_own_brand';
+  const OWN_BRAND_DEFAULT = 'バイセル';
+  const BRANDS = ['買取大吉', 'バイセル', 'おたからや', 'なんぼや', 'いくらや'];
   // 道路の通行量（t24 5段階：〜5千/〜1万/〜2万/〜4万/4万超）色＋太さ
   const ROAD_BREAKS  = [0, 5000, 10000, 20000, 40000];
   const ROAD_PAL     = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
@@ -390,17 +407,6 @@
       iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -9],
     });
   }
-  // 買取バイセル: ◆ダイヤ（出店ブランド・大吉と同等の主役級。daikichiペイン）
-  function buysellIcon() {
-    const s = 16;
-    return L.divIcon({
-      className: 'shape-pin',
-      html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
-          + `<polygon points="${s/2},1 ${s-1},${s/2} ${s/2},${s-1} 1,${s/2}" `
-          + `fill="${BUYSELL_COLOR}" stroke="#fff" stroke-width="2"/></svg>`,
-      iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
-    });
-  }
   // t24/滞在人口 → 段階インデックス
   function tierIndex(breaks, v) {
     for (let i = breaks.length - 1; i >= 0; i--) if (v >= breaks[i]) return i;
@@ -436,6 +442,54 @@
       + `休日昼: <b>${fmtN(p.hd_day)}</b> 人<br>`
       + `深夜(居住): ${fmtN(p.night)} 人<br>`
       + `<span style="color:#888;font-size:10px">2021年 12か月平均・1kmメッシュ</span></div>`;
+  }
+
+  // ---- 既存店/競合 レイヤー（自社ブランド選択に追従。選択=〇県別色/他=黒丸）----
+  function buildOwnMarkers(brand) {
+    const out = [];
+    (brandData[brand] || []).forEach(s => {
+      if (!s.lat || !s.lng) return;
+      const col = PREF_COLORS[s.pref] || '#888';
+      out.push(
+        L.circleMarker([s.lat, s.lng], {
+          pane: 'daikichi', renderer: daikichiRenderer,
+          radius: 6, fillColor: col, color: '#fff', weight: 2, fillOpacity: 1,
+        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${brand}（既存店）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
+      );
+    });
+    return out;
+  }
+  function buildRivalMarkers(brand) {
+    const out = [];
+    BRANDS.forEach(b => {
+      if (b === brand) return;
+      (brandData[b] || []).forEach(s => {
+        if (!s.lat || !s.lng) return;
+        out.push(
+          L.circleMarker([s.lat, s.lng], {
+            pane: 'stores', renderer: storeRenderer,
+            radius: 4, fillColor: '#222', color: '#888', weight: 0.8, fillOpacity: 0.85,
+          }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${b}（競合）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}`)
+        );
+      });
+    });
+    return out;
+  }
+  // レイヤーコントロールの「既存店（◯◯）」ラベルを差し替え
+  function updateOwnLayerLabel(brand) {
+    document.querySelectorAll('.leaflet-control-layers-overlays label span').forEach(sp => {
+      if (sp.textContent.includes('既存店')) sp.innerHTML = ` 🏪 既存店（${brand}）`;
+    });
+  }
+  // 自社ブランド切替：ピン・凡例・競合除外を再読込なしで更新（localStorage保存）
+  function applyOwnBrand(brand) {
+    if (!BRANDS.includes(brand)) brand = OWN_BRAND_DEFAULT;
+    ownBrand = brand;
+    try { localStorage.setItem(OWN_BRAND_KEY, brand); } catch (e) {}
+    if (ownLayer) { ownLayer.clearLayers(); buildOwnMarkers(brand).forEach(m => m.addTo(ownLayer)); }
+    if (rivalLayer) { rivalLayer.clearLayers(); buildRivalMarkers(brand).forEach(m => m.addTo(rivalLayer)); }
+    updateOwnLayerLabel(brand);
+    refreshLegend();
   }
 
   // ============================================================
@@ -540,14 +594,10 @@
     }
     return this._div;
   };
-  legend.update = function(mode, showComp, showLifeline, showNewOpen,
-                           showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya,
-                           showStation, showProp, showBuysell, showRoad, showFlow) {
+  legend.update = function(mode, showOwn, showRival, showLifeline, showNewOpen,
+                           showWomenLifeline, showFav, hasNg, showTownhall,
+                           showStation, showProp, showRoad, showFlow) {
     let h = '';
-    if (showBuysell) {
-      h += '<h4>買取バイセル（出店ブランド）</h4>';
-      h += `<span style="color:${BUYSELL_COLOR};font-size:15px;vertical-align:middle">◆</span> バイセル 店舗<br><div class="sep"></div>`;
-    }
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
       h += `<span class="sq" style="background:${NG_FILL_COLOR}"></span>出店NGの市区町村<br>`;
@@ -559,19 +609,14 @@
         h += `<i style="background:${POP_PAL[i]}"></i>${lo.toLocaleString('ja-JP')}${hi?'–'+hi:'以上'}<br>`;
       });
     }
-    h += (h?'<div class="sep"></div>':'') + '<h4>買取大吉</h4>';
-    for (const [k,v] of Object.entries(PREF_COLORS))
-      h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
-    if (showIkuraya) {
-      h += '<div class="sep"></div><h4>買取いくらや</h4>';
-      h += `<span class="sq" style="background:${IKURAYA_COLOR}"></span>いくらや 店舗<br>`;
-    }
-    if (showComp) {
-      h += '<div class="sep"></div><h4>競合店</h4>';
-      for (const [k,v] of Object.entries(BRAND_COLORS)) {
-        if (k === 'バイセル') continue;   // バイセルは出店ブランドとして別レイヤー
+    if (showOwn) {
+      h += (h?'<div class="sep"></div>':'') + `<h4>既存店（${ownBrand}）</h4>`;
+      for (const [k,v] of Object.entries(PREF_COLORS))
         h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
-      }
+    }
+    if (showRival) {
+      h += (h?'<div class="sep"></div>':'') + '<h4>競合店</h4>';
+      h += `<span class="dot" style="background:#222;border-color:#888"></span>他ブランド（大吉/バイセル/おたからや/なんぼや/いくらやのうち自社以外）<br>`;
     }
     if (showRoad) {
       h += '<div class="sep"></div><h4>道路の通行量（24時間・台/日）</h4>';
@@ -625,7 +670,10 @@
   let townhallLayer = null;                          // 市区町村の役所
   let ikurayaLayer = null;                           // 買取いくらや（□）
   let stationLayer = null;                            // 駅（1日乗降客数）
-  let buysellLayer = null;                            // 買取バイセル（出店ブランド・◆）
+  // 既存店/競合：自社ブランド選択で切替（選択=既存店〇県別色、他=競合黒丸）
+  let brandData = {};                                 // {ブランド名: [{name,pref,lat,lng,address},...]}
+  let ownLayer = null, rivalLayer = null;             // 既存店 / 競合店
+  let ownBrand = OWN_BRAND_DEFAULT;                   // 現在の自社ブランド
   let roadLayer = null, roadLoaded = false;           // 道路の通行量（遅延ロード）
   let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流（遅延ロード）
   let flowMetric = 'wd_day';                          // 人流の表示指標
@@ -682,17 +730,16 @@
   function refreshLegend() {
     legend.update(
       choroplethMode,
-      competitorLayer && map.hasLayer(competitorLayer),
+      ownLayer && map.hasLayer(ownLayer),
+      rivalLayer && map.hasLayer(rivalLayer),
       lifelineLayer && map.hasLayer(lifelineLayer),
       newOpeningLayer && map.hasLayer(newOpeningLayer),
       womenLifelineLayer && map.hasLayer(womenLifelineLayer),
       favLayer && map.hasLayer(favLayer),
       ngAreas.length > 0,
       townhallLayer && map.hasLayer(townhallLayer),
-      ikurayaLayer && map.hasLayer(ikurayaLayer),
       stationLayer && map.hasLayer(stationLayer),
       propLayer && map.hasLayer(propLayer),
-      buysellLayer && map.hasLayer(buysellLayer),
       roadLayer && map.hasLayer(roadLayer),
       flowLayer && map.hasLayer(flowLayer),
     );
@@ -1501,25 +1548,15 @@
       },
     }).addTo(map);
 
-    // ---- 買取大吉店舗ピン ----
-    const markers = [];
-    stores.forEach(s => {
-      if (!s.lat||!s.lng) return;
-      const col = PREF_COLORS[s.prefecture]||'#888';
-      markers.push(
-        L.circleMarker([s.lat,s.lng], {
-          pane:'daikichi', renderer:daikichiRenderer,
-          radius:6, fillColor:col, color:'#fff', weight:2, fillOpacity:1,
-        }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${s.prefecture}</span><br>${s.address}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
-      );
-    });
-    storeLayer = L.layerGroup(markers).addTo(map);
+    // ---- 買取大吉データは既存店/競合の統合レイヤーで使う（正規化して保持）----
+    brandData['買取大吉'] = stores
+      .filter(s => s.lat && s.lng)
+      .map(s => ({ name: s.name, pref: s.prefecture, lat: s.lat, lng: s.lng, address: s.address }));
 
-    // ---- レイヤーコントロール（初期 = 最低限のレイヤーのみ）----
+    // ---- レイヤーコントロール（既存店/競合は phase2 でブランドデータ確定後に追加）----
     // 小画面(幅768px未満)では折りたたみ表示（アイコンをタップで展開）
     layerControl = L.control.layers(
-      {},
-      { '📍 買取大吉 店舗': storeLayer },
+      {}, {},
       { collapsed: window.innerWidth < 768, position: 'topleft' }
     ).addTo(map);
 
@@ -1562,32 +1599,14 @@
       popPoints = popPts.points;
       updateMeasureResult();  // 「読込中」表示を更新
 
-      // ---- 競合店マーカー（バイセルは自社=別レイヤーなので黒ピンから除外）----
-      const compMarkers = [];
-      comp.forEach(s => {
-        if (!s.latitude||!s.longitude) return;
-        if (s.brand === 'バイセル') return;   // バイセルは下で別レイヤー化
-        const col = BRAND_COLORS[s.brand]||'#888';
-        compMarkers.push(
-          L.circleMarker([s.latitude,s.longitude], {
-            pane: 'stores', renderer: storeRenderer, // 常にコロプレスより前面＆イベント受取
-            radius:4, fillColor:'#222', color:'#888', weight:0.8, fillOpacity:0.85,
-          }).bindPopup(`<b>${s.name}</b><br><span style="color:${col};font-weight:bold">${s.brand}</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}${mapsLinks(s.latitude,s.longitude)}`)
-        );
+      // ---- 各ブランドの店舗データを正規化（既存店/競合の統合レイヤーで使う）----
+      // バイセルは公式店舗JSON(競合_buysell)を採用。おたからや/なんぼやは competitors_all から。
+      brandData['バイセル'] = buysell.filter(s => s.latitude && s.longitude)
+        .map(s => ({ name: s.name, pref: s.prefecture, lat: s.latitude, lng: s.longitude, address: s.address }));
+      ['おたからや', 'なんぼや'].forEach(b => {
+        brandData[b] = comp.filter(s => s.brand === b && s.latitude && s.longitude)
+          .map(s => ({ name: s.name, pref: s.prefecture, lat: s.latitude, lng: s.longitude, address: s.address }));
       });
-      competitorLayer = L.layerGroup(compMarkers);
-
-      // ---- 買取バイセル（出店ブランド=自社。◆ダイヤ・daikichiペイン・初期ON）----
-      const bsMarkers = [];
-      buysell.forEach(s => {
-        if (!s.latitude||!s.longitude) return;
-        bsMarkers.push(
-          L.marker([s.latitude,s.longitude], { pane:'daikichi', icon: buysellIcon() })
-            .bindTooltip(`<b>${s.name}</b><br><span style="color:${BUYSELL_COLOR};font-weight:bold">バイセル</span>`, {sticky:true})
-            .bindPopup(`<b>${s.name}</b><br><span style="color:${BUYSELL_COLOR};font-weight:bold">買取バイセル（出店ブランド）</span><br>${s.prefecture||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.latitude,s.longitude)}${favLinkHtml(s.latitude,s.longitude)}`)
-        );
-      });
-      buysellLayer = L.layerGroup(bsMarkers).addTo(map);   // 出店ブランドなので初期ON
 
       // ---- 生活動線（スーパー・複合施設）#DB2777 半透明・一回り小さめ ----
       // storesペイン(zIndex650)+SVGレンダラーで人口色塗りより必ず上＆空白透過
@@ -1643,17 +1662,18 @@
       });
       townhallLayer = L.layerGroup(thMarkers);
 
-      // ---- 買取いくらや（□・大吉と同等の主役級ピン / daichichiペインz680）----
-      const ikMarkers = [];
-      ikuraya.forEach(s => {
-        if (!s.lat || !s.lng) return;
-        ikMarkers.push(
-          L.marker([s.lat, s.lng], { pane:'daikichi', icon: ikurayaIcon() })
-            .bindTooltip(`<b>${s.name}</b><br><span style="color:${IKURAYA_COLOR};font-weight:bold">買取いくらや</span>`, {sticky:true})
-            .bindPopup(`<b>${s.name}</b><br><span style="color:${IKURAYA_COLOR};font-weight:bold">買取いくらや</span><br>${s.prefecture}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}${favLinkHtml(s.lat,s.lng)}`)
-        );
-      });
-      ikurayaLayer = L.layerGroup(ikMarkers).addTo(map);   // 大吉と並べて見られるよう初期ON
+      // ---- 買取いくらや：ブランドデータへ正規化（既存店/競合の統合レイヤーで使う）----
+      brandData['いくらや'] = ikuraya.filter(s => s.lat && s.lng)
+        .map(s => ({ name: s.name, pref: s.prefecture, lat: s.lat, lng: s.lng, address: s.address }));
+
+      // ---- 既存店/競合レイヤーを構築（自社ブランド選択に追従）----
+      ownBrand = (function () {
+        try { const v = localStorage.getItem(OWN_BRAND_KEY); if (BRANDS.includes(v)) return v; } catch (e) {}
+        return OWN_BRAND_DEFAULT;
+      })();
+      ownLayer = L.layerGroup().addTo(map);
+      rivalLayer = L.layerGroup().addTo(map);
+      applyOwnBrand(ownBrand);   // ピン・凡例を初期ブランドで描画
 
       // ---- 駅（クリックで1日乗降客数）小さめ丸・初期OFF ----
       const stMarkers = [];
@@ -1671,14 +1691,13 @@
       roadLayer = L.layerGroup();
       flowLayer = L.layerGroup();
 
-      // レイヤーコントロールに追加
-      layerControl.addOverlay(buysellLayer,    `<span style="color:${BUYSELL_COLOR}">◆</span> 買取バイセル（出店ブランド）`);
-      layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合（おたからや/なんぼや）');
+      // レイヤーコントロールに追加（既存店/競合を先頭に）
+      layerControl.addOverlay(ownLayer,        `🏪 既存店（${ownBrand}）`);
+      layerControl.addOverlay(rivalLayer,      '<span style="color:#222">●</span> 競合店（他ブランド）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
-      layerControl.addOverlay(ikurayaLayer,    `<span style="color:${IKURAYA_COLOR}">■</span> 買取いくらや`);
       layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
       layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
       layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
@@ -1720,6 +1739,13 @@
         if (flowGeo) flowGeo.setStyle(flowStyle);
         refreshLegend();
       });
+
+      // 自社ブランド（既存店）切替：ピン・凡例・競合除外を再読込なしで更新
+      const ownSel = document.getElementById('own-brand');
+      if (ownSel) {
+        ownSel.value = ownBrand;
+        ownSel.addEventListener('change', ev => applyOwnBrand(ev.target.value));
+      }
 
       map.on('overlayadd overlayremove', refreshLegend);
       refreshLegend();   // 初期ONレイヤーを凡例へ即反映
