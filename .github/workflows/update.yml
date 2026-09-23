@@ -42,12 +42,17 @@ jobs:
         run: |
           python -m population.export_stores
 
-      - name: Commit and push updated stores.json
+      # 出店ブランド（バイセル）店舗の週次更新。バイセル公式APIは座標付きのため認証不要。
+      - name: Update Buysell store data
+        run: |
+          python scraper/competitors/_run_buysell.py
+
+      - name: Commit and push updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/stores.json
-          git diff --cached --quiet || git commit -m "Auto-update stores.json [$(date -u '+%Y-%m-%d')]"
+          git add docs/data/stores.json docs/data/competitors_buysell.json
+          git diff --cached --quiet || git commit -m "Auto-update stores & buysell [$(date -u '+%Y-%m-%d')]"
           git push
 
       - name: Notify on failure

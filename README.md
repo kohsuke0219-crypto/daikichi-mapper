@@ -128,3 +128,31 @@ Looker Studio のメリットを活かして、以下のシートを追加する
 ## ライセンス
 
 このコードのライセンスはあなたが自由に設定してください。スクレイピング対象データの権利は買取大吉本部に帰属します。
+
+## データレイヤー出典・加工方法（2026-09 追記）
+
+地図（`docs/index.html`）は GitHub Pages で公開。各レイヤーの元データと加工は下記。
+
+### 道路の通行量（自動車交通量）
+- 出典: 令和3年度（2021）道路交通センサス 一般交通量調査（国土交通省）を shiwaku 氏が GeoParquet 化したもの。
+  https://github.com/shiwaku/mlit-road-traffic-census-converter （data-v1）
+- 加工: `analysis/build_road_traffic.py`。対象1都10県（市区町村コード上2桁）で抽出、
+  高速自動車国道・都市高速・自動車専用道路・路線名に「高速/自動車道」を含む区間を除外、
+  24時間交通量>0のみ、同一基本区間はt24最大の1本に集約。EPSG:4326・座標5桁・simplify 0.0006。
+- 出力: `docs/data/road_traffic.geojson`（約10MB）。プロパティ road/t24/t12/pt/cong/sidewalk/roadside/lanes。
+- 表示: t24で色＋太さ5段階（〜5千/〜1万/〜2万/〜4万/4万超）。初期OFF・トグルON時に遅延ロード。
+
+### 人流（滞在人口・1kmメッシュ）
+- 出典: 国土交通省「全国の人流オープンデータ」1kmメッシュ滞在人口（monthly_mdp_mesh1km）。
+  https://www.geospatial.jp/ckan/dataset/mlit-1km-fromto
+- 対象年・時間帯: 2021年の12か月平均。平日昼(dayflag=1,timezone=0)/休日昼(0,0)/深夜=居住(2,2)。
+- 加工: `analysis/build_people_flow.py`。対象1都10県のメッシュを集計。
+- 出力: 地図用 `docs/data/people_flow_1km.geojson`（1kmメッシュ ポリゴン, props mesh/wd_day/hd_day/night, 約10MB）、
+  Cowork参照用 `docs/data/people_flow_1km.json`（`{"<3次メッシュ8桁>":{"wd_day":n,"hd_day":n,"night":n}}`）。
+- 表示: wd_day/hd_day/night を左上セレクトで切替、5段階の半透明塗り。初期OFF・遅延ロード。
+
+### 買取バイセル（出店ブランド＝自社）
+- 出典: バイセル公式店舗API（buysell-kaitori.com WP REST, geolocation付き）。`scraper/competitors/_run_buysell.py`。
+- 2026-07開店「阿佐ヶ谷パールセンター商店街店」を含む最新版。旧買取むすび/福ちゃんからの転換店も公式APIに反映されたものを収録。
+- 出店ブランドが大吉→バイセルに変わったため、他競合（おたからや/なんぼや）とは別レイヤー・別色（◆オレンジ）で表示。
+- 週次 GitHub Actions（`.github/workflows/update.yml`）で `competitors_buysell.json` を自動更新。

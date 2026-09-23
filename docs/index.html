@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>買取大吉 商圏マップ</title>
+  <title>バイセル 商圏マップ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
   <style>
@@ -94,6 +94,15 @@
       box-shadow: 0 2px 6px rgba(0,0,0,.2);
       cursor: pointer;
     }
+    /* ---- 人流の指標切替（人流レイヤーON時のみ表示） ---- */
+    #flow-metric {
+      position: absolute; top: 10px; left: 240px; z-index: 800;
+      background: rgba(255,255,255,0.93);
+      border: 1px solid #2c7fb8; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer; display: none;
+    }
+    @media (max-width: 768px) { #flow-metric { left: auto; right: 10px; top: 48px; } }
 
     /* ---- Info box ---- */
     .info {
@@ -202,6 +211,11 @@
 <body>
   <div id="loading">地図を読み込み中…<div id="loading-sub"></div></div>
   <div id="map"></div>
+  <select id="flow-metric" title="人流の指標切替">
+    <option value="wd_day">人流: 平日昼</option>
+    <option value="hd_day">人流: 休日昼</option>
+    <option value="night">人流: 深夜(居住)</option>
+  </select>
   <select id="choropleth-select" title="コロプレス表示切替">
     <option value="pop">👥 女性40歳以上人口</option>
     <option value="none">（非表示）</option>
@@ -240,6 +254,16 @@
   const IKURAYA_COLOR  = '#3949AB';
   // 駅（クリックで1日乗降客数を表示）= スレート系の小さめ丸
   const STATION_COLOR  = '#334155';
+  // 買取バイセル = 出店ブランド（自社）。他競合と別色・別レイヤー。◆ダイヤ・オレンジ
+  const BUYSELL_COLOR  = '#E8590C';
+  // 道路の通行量（t24 5段階：〜5千/〜1万/〜2万/〜4万/4万超）色＋太さ
+  const ROAD_BREAKS  = [0, 5000, 10000, 20000, 40000];
+  const ROAD_PAL     = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
+  const ROAD_WEIGHTS = [1, 1.5, 2.5, 3.5, 5];
+  // 人流（滞在人口 5段階）半透明塗り
+  const FLOW_BREAKS = [0, 100, 500, 2000, 10000];
+  const FLOW_PAL    = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
+  const FLOW_LABELS = { wd_day: '平日昼', hd_day: '休日昼', night: '深夜(居住)' };
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -366,6 +390,53 @@
       iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -9],
     });
   }
+  // 買取バイセル: ◆ダイヤ（出店ブランド・大吉と同等の主役級。daikichiペイン）
+  function buysellIcon() {
+    const s = 16;
+    return L.divIcon({
+      className: 'shape-pin',
+      html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">`
+          + `<polygon points="${s/2},1 ${s-1},${s/2} ${s/2},${s-1} 1,${s/2}" `
+          + `fill="${BUYSELL_COLOR}" stroke="#fff" stroke-width="2"/></svg>`,
+      iconSize: [s, s], iconAnchor: [s/2, s/2], popupAnchor: [0, -s/2],
+    });
+  }
+  // t24/滞在人口 → 段階インデックス
+  function tierIndex(breaks, v) {
+    for (let i = breaks.length - 1; i >= 0; i--) if (v >= breaks[i]) return i;
+    return 0;
+  }
+  // 道路通行量: t24 で色＋太さ
+  function roadStyle(f) {
+    const t = f.properties.t24 || 0, i = tierIndex(ROAD_BREAKS, t);
+    return { color: ROAD_PAL[i], weight: ROAD_WEIGHTS[i], opacity: 0.9 };
+  }
+  function roadPopup(f) {
+    const p = f.properties;
+    let h = `<div style="font-size:12px;min-width:170px"><b>${p.road || '道路'}</b>`;
+    if (p.pt) h += `<br><span style="color:#555">観測: ${p.pt}</span>`;
+    h += `<br>24時間交通量: <b>${fmtN(p.t24)}</b> 台/日`;
+    if (p.t12) h += `<br>昼間12時間: ${fmtN(p.t12)} 台`;
+    if (p.roadside) h += `<br>沿道: ${p.roadside}`;
+    if (p.cong != null) h += `<br>混雑度: ${p.cong}`;
+    if (p.lanes) h += ` / ${p.lanes}車線`;
+    h += `<br><span style="color:#888;font-size:10px">令和3年度 道路交通センサス</span></div>`;
+    return h;
+  }
+  // 人流: 選択中の指標(flowMetric)で塗り分け（線なし・半透明）
+  function flowStyle(f) {
+    const v = f.properties[flowMetric] || 0, i = tierIndex(FLOW_BREAKS, v);
+    return { stroke: false, fillColor: FLOW_PAL[i], fillOpacity: 0.5 };
+  }
+  function flowPopup(f) {
+    const p = f.properties;
+    return `<div style="font-size:12px"><b>人流 滞在人口</b><br>`
+      + `メッシュ ${p.mesh}<br>`
+      + `平日昼: <b>${fmtN(p.wd_day)}</b> 人<br>`
+      + `休日昼: <b>${fmtN(p.hd_day)}</b> 人<br>`
+      + `深夜(居住): ${fmtN(p.night)} 人<br>`
+      + `<span style="color:#888;font-size:10px">2021年 12か月平均・1kmメッシュ</span></div>`;
+  }
 
   // ============================================================
   // 地図初期化
@@ -393,6 +464,14 @@
   // 機能3: お気に入り星ピン専用ペイン（全レイヤー中で最前面・必ず埋もれない）
   map.createPane('favorites');
   map.getPane('favorites').style.zIndex = 750;
+
+  // 人流メッシュ塗り（コロプレス400より上・ピンより下）／道路線（人流より上・ピンより下）
+  map.createPane('flow');
+  map.getPane('flow').style.zIndex = 410;
+  const flowCanvas = L.canvas({ pane: 'flow' });
+  map.createPane('roads');
+  map.getPane('roads').style.zIndex = 620;
+  const roadCanvas = L.canvas({ pane: 'roads' });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -463,8 +542,12 @@
   };
   legend.update = function(mode, showComp, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall, showIkuraya,
-                           showStation, showProp) {
+                           showStation, showProp, showBuysell, showRoad, showFlow) {
     let h = '';
+    if (showBuysell) {
+      h += '<h4>買取バイセル（出店ブランド）</h4>';
+      h += `<span style="color:${BUYSELL_COLOR};font-size:15px;vertical-align:middle">◆</span> バイセル 店舗<br><div class="sep"></div>`;
+    }
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
       h += `<span class="sq" style="background:${NG_FILL_COLOR}"></span>出店NGの市区町村<br>`;
@@ -485,8 +568,20 @@
     }
     if (showComp) {
       h += '<div class="sep"></div><h4>競合店</h4>';
-      for (const [k,v] of Object.entries(BRAND_COLORS))
+      for (const [k,v] of Object.entries(BRAND_COLORS)) {
+        if (k === 'バイセル') continue;   // バイセルは出店ブランドとして別レイヤー
         h += `<span class="dot" style="background:${v};border-color:${v}"></span>${k}<br>`;
+      }
+    }
+    if (showRoad) {
+      h += '<div class="sep"></div><h4>道路の通行量（24時間・台/日）</h4>';
+      const lab = ['〜5千', '5千〜1万', '1万〜2万', '2万〜4万', '4万超'];
+      ROAD_PAL.forEach((c, i) => { h += `<span class="line" style="background:${c};height:${ROAD_WEIGHTS[i]+1}px"></span>${lab[i]}<br>`; });
+    }
+    if (showFlow) {
+      h += `<div class="sep"></div><h4>人流 滞在人口（${FLOW_LABELS[flowMetric]}）</h4>`;
+      const lab = ['〜100', '100〜500', '500〜2千', '2千〜1万', '1万超'];
+      FLOW_PAL.forEach((c, i) => { h += `<i style="background:${c};opacity:.75"></i>${lab[i]}<br>`; });
     }
     if (showLifeline || showNewOpen) {
       h += '<div class="sep"></div>';
@@ -530,6 +625,10 @@
   let townhallLayer = null;                          // 市区町村の役所
   let ikurayaLayer = null;                           // 買取いくらや（□）
   let stationLayer = null;                            // 駅（1日乗降客数）
+  let buysellLayer = null;                            // 買取バイセル（出店ブランド・◆）
+  let roadLayer = null, roadLoaded = false;           // 道路の通行量（遅延ロード）
+  let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流（遅延ロード）
+  let flowMetric = 'wd_day';                          // 人流の表示指標
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -593,6 +692,9 @@
       ikurayaLayer && map.hasLayer(ikurayaLayer),
       stationLayer && map.hasLayer(stationLayer),
       propLayer && map.hasLayer(propLayer),
+      buysellLayer && map.hasLayer(buysellLayer),
+      roadLayer && map.hasLayer(roadLayer),
+      flowLayer && map.hasLayer(flowLayer),
     );
   }
 
@@ -1443,8 +1545,9 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations] = await Promise.all([
+      const [comp, buysell, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
+        fetch('data/competitors_buysell.json').then(r=>r.json()),   // 出店ブランド: バイセル
         fetch('data/lifeline_stores.json').then(r=>r.json()),
         fetch('data/new_openings.json').then(r=>r.json()),
         fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
@@ -1459,10 +1562,11 @@
       popPoints = popPts.points;
       updateMeasureResult();  // 「読込中」表示を更新
 
-      // ---- 競合店マーカー ----
+      // ---- 競合店マーカー（バイセルは自社=別レイヤーなので黒ピンから除外）----
       const compMarkers = [];
       comp.forEach(s => {
         if (!s.latitude||!s.longitude) return;
+        if (s.brand === 'バイセル') return;   // バイセルは下で別レイヤー化
         const col = BRAND_COLORS[s.brand]||'#888';
         compMarkers.push(
           L.circleMarker([s.latitude,s.longitude], {
@@ -1472,6 +1576,18 @@
         );
       });
       competitorLayer = L.layerGroup(compMarkers);
+
+      // ---- 買取バイセル（出店ブランド=自社。◆ダイヤ・daikichiペイン・初期ON）----
+      const bsMarkers = [];
+      buysell.forEach(s => {
+        if (!s.latitude||!s.longitude) return;
+        bsMarkers.push(
+          L.marker([s.latitude,s.longitude], { pane:'daikichi', icon: buysellIcon() })
+            .bindTooltip(`<b>${s.name}</b><br><span style="color:${BUYSELL_COLOR};font-weight:bold">バイセル</span>`, {sticky:true})
+            .bindPopup(`<b>${s.name}</b><br><span style="color:${BUYSELL_COLOR};font-weight:bold">買取バイセル（出店ブランド）</span><br>${s.prefecture||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.latitude,s.longitude)}${favLinkHtml(s.latitude,s.longitude)}`)
+        );
+      });
+      buysellLayer = L.layerGroup(bsMarkers).addTo(map);   // 出店ブランドなので初期ON
 
       // ---- 生活動線（スーパー・複合施設）#DB2777 半透明・一回り小さめ ----
       // storesペイン(zIndex650)+SVGレンダラーで人口色塗りより必ず上＆空白透過
@@ -1551,17 +1667,62 @@
       });
       stationLayer = L.layerGroup(stMarkers);   // 初期OFF（トグルで表示）
 
+      // ---- 道路の通行量 / 人流（重いので遅延ロード：トグルON時に初めて取得・生成）----
+      roadLayer = L.layerGroup();
+      flowLayer = L.layerGroup();
+
       // レイヤーコントロールに追加
-      layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合3社（おたからや/バイセル/なんぼや）');
+      layerControl.addOverlay(buysellLayer,    `<span style="color:${BUYSELL_COLOR}">◆</span> 買取バイセル（出店ブランド）`);
+      layerControl.addOverlay(competitorLayer, '<span style="color:#9b59b6">●</span> 競合（おたからや/なんぼや）');
       layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
       layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
       layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
       layerControl.addOverlay(ikurayaLayer,    `<span style="color:${IKURAYA_COLOR}">■</span> 買取いくらや`);
       layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
+      layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
+      layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
+
+      // 遅延ロード：ONにされた時だけ重いGeoJSONを取得して描画
+      async function ensureRoad() {
+        if (roadLoaded) return;
+        roadLoaded = true;
+        bgEl.textContent = '道路通行量を読み込み中…'; bgEl.style.display = 'block';
+        try {
+          const d = await fetch('data/road_traffic.geojson').then(r=>r.json());
+          L.geoJSON(d, { pane:'roads', renderer: roadCanvas, style: roadStyle,
+                         onEachFeature: (f,l)=>l.bindPopup(roadPopup(f), {maxWidth:260}) }).addTo(roadLayer);
+        } catch(e) { roadLoaded = false; console.error('道路データ読込失敗', e); }
+        bgEl.style.display = 'none';
+      }
+      async function ensureFlow() {
+        if (flowLoaded) return;
+        flowLoaded = true;
+        bgEl.textContent = '人流データを読み込み中…'; bgEl.style.display = 'block';
+        try {
+          const d = await fetch('data/people_flow_1km.geojson').then(r=>r.json());
+          flowGeo = L.geoJSON(d, { pane:'flow', renderer: flowCanvas, style: flowStyle,
+                                   onEachFeature: (f,l)=>l.bindPopup(flowPopup(f), {maxWidth:220}) });
+          flowGeo.addTo(flowLayer);
+          const sel = document.getElementById('flow-metric'); if (sel) sel.style.display = '';
+        } catch(e) { flowLoaded = false; console.error('人流データ読込失敗', e); }
+        bgEl.style.display = 'none';
+      }
+      map.on('overlayadd', e => {
+        if (e.layer === roadLayer) ensureRoad();
+        else if (e.layer === flowLayer) ensureFlow();
+      });
+
+      // 人流の指標切替（平日昼/休日昼/深夜）
+      const flowSel = document.getElementById('flow-metric');
+      if (flowSel) flowSel.addEventListener('change', ev => {
+        flowMetric = ev.target.value;
+        if (flowGeo) flowGeo.setStyle(flowStyle);
+        refreshLegend();
+      });
 
       map.on('overlayadd overlayremove', refreshLegend);
-      refreshLegend();   // いくらやは初期ONなので凡例へ即反映
+      refreshLegend();   // 初期ONレイヤーを凡例へ即反映
 
       bgEl.style.display = 'none';
     } catch(err) {
