@@ -1671,8 +1671,10 @@
         try { const v = localStorage.getItem(OWN_BRAND_KEY); if (BRANDS.includes(v)) return v; } catch (e) {}
         return OWN_BRAND_DEFAULT;
       })();
-      ownLayer = L.layerGroup().addTo(map);
-      rivalLayer = L.layerGroup().addTo(map);
+      ownLayer = L.layerGroup().addTo(map);   // 既存店は初期ON
+      rivalLayer = L.layerGroup();            // 競合店は初期OFF（トグルで表示）
+      // ※ applyOwnBrand は rivalLayer の中身を作り替えるだけで map への追加/削除はしない
+      //   → ブランド切替後もユーザーの競合ON/OFF状態を維持する
       applyOwnBrand(ownBrand);   // ピン・凡例を初期ブランドで描画
 
       // ---- 駅（クリックで1日乗降客数）小さめ丸・初期OFF ----
