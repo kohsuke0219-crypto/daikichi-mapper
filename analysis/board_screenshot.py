@@ -136,10 +136,17 @@ def main():
         rows = ROWS
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
+    # 既存 centers.json に追記（マージ）
+    cpath = OUTDIR / "centers.json"
     centers = {}
+    if cpath.exists():
+        try: centers = json.loads(cpath.read_text(encoding="utf-8"))
+        except Exception: centers = {}
+    this_run = {}
     for r in rows:
-        centers[r[0]] = resolve_center(r)
-    (OUTDIR / "centers.json").write_text(json.dumps(centers, ensure_ascii=False, indent=1), encoding="utf-8")
+        c = resolve_center(r)
+        centers[r[0]] = c; this_run[r[0]] = c
+    cpath.write_text(json.dumps(centers, ensure_ascii=False, indent=1), encoding="utf-8")
 
     httpd = start_server()
     saved, failed = [], []
