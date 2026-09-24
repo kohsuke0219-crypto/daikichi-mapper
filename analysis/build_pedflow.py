@@ -136,17 +136,20 @@ def stage_b():
         for _, r in grp.iterrows():
             if r.geometry.is_empty: continue
             coords = [[round(x, 5), round(y, 5)] for x, y in r.geometry.coords]
+            road_name = "" if pd.isna(r["name"]) else str(r["name"])
+            cls = "" if pd.isna(r["highway"]) else str(r["highway"])
+            mesh8 = "" if pd.isna(r["m8"]) else str(r["m8"])
             feats.append({"type": "Feature",
-                "properties": {"idx": int(r["idx"]), "road": r["name"] or "", "cls": r["highway"],
-                               "shops": int(r["shops"]), "st_km": float(r["st_km"]), "mesh": r["m8"]},
+                "properties": {"idx": int(r["idx"]), "road": road_name, "cls": cls,
+                               "shops": int(r["shops"]), "st_km": float(r["st_km"]), "mesh": mesh8},
                 "geometry": {"type": "LineString", "coordinates": coords}})
         if not feats: continue
         gj = {"type": "FeatureCollection", "features": feats}
-        (OUTDIR / f"{m6v}.geojson").write_text(json.dumps(gj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        (OUTDIR / f"{m6v}.geojson").write_text(json.dumps(gj, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
         # タイルbbox
         b = grp.total_bounds
         tiles.append({"code": m6v, "bbox": [round(b[0],4), round(b[1],4), round(b[2],4), round(b[3],4)], "n": len(feats)})
-    (OUTDIR / "index.json").write_text(json.dumps({"tiles": tiles}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    (OUTDIR / "index.json").write_text(json.dumps({"tiles": tiles}, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     tot = sum(t["n"] for t in tiles)
     sz = sum(f.stat().st_size for f in OUTDIR.glob("*.geojson"))
     print(f"[B] タイル{len(tiles)}枚 / 区間{tot} / 合計{sz//1024}KB", flush=True)
