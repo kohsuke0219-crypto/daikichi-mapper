@@ -625,6 +625,40 @@
     return sum;
   }
 
+  // 物件位置の赤ピン＋半径1km(実線)/2km(破線)円（board_screenshot.py と同じ見た目）
+  let boardPinLayers = null;
+  function drawBoardPin(lat, lng, name) {
+    if (boardPinLayers) boardPinLayers.forEach(l => map.removeLayer(l));
+    const icon = L.divIcon({ className: '', iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -38],
+      html: '<svg width=30 height=42 viewBox="0 0 30 42"><path d="M15 0C6.7 0 0 6.7 0 15c0 11 15 27 15 27s15-16 15-27C30 6.7 23.3 0 15 0z" fill="#e11d1d" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg>' });
+    const m = L.marker([lat, lng], { icon, zIndexOffset: 10000 });
+    if (name) m.bindPopup(`<b>${name}</b>`);
+    const c1 = L.circle([lat, lng], { radius: 1000, color: '#e11d1d', weight: 2.5, opacity: 0.95, fill: false });
+    const c2 = L.circle([lat, lng], { radius: 2000, color: '#e11d1d', weight: 2, opacity: 0.9, dashArray: '9,7', fill: false });
+    [c1, c2, m].forEach(l => l.addTo(map));
+    boardPinLayers = [c1, c2, m];
+    if (name) m.openPopup();
+  }
+
+  // URLパラメータ（?lat=&lng=&z=&pin=1&name=）でボードのスクショと同じ位置・見た目で開く
+  function applyUrlParams() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const lat = parseFloat(q.get('lat')), lng = parseFloat(q.get('lng'));
+      if (!isFinite(lat) || !isFinite(lng)) return;   // パラメータ無しは従来どおり
+      const z = parseInt(q.get('z') || '15', 10);
+      // レイヤーをスクショと同じ状態に：買取店(既存店+競合)ON・埋蔵金ON・重いレイヤーOFF
+      if (ownLayer && !map.hasLayer(ownLayer)) map.addLayer(ownLayer);
+      if (rivalLayer && !map.hasLayer(rivalLayer)) map.addLayer(rivalLayer);
+      if (mzLayer && !map.hasLayer(mzLayer)) map.addLayer(mzLayer);
+      [roadLayer, flowLayer, pedLayer, pcLayer].forEach(l => { if (l && map.hasLayer(l)) map.removeLayer(l); });
+      const csel = document.getElementById('choropleth-select');
+      if (csel && csel.value !== 'none') { csel.value = 'none'; csel.dispatchEvent(new Event('change', { bubbles: true })); }
+      map.setView([lat, lng], (isFinite(z) ? z : 15));
+      if (q.get('pin') === '1') drawBoardPin(lat, lng, q.get('name') || '');
+    } catch (e) { console.error('URLパラメータ処理失敗', e); }
+  }
+
   // 既存店アイコン：◆（daikichiペインで主役級・色はブランド別）
   function ownIcon(color) {
     const s = 16;
@@ -2021,6 +2055,8 @@
 
       map.on('overlayadd overlayremove', refreshLegend);
       refreshLegend();   // 初期ONレイヤーを凡例へ即反映
+
+      applyUrlParams();  // ?lat=&lng=&z=&pin=1&name= で物件位置を直接表示（無ければ従来どおり）
 
       bgEl.style.display = 'none';
     } catch(err) {
