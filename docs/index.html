@@ -111,6 +111,15 @@
       box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer; display: none;
     }
     @media (max-width: 768px) { #flow-metric { left: auto; right: 10px; top: 48px; } }
+    /* ---- 埋蔵金の指標切替（埋蔵金レイヤーON時のみ表示） ---- */
+    #mz-metric {
+      position: absolute; top: 10px; left: 240px; z-index: 800;
+      background: rgba(255,255,255,0.93);
+      border: 1px solid #b7791f; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer; display: none;
+    }
+    @media (max-width: 768px) { #mz-metric { left: auto; right: 10px; top: 86px; } }
 
     /* ---- Info box ---- */
     .info {
@@ -228,6 +237,11 @@
     <option value="hd_day">人流: 休日昼</option>
     <option value="night">人流: 深夜(居住)</option>
   </select>
+  <select id="mz-metric" title="埋蔵金の表示指標切替">
+    <option value="buy_km2">埋蔵金: 買取向け(億円/km²)</option>
+    <option value="total_km2">埋蔵金: 総額(億円/km²)</option>
+    <option value="buy">埋蔵金: 買取向け額(億円)</option>
+  </select>
   <select id="choropleth-select" title="コロプレス表示切替">
     <option value="pop">👥 女性40歳以上人口</option>
     <option value="none">（非表示）</option>
@@ -299,6 +313,15 @@
   const PC_COLOR      = '#D6336C';   // 実測=マゼンタ系（既存色と非重複）
   const PC_OLD_COLOR  = '#868E96';   // 古い調査(2015以前)はグレー
   const PC_COVID_RING = '#F59F00';   // コロナ期(2020-2021)は縁を橙に
+  // 埋蔵金（推計・町丁目）: かくれ資産の推計額。金〜茶の5段階
+  const MZ_MIN_ZOOM = 10;
+  const MZ_PAL = ['#f6e8b0', '#ecc94b', '#d69e2e', '#a9741a', '#6b4708'];
+  const MZ_METRICS = {
+    buy_km2:  { label: '買取向け（億円/km²）', prop: 'buy_km2',   breaks: [0, 5, 10, 18, 28],    unit: '億円/km²' },
+    total_km2:{ label: '総額（億円/km²）',     prop: 'total_km2', breaks: [0, 50, 100, 160, 250], unit: '億円/km²' },
+    buy:      { label: '買取向け額（億円）',    prop: 'buy',       breaks: [0, 1, 2, 3.5, 6],      unit: '億円' },
+  };
+  let mzMetric = 'buy_km2';
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -541,6 +564,67 @@
     } catch(e) { pcLoaded = false; console.error('実測(通行量調査)読込失敗', e); }
   }
 
+  // 埋蔵金（推計・町丁目）: かくれ資産の推計額コロプレス（都県別に遅延ロード）
+  function mzColor(v) {
+    const br = MZ_METRICS[mzMetric].breaks;
+    return MZ_PAL[tierIndex(br, v || 0)];
+  }
+  function mzStyle(f) {
+    const v = f.properties[MZ_METRICS[mzMetric].prop] || 0;
+    return { color: '#8a6d1b', weight: 0.3, fillColor: mzColor(v), fillOpacity: 0.72 };
+  }
+  function mzPopup(f) {
+    const p = f.properties;
+    const fem = (p.fem50 != null ? fmtN(p.fem50) + ' 人' : '—');
+    return `<div style="font-size:12px;min-width:200px"><b>${p.name || ''}</b>`
+      + `<br><span style="color:#a9741a;font-weight:bold">埋蔵金（推計）</span>`
+      + `<br>総額: <b>${fmtN(p.total)}</b> 億円`
+      + `<br>買取向け額: <b>${fmtN(p.buy)}</b> 億円`
+      + `<br>面積あたり: ${fmtN(p.buy_km2)} 億円/km²（買取向け）`
+      + `<br>65歳以上人口: ${fmtN(p.pop65)} 人 ／ 女性50歳以上: ${fem}`
+      + `<br><span style="color:#888;font-size:10px">根拠: メルカリ"かくれ資産"1人71.5万円を年齢別に配分×地域補正／買取向け=総額×11.7%</span>`
+      + `<br><span style="color:#c0392b;font-size:10px">※推計値。実際の保有額ではありません</span></div>`;
+  }
+  async function updateMaizokin() {
+    if (!mzLayer || !map.hasLayer(mzLayer)) return;
+    if (map.getZoom() < MZ_MIN_ZOOM) { mzLayer.clearLayers(); mzTiles = {}; return; }
+    if (!mzIndex) {
+      try { mzIndex = await fetch('data/maizokin/index.json').then(r=>r.json()); }
+      catch(e) { mzIndex = {prefs:[]}; console.error('maizokin index 読込失敗', e); }
+    }
+    const b = map.getBounds();
+    for (const t of (mzIndex.prefs||[])) {
+      if (mzTiles[t.pref]) continue;
+      const [w,s,e,n] = t.bbox;
+      if (e < b.getWest() || w > b.getEast() || n < b.getSouth() || s > b.getNorth()) continue;
+      mzTiles[t.pref] = true;
+      try {
+        const d = await fetch(`data/maizokin/${t.file}`).then(r=>r.json());
+        const g = L.geoJSON(d, { pane:'maizokin', renderer: mzCanvas, style: mzStyle,
+                                 onEachFeature:(f,l)=>l.bindPopup(mzPopup(f), {maxWidth:260}) });
+        if (map.hasLayer(mzLayer) && map.getZoom()>=MZ_MIN_ZOOM) g.addTo(mzLayer);
+        mzTiles[t.pref] = g;
+      } catch(e) { mzTiles[t.pref] = false; console.error('maizokin tile', t.pref, e); }
+    }
+  }
+  function restyleMaizokin() {
+    Object.values(mzTiles).forEach(g => { if (g && g.setStyle) g.setStyle(mzStyle); });
+  }
+  async function ensureMzPoints() {
+    if (mzPoints) return;
+    try { mzPoints = (await fetch('data/maizokin_points.json').then(r=>r.json())).pts || []; }
+    catch(e) { mzPoints = []; console.error('maizokin points 読込失敗', e); }
+  }
+  function sumMaizokinWithinRadius(lat, lng, radiusKm) {
+    if (!mzPoints) return null;
+    let sum = 0;
+    for (let i = 0; i < mzPoints.length; i++) {
+      const p = mzPoints[i];
+      if (haversineKm(lat, lng, p[0], p[1]) <= radiusKm) sum += p[2];
+    }
+    return sum;
+  }
+
   // 既存店アイコン：◆（daikichiペインで主役級・色はブランド別）
   function ownIcon(color) {
     const s = 16;
@@ -638,6 +722,11 @@
   map.getPane('pedflow').style.zIndex = 615;
   const pedCanvas = L.canvas({ pane: 'pedflow' });
 
+  // 埋蔵金（町丁目コロプレス）: 基本コロプレス(400)より上・施設ピン(650)より下
+  map.createPane('maizokin');
+  map.getPane('maizokin').style.zIndex = 605;
+  const mzCanvas = L.canvas({ pane: 'maizokin' });
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18,
@@ -707,7 +796,7 @@
   };
   legend.update = function(mode, showOwn, showRival, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall,
-                           showStation, showProp, showRoad, showFlow, showPed, showPedCounts) {
+                           showStation, showProp, showRoad, showFlow, showPed, showPedCounts, showMaizokin) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -750,6 +839,16 @@
       h += `<span class="dot" style="background:${PC_OLD_COLOR};border-color:#fff"></span>古い調査(2015以前)<br>`;
       h += `<span class="dot" style="background:${PC_COLOR};border-color:${PC_COVID_RING};border-width:2px"></span>コロナ期(2020-21)<br>`;
       h += `<span style="color:#888;font-size:10px">実測＝自治体の通行量調査（調査年・時間帯・定義がまちまち。一部は歩行者＋自転車の合算や概位置）</span><br>`;
+    }
+    if (showMaizokin) {
+      const m = MZ_METRICS[mzMetric];
+      h += `<div class="sep"></div><h4>埋蔵金（推計・町丁目）</h4>`;
+      h += `<div style="font-size:11px;color:#555;margin-bottom:2px">${m.label}</div>`;
+      m.breaks.forEach((lo,i) => {
+        const hi = i+1<m.breaks.length ? m.breaks[i+1] : null;
+        h += `<i style="background:${MZ_PAL[i]};opacity:.8"></i>${fmtN(lo)}${hi!=null?'–'+fmtN(hi):'以上'}<br>`;
+      });
+      h += `<span style="color:#c0392b;font-size:10px">推計値（メルカリ"かくれ資産"調査×国勢調査の年齢別人口）。実際の保有額ではありません</span><br>`;
     }
     if (showLifeline || showNewOpen) {
       h += '<div class="sep"></div>';
@@ -801,6 +900,7 @@
   let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流メッシュ（遅延ロード）
   let pedLayer = null, pedIndex = null, pedTiles = {}; // 人流(通り別・推計) タイル遅延ロード
   let pcLayer = null, pcLoaded = false;               // 人流・実測(通行量調査) 遅延ロード
+  let mzLayer = null, mzIndex = null, mzTiles = {}, mzPoints = null; // 埋蔵金(町丁目) 遅延ロード
   let flowMetric = 'wd_day';                          // 人流の表示指標
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
@@ -869,6 +969,7 @@
       flowLayer && map.hasLayer(flowLayer),
       pedLayer && map.hasLayer(pedLayer),
       pcLayer && map.hasLayer(pcLayer),
+      mzLayer && map.hasLayer(mzLayer),
     );
   }
 
@@ -907,10 +1008,20 @@
     }
     if (!popPoints) { el.innerHTML = '人口メッシュ読込中…'; return; }
     const sum = sumPopWithinRadius(measureCenter.lat, measureCenter.lng, MEASURE_RADIUS_KM);
-    el.innerHTML =
+    let html =
       `半径${MEASURE_RADIUS_KM.toFixed(1)}km圏内の${popMeta ? popMeta.label : '40歳以上女性人口'}: `
       + `<b>約${fmtN(sum)}人</b>`
       + `<br><span style="color:#888;font-size:10px">※${popMeta ? popMeta.granularity : '小地域centroid'}の合計による近似値</span>`;
+    // 埋蔵金（買取向け額）の圏内合計
+    if (!mzPoints) {
+      ensureMzPoints().then(() => { if (measureCenter) updateMeasureResult(); });
+      html += `<br><span style="color:#a9741a">埋蔵金（買取向け額）: 読込中…</span>`;
+    } else {
+      const mz = sumMaizokinWithinRadius(measureCenter.lat, measureCenter.lng, MEASURE_RADIUS_KM);
+      html += `<br>埋蔵金（買取向け額）: <b style="color:#a9741a">約${fmtN(Math.round(mz*10)/10)}億円</b>`
+           + `<br><span style="color:#888;font-size:10px">※町丁目centroidの推計買取向け額の合計（推計値）</span>`;
+    }
+    el.innerHTML = html;
   }
 
   function runMeasure(latlng) {
@@ -1504,7 +1615,7 @@
       +       '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
       +     '</div>'
       +     '<div id="mode-hint" style="color:#888;font-size:10px;margin:2px 0 4px">通常モード（ピン/市区町村を操作）</div>'
-      +     '<h4>📏 半径集計（40歳以上女性人口）</h4>'
+      +     '<h4>📏 半径集計（女性人口＋埋蔵金）</h4>'
       +     '<div class="tp-row"><span>半径</span>'
       +       `<input type="range" id="measure-radius" min="${MEASURE_RADIUS_MIN_KM}" max="${MEASURE_RADIUS_MAX_KM}" step="${MEASURE_RADIUS_STEP_KM}" value="${MEASURE_RADIUS_KM}">`
       +       '<span id="measure-radius-val" style="white-space:nowrap"></span></div>'
@@ -1821,6 +1932,7 @@
       flowLayer = L.layerGroup();
       pedLayer = L.layerGroup();   // 人流(通り別・推計)。ズーム14以上で範囲内タイルを読み込む
       pcLayer = L.layerGroup();    // 人流・実測(通行量調査)。トグルONで地点マーカーを読み込む
+      mzLayer = L.layerGroup();    // 埋蔵金(推計・町丁目)。ズーム10以上で範囲内の都県を読み込む
 
       // レイヤーコントロールに追加（既存店/競合を先頭に）
       layerControl.addOverlay(ownLayer,        `<span style="color:${ownColor(ownBrand)}">◆</span> 既存店（${ownBrand}）`);
@@ -1834,6 +1946,7 @@
       layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
       layerControl.addOverlay(pedLayer,        `<span style="color:${PED_PAL[4]}">━</span> 人流（通り別・推計/ズーム14+）`);
       layerControl.addOverlay(pcLayer,         `<span style="color:${PC_COLOR}">●</span> 人流・実測（通行量調査）`);
+      layerControl.addOverlay(mzLayer,         `<span style="color:${MZ_PAL[3]}">■</span> 埋蔵金（推計・町丁目/ズーム10+）`);
 
       // 遅延ロード：ONにされた時だけ重いGeoJSONを取得して描画
       async function ensureRoad() {
@@ -1865,12 +1978,31 @@
         else if (e.layer === flowLayer) ensureFlow();
         else if (e.layer === pedLayer) updatePedflow();
         else if (e.layer === pcLayer) ensurePedCounts();
+        else if (e.layer === mzLayer) {
+          const sel = document.getElementById('mz-metric'); if (sel) sel.style.display = 'block';
+          ensureMzPoints(); updateMaizokin(); refreshLegend();
+        }
       });
       map.on('overlayremove', e => {
         if (e.layer === pedLayer) { pedLayer.clearLayers(); pedTiles = {}; }
+        else if (e.layer === mzLayer) {
+          mzLayer.clearLayers(); mzTiles = {};
+          const sel = document.getElementById('mz-metric'); if (sel) sel.style.display = 'none';
+        }
       });
-      // 表示範囲/ズーム変更で通り別人流タイルを追随ロード
-      map.on('moveend zoomend', () => { if (pedLayer && map.hasLayer(pedLayer)) updatePedflow(); });
+      // 表示範囲/ズーム変更で通り別人流・埋蔵金タイルを追随ロード
+      map.on('moveend zoomend', () => {
+        if (pedLayer && map.hasLayer(pedLayer)) updatePedflow();
+        if (mzLayer && map.hasLayer(mzLayer)) updateMaizokin();
+      });
+
+      // 埋蔵金の指標切替（買取向け/km² ・ 総額/km² ・ 買取向け額）
+      const mzSel = document.getElementById('mz-metric');
+      if (mzSel) mzSel.addEventListener('change', ev => {
+        mzMetric = ev.target.value;
+        restyleMaizokin();
+        refreshLegend();
+      });
 
       // 人流の指標切替（平日昼/休日昼/深夜）
       const flowSel = document.getElementById('flow-metric');
