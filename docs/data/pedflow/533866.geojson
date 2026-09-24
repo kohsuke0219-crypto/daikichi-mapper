@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"idx":12,"road":NaN,"cls":"tertiary","shops":0,"st_km":15.26,"mesh":"53386695"},"geometry":{"type":"LineString","coordinates":[[138.82052,35.91199],[138.82015,35.91193],[138.81963,35.91205],[138.81875,35.91262],[138.81858,35.91269],[138.81843,35.91268],[138.81803,35.9125]]}}]}

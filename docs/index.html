@@ -290,6 +290,11 @@
   const FLOW_BREAKS = [0, 100, 500, 2000, 10000];
   const FLOW_PAL    = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
   const FLOW_LABELS = { wd_day: '平日昼', hd_day: '休日昼', night: '深夜(居住)' };
+  // 人流（通り別・推計）: 人流指数の5段階（線色＋太さ）。ズーム14以上でのみ描画
+  const PED_BREAKS  = [0, 50, 150, 400, 1000];
+  const PED_PAL     = ['#c7e9c0', '#74c476', '#31a354', '#006d2c', '#00441b'];
+  const PED_WEIGHTS = [1, 1.5, 2.5, 3.5, 4.5];
+  const PED_MIN_ZOOM = 14;
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -452,6 +457,41 @@
       + `深夜(居住): ${fmtN(p.night)} 人<br>`
       + `<span style="color:#888;font-size:10px">2021年 12か月平均・1kmメッシュ</span></div>`;
   }
+  // 通り別人流（推計）: 人流指数で色＋太さ（細め・やや透明）
+  function pedStyle(f) {
+    const v = f.properties.idx || 0, i = tierIndex(PED_BREAKS, v);
+    return { color: PED_PAL[i], weight: PED_WEIGHTS[i], opacity: 0.6 };
+  }
+  function pedPopup(f) {
+    const p = f.properties;
+    return `<div style="font-size:12px;min-width:180px"><b>人流指数（推計）: ${fmtN(p.idx)}</b>`
+      + `<br>${p.road || '（名称なし）'}（${p.cls}）`
+      + `<br><span style="color:#888;font-size:10px">根拠: 1kmメッシュ平日昼人口を道路へ配分／道路の格=${p.cls}／沿道店舗 約${p.shops}件（50m内）／最寄駅 約${p.st_km}km</span>`
+      + `<br><span style="color:#c0392b;font-size:10px">※実測ではなく推計値です</span></div>`;
+  }
+  // ズーム14以上で表示範囲の2次メッシュタイルだけ読み込む
+  async function updatePedflow() {
+    if (!pedLayer || !map.hasLayer(pedLayer)) return;
+    if (map.getZoom() < PED_MIN_ZOOM) { pedLayer.clearLayers(); pedTiles = {}; return; }
+    if (!pedIndex) {
+      try { pedIndex = await fetch('data/pedflow/index.json').then(r=>r.json()); }
+      catch(e) { pedIndex = {tiles:[]}; console.error('pedflow index 読込失敗', e); }
+    }
+    const b = map.getBounds();
+    for (const t of (pedIndex.tiles||[])) {
+      if (pedTiles[t.code]) continue;
+      const [w,s,e,n] = t.bbox;
+      if (e < b.getWest() || w > b.getEast() || n < b.getSouth() || s > b.getNorth()) continue;
+      pedTiles[t.code] = true;   // 多重取得防止
+      try {
+        const d = await fetch(`data/pedflow/${t.code}.geojson`).then(r=>r.json());
+        const g = L.geoJSON(d, { pane:'pedflow', renderer: pedCanvas, style: pedStyle,
+                                 onEachFeature:(f,l)=>l.bindPopup(pedPopup(f), {maxWidth:240}) });
+        if (map.hasLayer(pedLayer) && map.getZoom()>=PED_MIN_ZOOM) g.addTo(pedLayer);
+        pedTiles[t.code] = g;
+      } catch(e) { pedTiles[t.code] = false; console.error('pedflow tile', t.code, e); }
+    }
+  }
 
   // 既存店アイコン：◆（daikichiペインで主役級・色はブランド別）
   function ownIcon(color) {
@@ -545,6 +585,10 @@
   map.createPane('roads');
   map.getPane('roads').style.zIndex = 620;
   const roadCanvas = L.canvas({ pane: 'roads' });
+  // 通り別人流（推計）: 道路線より少し下（z615）・canvas描画
+  map.createPane('pedflow');
+  map.getPane('pedflow').style.zIndex = 615;
+  const pedCanvas = L.canvas({ pane: 'pedflow' });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -615,7 +659,7 @@
   };
   legend.update = function(mode, showOwn, showRival, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall,
-                           showStation, showProp, showRoad, showFlow) {
+                           showStation, showProp, showRoad, showFlow, showPed) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -645,6 +689,12 @@
       h += `<div class="sep"></div><h4>人流 滞在人口（${FLOW_LABELS[flowMetric]}）</h4>`;
       const lab = ['〜100', '100〜500', '500〜2千', '2千〜1万', '1万超'];
       FLOW_PAL.forEach((c, i) => { h += `<i style="background:${c};opacity:.75"></i>${lab[i]}<br>`; });
+    }
+    if (showPed) {
+      h += '<div class="sep"></div><h4>人流（通り別・推計）</h4>';
+      const lab = ['〜50', '50〜150', '150〜400', '400〜1000', '1000超'];
+      PED_PAL.forEach((c, i) => { h += `<span class="line" style="background:${c};height:${PED_WEIGHTS[i]+1}px"></span>人流指数 ${lab[i]}<br>`; });
+      h += `<span style="color:#c0392b;font-size:10px">※推計値は1kmメッシュ人流を道路に割り振ったもので、実測ではありません（ズーム14以上で表示）</span><br>`;
     }
     if (showLifeline || showNewOpen) {
       h += '<div class="sep"></div>';
@@ -693,7 +743,8 @@
   let ownLayer = null, rivalLayer = null;             // 既存店 / 競合店
   let ownBrand = OWN_BRAND_DEFAULT;                   // 現在の自社ブランド
   let roadLayer = null, roadLoaded = false;           // 道路の通行量（遅延ロード）
-  let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流（遅延ロード）
+  let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流メッシュ（遅延ロード）
+  let pedLayer = null, pedIndex = null, pedTiles = {}; // 人流(通り別・推計) タイル遅延ロード
   let flowMetric = 'wd_day';                          // 人流の表示指標
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
@@ -760,6 +811,7 @@
       propLayer && map.hasLayer(propLayer),
       roadLayer && map.hasLayer(roadLayer),
       flowLayer && map.hasLayer(flowLayer),
+      pedLayer && map.hasLayer(pedLayer),
     );
   }
 
@@ -1710,6 +1762,7 @@
       // ---- 道路の通行量 / 人流（重いので遅延ロード：トグルON時に初めて取得・生成）----
       roadLayer = L.layerGroup();
       flowLayer = L.layerGroup();
+      pedLayer = L.layerGroup();   // 人流(通り別・推計)。ズーム14以上で範囲内タイルを読み込む
 
       // レイヤーコントロールに追加（既存店/競合を先頭に）
       layerControl.addOverlay(ownLayer,        `<span style="color:${ownColor(ownBrand)}">◆</span> 既存店（${ownBrand}）`);
@@ -1721,6 +1774,7 @@
       layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
       layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
       layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
+      layerControl.addOverlay(pedLayer,        `<span style="color:${PED_PAL[4]}">━</span> 人流（通り別・推計/ズーム14+）`);
 
       // 遅延ロード：ONにされた時だけ重いGeoJSONを取得して描画
       async function ensureRoad() {
@@ -1750,7 +1804,13 @@
       map.on('overlayadd', e => {
         if (e.layer === roadLayer) ensureRoad();
         else if (e.layer === flowLayer) ensureFlow();
+        else if (e.layer === pedLayer) updatePedflow();
       });
+      map.on('overlayremove', e => {
+        if (e.layer === pedLayer) { pedLayer.clearLayers(); pedTiles = {}; }
+      });
+      // 表示範囲/ズーム変更で通り別人流タイルを追随ロード
+      map.on('moveend zoomend', () => { if (pedLayer && map.hasLayer(pedLayer)) updatePedflow(); });
 
       // 人流の指標切替（平日昼/休日昼/深夜）
       const flowSel = document.getElementById('flow-metric');

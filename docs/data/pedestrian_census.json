@@ -1,0 +1,8 @@
+{
+  "note": "歩行者類交通量(歩行者・自転車, 昼間12時間)は、令和3年度・平成27年度いずれの道路交通センサス『変換済みGeoParquet(shiwaku)』にも含まれておらず(収録は自動車類交通量のみ)、無料で整形済みの公開データが得られなかったため未収録。生の箇所別基本表(MLIT/e-Stat)には一部地点のみ存在するが今回は取得対象外とした。",
+  "source_checked": [
+    "shiwaku data-v1 traffic_census_2021_converted.parquet",
+    "traffic_census_2015_converted.parquet"
+  ],
+  "points": []
+}
