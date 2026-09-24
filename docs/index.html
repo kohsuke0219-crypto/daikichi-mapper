@@ -571,7 +571,7 @@
   }
   function mzStyle(f) {
     const v = f.properties[MZ_METRICS[mzMetric].prop] || 0;
-    return { color: '#8a6d1b', weight: 0.3, fillColor: mzColor(v), fillOpacity: 0.72 };
+    return { color: '#8a6d1b', weight: 0.3, fillColor: mzColor(v), fillOpacity: 0.55 };
   }
   function mzPopup(f) {
     const p = f.properties;
@@ -633,8 +633,8 @@
       html: '<svg width=30 height=42 viewBox="0 0 30 42"><path d="M15 0C6.7 0 0 6.7 0 15c0 11 15 27 15 27s15-16 15-27C30 6.7 23.3 0 15 0z" fill="#e11d1d" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg>' });
     const m = L.marker([lat, lng], { icon, zIndexOffset: 10000 });
     if (name) m.bindPopup(`<b>${name}</b>`);
-    const c1 = L.circle([lat, lng], { radius: 1000, color: '#e11d1d', weight: 2.5, opacity: 0.95, fill: false });
-    const c2 = L.circle([lat, lng], { radius: 2000, color: '#e11d1d', weight: 2, opacity: 0.9, dashArray: '9,7', fill: false });
+    const c1 = L.circle([lat, lng], { radius: 500,  color: '#e11d1d', weight: 3.5, opacity: 0.95, fill: false });   // 500m 実線(太め)
+    const c2 = L.circle([lat, lng], { radius: 1000, color: '#e11d1d', weight: 2,   opacity: 0.9,  dashArray: '9,7', fill: false }); // 1km 破線
     [c1, c2, m].forEach(l => l.addTo(map));
     boardPinLayers = [c1, c2, m];
     if (name) m.openPopup();

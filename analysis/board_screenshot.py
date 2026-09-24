@@ -18,7 +18,7 @@ ROOT = BASE.parent
 DOCS = ROOT / "docs"
 OUTDIR = ROOT / "screenshots" / "board"
 PORT = 8765
-ZOOM = 15
+ZOOM = 16   # 既定ズーム（--zoom で変更可）
 
 # 内蔵19物件 (id, 物件名, 住所, lat, lng)
 ROWS = [
@@ -87,6 +87,11 @@ INIT = r"""
 HIDE_CSS = """
 .leaflet-control-container { display:none !important; }
 #choropleth-select, #own-brand, #flow-metric, #mz-metric, #bg-status { display:none !important; }
+/* 店舗マーカーを少し大きめに（買取大吉/おたからや/なんぼや/バイセル等） */
+.leaflet-daikichi-pane .shape-pin { transform: scale(1.5); }
+.leaflet-stores-pane circle { r: 6; }
+/* 埋蔵金レイヤーの不透明度を少し下げて道路・駅名を読めるように */
+.leaflet-maizokin-pane { opacity: 0.82; }
 """
 
 SET_LAYERS = r"""
@@ -117,8 +122,8 @@ def marker_js(lat, lng):
       const icon = L.divIcon({{ className:'', iconSize:[30,42], iconAnchor:[15,42],
         html:'<svg width=30 height=42 viewBox="0 0 30 42"><path d="M15 0C6.7 0 0 6.7 0 15c0 11 15 27 15 27s15-16 15-27C30 6.7 23.3 0 15 0z" fill="#e11d1d" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg>' }});
       const m = L.marker([{lat},{lng}], {{ icon, zIndexOffset:10000 }});
-      const c1 = L.circle([{lat},{lng}], {{ radius:1000, color:'#e11d1d', weight:2.5, opacity:0.95, fill:false }});
-      const c2 = L.circle([{lat},{lng}], {{ radius:2000, color:'#e11d1d', weight:2, opacity:0.9, dashArray:'9,7', fill:false }});
+      const c1 = L.circle([{lat},{lng}], {{ radius:500,  color:'#e11d1d', weight:3.5, opacity:0.95, fill:false }});
+      const c2 = L.circle([{lat},{lng}], {{ radius:1000, color:'#e11d1d', weight:2,   opacity:0.9,  dashArray:'9,7', fill:false }});
       [c1,c2,m].forEach(l => l.addTo(map));
       window.__mk = [c1,c2,m];
       return true;
@@ -126,27 +131,36 @@ def marker_js(lat, lng):
     """
 
 def main():
+    global ZOOM
     args = sys.argv[1:]
-    if len(args) == 3:
-        rows = [(args[0], args[0], "", float(args[1]), float(args[2]))]
-    elif len(args) == 1 and args[0].endswith(".json"):
-        data = json.loads(Path(args[0]).read_text(encoding="utf-8"))
-        rows = [(d["id"], d.get("name",d["id"]), d.get("address",""), float(d["lat"]), float(d["lng"])) for d in data]
-    else:
-        rows = ROWS
+    # --zoom N（既定16）
+    if "--zoom" in args:
+        i = args.index("--zoom"); ZOOM = int(args[i+1]); del args[i:i+2]
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    # 既存 centers.json に追記（マージ）
     cpath = OUTDIR / "centers.json"
     centers = {}
     if cpath.exists():
         try: centers = json.loads(cpath.read_text(encoding="utf-8"))
         except Exception: centers = {}
-    this_run = {}
-    for r in rows:
-        c = resolve_center(r)
-        centers[r[0]] = c; this_run[r[0]] = c
-    cpath.write_text(json.dumps(centers, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    reshoot = False
+    if len(args) == 3:
+        rows = [(args[0], args[0], "", float(args[1]), float(args[2]))]
+    elif len(args) == 1 and args[0].endswith(".json"):
+        data = json.loads(Path(args[0]).read_text(encoding="utf-8"))
+        rows = [(d["id"], d.get("name",d["id"]), d.get("address",""), float(d["lat"]), float(d["lng"])) for d in data]
+    elif centers:
+        # 引数なし: centers.json の全物件を保存済み座標のまま撮り直す（再ジオコーディングしない）
+        reshoot = True
+        rows = [(k, k, "", v["lat"], v["lng"]) for k, v in centers.items()]
+    else:
+        rows = ROWS
+
+    if not reshoot:
+        for r in rows:
+            centers[r[0]] = resolve_center(r)
+        cpath.write_text(json.dumps(centers, ensure_ascii=False, indent=1), encoding="utf-8")
 
     httpd = start_server()
     saved, failed = [], []
