@@ -185,6 +185,17 @@ def main():
                     pg.evaluate(SET_LAYERS)
                     try: pg.wait_for_load_state("networkidle", timeout=8000)
                     except Exception: pass
+                    # 埋蔵金レイヤーのcanvasが描画されるまで待つ（初回ロード対策）
+                    try:
+                        pg.wait_for_function("""() => {
+                          const pane=document.querySelector('.leaflet-maizokin-pane');
+                          if(!pane) return false;
+                          const c=pane.querySelector('canvas'); if(!c||!c.width||!c.height) return false;
+                          const w=Math.min(c.width,300), h=Math.min(c.height,300);
+                          const d=c.getContext('2d').getImageData(0,0,w,h).data;
+                          for(let i=3;i<d.length;i+=4){ if(d[i]!==0) return true; }
+                          return false; }""", timeout=8000)
+                    except Exception: pass
                     pg.evaluate(marker_js(c['lat'], c['lng']))
                     pg.wait_for_timeout(1800)
                     pg.screenshot(path=str(OUTDIR / f"{_id}.png"))
