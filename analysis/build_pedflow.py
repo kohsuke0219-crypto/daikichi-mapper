@@ -28,6 +28,19 @@ CLASS_W = {
     "tertiary": 0.8, "tertiary_link": 0.5, "pedestrian": 1.1, "living_street": 0.6,
 }
 METRIC = "EPSG:6677"
+CALIB = BASE / "pedflow_calib.json"   # 実測較正の係数（無ければ既定値=較正なし）
+
+def load_calib():
+    """重み式 w = clsW^A * (1 + B*shops) * (0.4 + st_factor)^C の係数。
+    既定 (A,B,C)=(1.0,0.5,1.0) は較正なし（従来出力と完全一致）。"""
+    a, b, c = 1.0, 0.5, 1.0
+    try:
+        if CALIB.exists():
+            d = json.loads(CALIB.read_text(encoding="utf-8"))
+            a = float(d.get("A", a)); b = float(d.get("B", b)); c = float(d.get("C", c))
+    except Exception as e:
+        print(f"    [calib] 読込失敗→既定値を使用: {e}", flush=True)
+    return a, b, c
 
 
 def stage_a():
@@ -58,21 +71,21 @@ def mesh_codes(lat, lng):
     return c1 + c2 + c3, c1 + c2
 
 
-def stage_b():
+def compute_components():
+    """道路区間ごとの重み成分（clsW, shops, stf, m8/m6, wd）を計算して返す。
+    A/B/C は適用しない（stage_b と calib で共用）。"""
     import scipy.spatial as sp
-    print("[B] 読込", flush=True)
+    print("[components] 読込", flush=True)
     roads = gpd.read_parquet(ROADS_PQ).to_crs(4326)
     pois = gpd.read_parquet(POIS_PQ).to_crs(4326)
     flow = json.loads(FLOW.read_text(encoding="utf-8"))
     st = json.loads(STATIONS.read_text(encoding="utf-8"))
     wards = gpd.read_file(WARD)[["pref", "geometry"]]
 
-    # 代表点(midpoint)
     roads = roads[roads.geometry.notna() & (roads.geometry.geom_type == "LineString")].copy()
     mid = roads.geometry.interpolate(0.5, normalized=True)
     roads["lng"] = mid.x; roads["lat"] = mid.y
 
-    # 3府県内に絞る（midpointを県ポリゴンにsjoin）
     mp = gpd.GeoDataFrame(roads.drop(columns="geometry"), geometry=mid, crs=4326)
     j = gpd.sjoin(mp, wards, how="left", predicate="within")
     j = j[~j.index.duplicated(keep="first")]
@@ -82,7 +95,6 @@ def stage_b():
     roads["lng"] = mid.loc[roads.index].x; roads["lat"] = mid.loc[roads.index].y
     print(f"    3府県内 道路区間: {len(roads)}", flush=True)
 
-    # メートル座標で沿道店舗数(50m)・駅近接
     roads_m = roads.to_crs(METRIC)
     rmx = roads_m.geometry.interpolate(0.5, normalized=True)
     rx = np.c_[rmx.x.values, rmx.y.values]
@@ -93,7 +105,6 @@ def stage_b():
     if ptree is not None:
         near = ptree.query_ball_point(rx, r=50)
         shops = np.array([len(a) for a in near])
-    # 駅近接（EPSG:6677で最近傍駅の距離＋乗降客数）
     sxy = []; sride = []
     for s in st:
         if s.get("lat") and s.get("lng"):
@@ -101,28 +112,39 @@ def stage_b():
     sgdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy([a[0] for a in sxy], [a[1] for a in sxy]), crs=4326).to_crs(METRIC)
     smat = np.c_[sgdf.geometry.x.values, sgdf.geometry.y.values]
     stree = sp.cKDTree(smat)
-    dist, idx = stree.query(rx, k=1)
+    dist, idxs = stree.query(rx, k=1)
     dist_km = dist / 1000.0
-    ride = np.array(sride)[idx]
+    ride = np.array(sride)[idxs]
     st_factor = (1 + np.log10(1 + ride) / 3.0) * np.exp(-dist_km / 0.8)
 
-    clsW = roads["highway"].map(CLASS_W).fillna(0.4).values
-    weight = clsW * (1 + 0.5 * shops) * (0.4 + st_factor)
-    roads["w"] = weight; roads["shops"] = shops
+    roads["clsW"] = roads["highway"].map(CLASS_W).fillna(0.4).values
+    roads["shops"] = shops
+    roads["stf"] = st_factor
     roads["st_km"] = np.round(dist_km, 2)
-
-    # メッシュ割当
     m8 = []; m6 = []
     for la, lo in zip(roads["lat"].values, roads["lng"].values):
         a, b = mesh_codes(la, lo); m8.append(a); m6.append(b)
     roads["m8"] = m8; roads["m6"] = m6
+    roads["wd"] = roads["m8"].map(lambda m: (flow.get(m, {}) or {}).get("wd_day", 0)).astype(float)
+    return roads
 
-    # メッシュ内で wd_day を weight 比例配分 → 人流指数
+
+def apply_idx(roads, A, B, C):
+    """成分と係数(A,B,C)から人流指数 idx を計算した列を付けて返す（idx>0のみ）。"""
+    w = (roads["clsW"].values ** A) * (1 + B * roads["shops"].values) * ((0.4 + roads["stf"].values) ** C)
+    roads = roads.copy(); roads["w"] = w
     wsum = roads.groupby("m8")["w"].transform("sum")
-    wd = roads["m8"].map(lambda m: (flow.get(m, {}) or {}).get("wd_day", 0)).astype(float)
-    roads["idx"] = np.where(wsum > 0, wd * roads["w"] / wsum, 0.0)
+    roads["idx"] = np.where(wsum > 0, roads["wd"] * roads["w"] / wsum, 0.0)
     roads = roads[roads["idx"] > 0].copy()
     roads["idx"] = roads["idx"].round().astype(int)
+    return roads
+
+
+def stage_b():
+    roads = compute_components()
+    A, B, C = load_calib()
+    print(f"    重み係数 (A,B,C)=({A},{B},{C})", flush=True)
+    roads = apply_idx(roads, A, B, C)
     print(f"    出力対象区間: {len(roads)}", flush=True)
 
     # 2次メッシュ別 geojson 出力（座標5桁・簡略化）
@@ -155,7 +177,78 @@ def stage_b():
     print(f"[B] タイル{len(tiles)}枚 / 区間{tot} / 合計{sz//1024}KB", flush=True)
 
 
+def _idx_full(roads, A, B, C):
+    """全区間のidxを（0含め）順序を保って返す numpy 配列。"""
+    w = (roads["clsW"].values ** A) * (1 + B * roads["shops"].values) * ((0.4 + roads["stf"].values) ** C)
+    tmp = roads[["m8"]].copy(); tmp["w"] = w
+    wsum = tmp.groupby("m8")["w"].transform("sum").values
+    idx = np.where(wsum > 0, roads["wd"].values * w / wsum, 0.0)
+    return idx
+
+
+def calib():
+    """実測(pedestrian_counts.json)で推計を検証・較正。
+    各実測点を最寄り推計区間に対応づけ、人流指数と per_hour の相関を出す。
+    重み係数(A,B,C)をグリッド探索し、改善すれば pedflow_calib.json に書き出す。"""
+    import scipy.spatial as sp
+    from scipy.stats import spearmanr, pearsonr
+    PC = BASE.parent / "docs" / "data" / "pedestrian_counts.json"
+    pc = json.loads(PC.read_text(encoding="utf-8"))["points"]
+    roads = compute_components()
+    # 区間midpointを EPSG:6677 で
+    rm = roads.to_crs(METRIC)
+    mid = rm.geometry.interpolate(0.5, normalized=True)
+    seg = np.c_[mid.x.values, mid.y.values]
+    tree = sp.cKDTree(seg)
+    # 実測点を 6677 に
+    import pandas as _pd
+    pts = [p for p in pc if p.get("lat") and p.get("lng")]
+    g = gpd.GeoDataFrame(geometry=gpd.points_from_xy([p["lng"] for p in pts], [p["lat"] for p in pts]), crs=4326).to_crs(METRIC)
+    P = np.c_[g.geometry.x.values, g.geometry.y.values]
+    dist, sidx = tree.query(P, k=1)
+    per_hour = np.array([p["per_hour"] for p in pts], dtype=float)
+    prec = np.array([p.get("precision","area") for p in pts])
+    def corr(A,B,C, mask):
+        idx = _idx_full(roads, A, B, C)[sidx]
+        m = mask & (idx > 0) & (per_hour > 0)
+        if m.sum() < 8: return None, None, int(m.sum())
+        sr = spearmanr(idx[m], per_hour[m]).correlation
+        pr = pearsonr(np.log(idx[m]), np.log(per_hour[m]))[0]
+        return sr, pr, int(m.sum())
+    for label, radius in [("50m",50),("150m",150),("300m",300)]:
+        print(f"[match] {label}以内: {(dist<=radius).sum()}/{len(dist)}点", flush=True)
+    # 較正前後（street精度優先だが少数なので全点でも評価）
+    for setname, mask in [("全点(300m内)", dist<=300), ("street精度(300m内)", (dist<=300)&(prec=="street"))]:
+        sr0,pr0,n0 = corr(1.0,0.5,1.0, mask)
+        print(f"[before] {setname} n={n0} Spearman={sr0} logPearson={pr0}", flush=True)
+        best=(sr0 or -9, 1.0,0.5,1.0)
+        for A in [0.6,0.8,1.0,1.2,1.5]:
+            for B in [0.1,0.3,0.5,0.8,1.2]:
+                for C in [0.6,1.0,1.5,2.0]:
+                    sr,_,n = corr(A,B,C, mask)
+                    if sr is not None and sr>best[0]: best=(sr,A,B,C)
+        print(f"[grid]   {setname} best Spearman={best[0]:.3f} @ (A,B,C)=({best[1]},{best[2]},{best[3]})", flush=True)
+    # 採否：全点(300m内)で改善が+0.05以上なら採用
+    sr0,_,_ = corr(1.0,0.5,1.0, dist<=300)
+    best=(sr0 or -9,1.0,0.5,1.0)
+    for A in [0.6,0.8,1.0,1.2,1.5]:
+        for B in [0.1,0.3,0.5,0.8,1.2]:
+            for C in [0.6,1.0,1.5,2.0]:
+                sr,_,_=corr(A,B,C, dist<=300)
+                if sr is not None and sr>best[0]: best=(sr,A,B,C)
+    improved = (sr0 is not None) and (best[0] - sr0 >= 0.05)
+    if improved and "--write" in sys.argv:
+        CALIB.write_text(json.dumps({"A":best[1],"B":best[2],"C":best[3],
+            "note":f"実測較正 Spearman {sr0:.3f}->{best[0]:.3f}"}, ensure_ascii=False), encoding="utf-8")
+        print(f"[calib] 改善あり→採用 (A,B,C)=({best[1]},{best[2]},{best[3]}) 書出: {CALIB.name}", flush=True)
+    elif improved:
+        print(f"[calib] 改善あり(未書出。--write で採用): (A,B,C)=({best[1]},{best[2]},{best[3]})", flush=True)
+    else:
+        print(f"[calib] 有意な改善なし(+0.05未満)→係数は既定(1.0,0.5,1.0)のまま", flush=True)
+
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "ab"
     if mode in ("a", "ab"): stage_a()
     if mode in ("b", "ab"): stage_b()
+    if mode == "calib": calib()

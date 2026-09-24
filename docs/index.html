@@ -295,6 +295,10 @@
   const PED_PAL     = ['#c7e9c0', '#74c476', '#31a354', '#006d2c', '#00441b'];
   const PED_WEIGHTS = [1, 1.5, 2.5, 3.5, 4.5];
   const PED_MIN_ZOOM = 14;
+  // 人流・実測（自治体の歩行者通行量調査）: 地点マーカー。1時間あたり歩行者数で大きさ
+  const PC_COLOR      = '#D6336C';   // 実測=マゼンタ系（既存色と非重複）
+  const PC_OLD_COLOR  = '#868E96';   // 古い調査(2015以前)はグレー
+  const PC_COVID_RING = '#F59F00';   // コロナ期(2020-2021)は縁を橙に
   // ----- NGエリア（出店しない市区町村）黒塗り -----
   const NG_STORAGE_KEY = 'daikichi_ng_areas_v1';   // localStorageキャッシュ
   const NG_FILL_COLOR  = '#111111';                // 黒塗り色
@@ -493,6 +497,50 @@
     }
   }
 
+  // 人流・実測（自治体の歩行者通行量調査）: 地点マーカー（遅延ロード）
+  function pcRadius(perHour) {
+    const v = Math.max(0, perHour||0);
+    return Math.max(4, Math.min(16, Math.sqrt(v)/6));   // 4〜16px
+  }
+  function pcPopup(p) {
+    const ped = (p.pedestrians!=null? fmtN(p.pedestrians)+' 人':'—');
+    const bic = (p.bicycles!=null? `<br>自転車: ${fmtN(p.bicycles)} 台`:'');
+    const per = (p.per_hour!=null? fmtN(p.per_hour)+' 人/時':'—');
+    const badges = [];
+    if (p.old) badges.push('<span style="color:#868E96">■古い調査(2015以前)</span>');
+    if (p.covid) badges.push('<span style="color:#F59F00">■コロナ期(2020-21)</span>');
+    if (p.precision==='area') badges.push('<span style="color:#888">■座標は概位置</span>');
+    const src = p.source_url? `<br><a href="${p.source_url}" target="_blank" rel="noopener">出典（自治体資料）</a>`:'';
+    return `<div style="font-size:12px;min-width:190px"><b>${p.point_name||''}</b>`
+      + `<br><span style="color:${PC_COLOR};font-weight:bold">人流・実測（通行量調査）</span>`
+      + `<br>${p.pref||''}${p.city||''}`
+      + `<br>調査: ${p.survey_date||'—'}（${p.weekday||'—'} / ${p.time_range||'—'}）`
+      + `<br>歩行者: <b>${ped}</b>${bic}`
+      + `<br>1時間あたり: <b>${per}</b>`
+      + (badges.length? '<br>'+badges.join(' '):'')
+      + (p.note? `<br><span style="color:#888;font-size:10px">${p.note}</span>`:'')
+      + src + `</div>`;
+  }
+  async function ensurePedCounts() {
+    if (pcLoaded) return;
+    pcLoaded = true;
+    try {
+      const d = await fetch('data/pedestrian_counts.json').then(r=>r.json());
+      (d.points||[]).forEach(p => {
+        if (p.lat==null || p.lng==null) return;
+        L.circleMarker([p.lat, p.lng], {
+          pane: 'stores', renderer: storeRenderer,
+          radius: pcRadius(p.per_hour),
+          fillColor: p.old ? PC_OLD_COLOR : PC_COLOR,
+          color: p.covid ? PC_COVID_RING : '#fff',
+          weight: p.covid ? 2 : 1, fillOpacity: 0.8,
+        }).bindPopup(pcPopup(p), {maxWidth:260})
+          .bindTooltip(`${p.point_name||''}｜${p.per_hour!=null?fmtN(p.per_hour)+'人/時':''}`, {sticky:true})
+          .addTo(pcLayer);
+      });
+    } catch(e) { pcLoaded = false; console.error('実測(通行量調査)読込失敗', e); }
+  }
+
   // 既存店アイコン：◆（daikichiペインで主役級・色はブランド別）
   function ownIcon(color) {
     const s = 16;
@@ -659,7 +707,7 @@
   };
   legend.update = function(mode, showOwn, showRival, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall,
-                           showStation, showProp, showRoad, showFlow, showPed) {
+                           showStation, showProp, showRoad, showFlow, showPed, showPedCounts) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -695,6 +743,13 @@
       const lab = ['〜50', '50〜150', '150〜400', '400〜1000', '1000超'];
       PED_PAL.forEach((c, i) => { h += `<span class="line" style="background:${c};height:${PED_WEIGHTS[i]+1}px"></span>人流指数 ${lab[i]}<br>`; });
       h += `<span style="color:#c0392b;font-size:10px">※推計値は1kmメッシュ人流を道路に割り振ったもので、実測ではありません（ズーム14以上で表示）</span><br>`;
+    }
+    if (showPedCounts) {
+      h += '<div class="sep"></div><h4>人流・実測（通行量調査）</h4>';
+      h += `<span class="dot" style="background:${PC_COLOR};border-color:#fff"></span>歩行者通行量調査の地点（円の大きさ=1時間あたり歩行者数）<br>`;
+      h += `<span class="dot" style="background:${PC_OLD_COLOR};border-color:#fff"></span>古い調査(2015以前)<br>`;
+      h += `<span class="dot" style="background:${PC_COLOR};border-color:${PC_COVID_RING};border-width:2px"></span>コロナ期(2020-21)<br>`;
+      h += `<span style="color:#888;font-size:10px">実測＝自治体の通行量調査（調査年・時間帯・定義がまちまち。一部は歩行者＋自転車の合算や概位置）</span><br>`;
     }
     if (showLifeline || showNewOpen) {
       h += '<div class="sep"></div>';
@@ -745,6 +800,7 @@
   let roadLayer = null, roadLoaded = false;           // 道路の通行量（遅延ロード）
   let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流メッシュ（遅延ロード）
   let pedLayer = null, pedIndex = null, pedTiles = {}; // 人流(通り別・推計) タイル遅延ロード
+  let pcLayer = null, pcLoaded = false;               // 人流・実測(通行量調査) 遅延ロード
   let flowMetric = 'wd_day';                          // 人流の表示指標
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
@@ -812,6 +868,7 @@
       roadLayer && map.hasLayer(roadLayer),
       flowLayer && map.hasLayer(flowLayer),
       pedLayer && map.hasLayer(pedLayer),
+      pcLayer && map.hasLayer(pcLayer),
     );
   }
 
@@ -1763,6 +1820,7 @@
       roadLayer = L.layerGroup();
       flowLayer = L.layerGroup();
       pedLayer = L.layerGroup();   // 人流(通り別・推計)。ズーム14以上で範囲内タイルを読み込む
+      pcLayer = L.layerGroup();    // 人流・実測(通行量調査)。トグルONで地点マーカーを読み込む
 
       // レイヤーコントロールに追加（既存店/競合を先頭に）
       layerControl.addOverlay(ownLayer,        `<span style="color:${ownColor(ownBrand)}">◆</span> 既存店（${ownBrand}）`);
@@ -1775,6 +1833,7 @@
       layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
       layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
       layerControl.addOverlay(pedLayer,        `<span style="color:${PED_PAL[4]}">━</span> 人流（通り別・推計/ズーム14+）`);
+      layerControl.addOverlay(pcLayer,         `<span style="color:${PC_COLOR}">●</span> 人流・実測（通行量調査）`);
 
       // 遅延ロード：ONにされた時だけ重いGeoJSONを取得して描画
       async function ensureRoad() {
@@ -1805,6 +1864,7 @@
         if (e.layer === roadLayer) ensureRoad();
         else if (e.layer === flowLayer) ensureFlow();
         else if (e.layer === pedLayer) updatePedflow();
+        else if (e.layer === pcLayer) ensurePedCounts();
       });
       map.on('overlayremove', e => {
         if (e.layer === pedLayer) { pedLayer.clearLayers(); pedTiles = {}; }
