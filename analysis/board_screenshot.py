@@ -194,7 +194,7 @@ def main():
                           const w=Math.min(c.width,300), h=Math.min(c.height,300);
                           const d=c.getContext('2d').getImageData(0,0,w,h).data;
                           for(let i=3;i<d.length;i+=4){ if(d[i]!==0) return true; }
-                          return false; }""", timeout=8000)
+                          return false; }""", timeout=15000)
                     except Exception: pass
                     pg.evaluate(marker_js(c['lat'], c['lng']))
                     pg.wait_for_timeout(1800)
