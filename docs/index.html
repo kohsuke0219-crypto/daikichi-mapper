@@ -102,15 +102,6 @@
       padding: 5px 8px; font-size: 13px;
       box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer;
     }
-    /* ---- 人流の指標切替（人流レイヤーON時のみ表示） ---- */
-    #flow-metric {
-      position: absolute; top: 10px; left: 240px; z-index: 800;
-      background: rgba(255,255,255,0.93);
-      border: 1px solid #2c7fb8; border-radius: 6px;
-      padding: 5px 8px; font-size: 13px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer; display: none;
-    }
-    @media (max-width: 768px) { #flow-metric { left: auto; right: 10px; top: 48px; } }
     /* ---- 埋蔵金の指標切替（埋蔵金レイヤーON時のみ表示） ---- */
     #mz-metric {
       position: absolute; top: 10px; left: 240px; z-index: 800;
@@ -232,11 +223,6 @@
     <option value="バイセル">自社: バイセル</option>
     <option value="買取大吉">自社: 買取大吉</option>
   </select>
-  <select id="flow-metric" title="人流の指標切替">
-    <option value="wd_day">人流: 平日昼</option>
-    <option value="hd_day">人流: 休日昼</option>
-    <option value="night">人流: 深夜(居住)</option>
-  </select>
   <select id="mz-metric" title="埋蔵金の表示指標切替">
     <option value="buy_km2">埋蔵金: 買取向け(億円/km²)</option>
     <option value="total_km2">埋蔵金: 総額(億円/km²)</option>
@@ -283,7 +269,9 @@
   // 自社ブランド（既存店）設定：選んだブランド=既存店(◆オレンジ)、他=競合(黒丸)
   const OWN_BRAND_KEY = 'daikichi_own_brand';
   const OWN_BRAND_DEFAULT = 'バイセル';
-  const BRANDS = ['買取大吉', 'バイセル', 'おたからや', 'なんぼや', 'いくらや'];  // 競合判定用（全ブランド）
+  const BRANDS = ['買取大吉', 'バイセル', 'おたからや', 'なんぼや', 'いくらや', 'リプセル'];  // 競合判定用（全ブランド）
+  // 競合マーカーの色（既定は黒丸。区別したいチェーンは色指定）
+  const RIVAL_COLORS = { 'リプセル': '#9C36B5' };   // リプセル=紫（他チェーンと区別）
   // 自社ブランド(既存店)として選べるのはFC加盟の2つのみ。他は常に競合(黒丸)。
   const OWN_SELECTABLE = ['バイセル', '買取大吉'];
   const OWN_COLOR = '#E8590C';   // 既存店ピン色の既定（◆オレンジ）
@@ -300,19 +288,11 @@
   const ROAD_BREAKS  = [0, 5000, 10000, 20000, 40000];
   const ROAD_PAL     = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
   const ROAD_WEIGHTS = [1, 1.5, 2.5, 3.5, 5];
-  // 人流（滞在人口 5段階）半透明塗り
-  const FLOW_BREAKS = [0, 100, 500, 2000, 10000];
-  const FLOW_PAL    = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
-  const FLOW_LABELS = { wd_day: '平日昼', hd_day: '休日昼', night: '深夜(居住)' };
-  // 人流（通り別・推計）: 人流指数の5段階（線色＋太さ）。ズーム14以上でのみ描画
+  // 人流（通り別・推計）: 人流指数の5段階（線色＋太さ）。ズーム14以上でのみ描画（唯一残す人流レイヤー）
   const PED_BREAKS  = [0, 50, 150, 400, 1000];
   const PED_PAL     = ['#c7e9c0', '#74c476', '#31a354', '#006d2c', '#00441b'];
   const PED_WEIGHTS = [1, 1.5, 2.5, 3.5, 4.5];
   const PED_MIN_ZOOM = 14;
-  // 人流・実測（自治体の歩行者通行量調査）: 地点マーカー。1時間あたり歩行者数で大きさ
-  const PC_COLOR      = '#D6336C';   // 実測=マゼンタ系（既存色と非重複）
-  const PC_OLD_COLOR  = '#868E96';   // 古い調査(2015以前)はグレー
-  const PC_COVID_RING = '#F59F00';   // コロナ期(2020-2021)は縁を橙に
   // 埋蔵金（推計・町丁目）: かくれ資産の推計額。金〜茶の5段階
   const MZ_MIN_ZOOM = 10;
   const MZ_PAL = ['#f6e8b0', '#ecc94b', '#d69e2e', '#a9741a', '#6b4708'];
@@ -470,20 +450,6 @@
     h += `<br><span style="color:#888;font-size:10px">令和3年度 道路交通センサス</span></div>`;
     return h;
   }
-  // 人流: 選択中の指標(flowMetric)で塗り分け（線なし・半透明）
-  function flowStyle(f) {
-    const v = f.properties[flowMetric] || 0, i = tierIndex(FLOW_BREAKS, v);
-    return { stroke: false, fillColor: FLOW_PAL[i], fillOpacity: 0.5 };
-  }
-  function flowPopup(f) {
-    const p = f.properties;
-    return `<div style="font-size:12px"><b>人流 滞在人口</b><br>`
-      + `メッシュ ${p.mesh}<br>`
-      + `平日昼: <b>${fmtN(p.wd_day)}</b> 人<br>`
-      + `休日昼: <b>${fmtN(p.hd_day)}</b> 人<br>`
-      + `深夜(居住): ${fmtN(p.night)} 人<br>`
-      + `<span style="color:#888;font-size:10px">2021年 12か月平均・1kmメッシュ</span></div>`;
-  }
   // 通り別人流（推計）: 人流指数で色＋太さ（細め・やや透明）
   function pedStyle(f) {
     const v = f.properties.idx || 0, i = tierIndex(PED_BREAKS, v);
@@ -520,49 +486,6 @@
     }
   }
 
-  // 人流・実測（自治体の歩行者通行量調査）: 地点マーカー（遅延ロード）
-  function pcRadius(perHour) {
-    const v = Math.max(0, perHour||0);
-    return Math.max(4, Math.min(16, Math.sqrt(v)/6));   // 4〜16px
-  }
-  function pcPopup(p) {
-    const ped = (p.pedestrians!=null? fmtN(p.pedestrians)+' 人':'—');
-    const bic = (p.bicycles!=null? `<br>自転車: ${fmtN(p.bicycles)} 台`:'');
-    const per = (p.per_hour!=null? fmtN(p.per_hour)+' 人/時':'—');
-    const badges = [];
-    if (p.old) badges.push('<span style="color:#868E96">■古い調査(2015以前)</span>');
-    if (p.covid) badges.push('<span style="color:#F59F00">■コロナ期(2020-21)</span>');
-    if (p.precision==='area') badges.push('<span style="color:#888">■座標は概位置</span>');
-    const src = p.source_url? `<br><a href="${p.source_url}" target="_blank" rel="noopener">出典（自治体資料）</a>`:'';
-    return `<div style="font-size:12px;min-width:190px"><b>${p.point_name||''}</b>`
-      + `<br><span style="color:${PC_COLOR};font-weight:bold">人流・実測（通行量調査）</span>`
-      + `<br>${p.pref||''}${p.city||''}`
-      + `<br>調査: ${p.survey_date||'—'}（${p.weekday||'—'} / ${p.time_range||'—'}）`
-      + `<br>歩行者: <b>${ped}</b>${bic}`
-      + `<br>1時間あたり: <b>${per}</b>`
-      + (badges.length? '<br>'+badges.join(' '):'')
-      + (p.note? `<br><span style="color:#888;font-size:10px">${p.note}</span>`:'')
-      + src + `</div>`;
-  }
-  async function ensurePedCounts() {
-    if (pcLoaded) return;
-    pcLoaded = true;
-    try {
-      const d = await fetch('data/pedestrian_counts.json').then(r=>r.json());
-      (d.points||[]).forEach(p => {
-        if (p.lat==null || p.lng==null) return;
-        L.circleMarker([p.lat, p.lng], {
-          pane: 'stores', renderer: storeRenderer,
-          radius: pcRadius(p.per_hour),
-          fillColor: p.old ? PC_OLD_COLOR : PC_COLOR,
-          color: p.covid ? PC_COVID_RING : '#fff',
-          weight: p.covid ? 2 : 1, fillOpacity: 0.8,
-        }).bindPopup(pcPopup(p), {maxWidth:260})
-          .bindTooltip(`${p.point_name||''}｜${p.per_hour!=null?fmtN(p.per_hour)+'人/時':''}`, {sticky:true})
-          .addTo(pcLayer);
-      });
-    } catch(e) { pcLoaded = false; console.error('実測(通行量調査)読込失敗', e); }
-  }
 
   // 埋蔵金（推計・町丁目）: かくれ資産の推計額コロプレス（都県別に遅延ロード）
   function mzColor(v) {
@@ -651,7 +574,7 @@
       if (ownLayer && !map.hasLayer(ownLayer)) map.addLayer(ownLayer);
       if (rivalLayer && !map.hasLayer(rivalLayer)) map.addLayer(rivalLayer);
       if (mzLayer && !map.hasLayer(mzLayer)) map.addLayer(mzLayer);
-      [roadLayer, flowLayer, pedLayer, pcLayer].forEach(l => { if (l && map.hasLayer(l)) map.removeLayer(l); });
+      [roadLayer, pedLayer].forEach(l => { if (l && map.hasLayer(l)) map.removeLayer(l); });
       const csel = document.getElementById('choropleth-select');
       if (csel && csel.value !== 'none') { csel.value = 'none'; csel.dispatchEvent(new Event('change', { bubbles: true })); }
       map.setView([lat, lng], (isFinite(z) ? z : 15));
@@ -688,13 +611,15 @@
     const out = [];
     BRANDS.forEach(b => {
       if (b === brand) return;
+      const rc = RIVAL_COLORS[b];
       (brandData[b] || []).forEach(s => {
         if (!s.lat || !s.lng) return;
         out.push(
           L.circleMarker([s.lat, s.lng], {
             pane: 'stores', renderer: storeRenderer,
-            radius: 4, fillColor: '#222', color: '#888', weight: 0.8, fillOpacity: 0.85,
-          }).bindPopup(`<b>${s.name}</b><br><span style="color:#555">${b}（競合）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}`)
+            radius: rc ? 5 : 4, fillColor: rc || '#222', color: rc ? '#fff' : '#888',
+            weight: rc ? 1.2 : 0.8, fillOpacity: 0.9,
+          }).bindPopup(`<b>${s.name}</b><br><span style="color:${rc||'#555'}">${b}（競合）</span><br>${s.pref||''}${s.address?'<br>'+s.address:''}${mapsLinks(s.lat,s.lng)}`)
         );
       });
     });
@@ -744,10 +669,7 @@
   map.createPane('favorites');
   map.getPane('favorites').style.zIndex = 750;
 
-  // 人流メッシュ塗り（コロプレス400より上・ピンより下）／道路線（人流より上・ピンより下）
-  map.createPane('flow');
-  map.getPane('flow').style.zIndex = 410;
-  const flowCanvas = L.canvas({ pane: 'flow' });
+  // 道路線（コロプレスより上・ピンより下）
   map.createPane('roads');
   map.getPane('roads').style.zIndex = 620;
   const roadCanvas = L.canvas({ pane: 'roads' });
@@ -830,7 +752,7 @@
   };
   legend.update = function(mode, showOwn, showRival, showLifeline, showNewOpen,
                            showWomenLifeline, showFav, hasNg, showTownhall,
-                           showStation, showProp, showRoad, showFlow, showPed, showPedCounts, showMaizokin) {
+                           showStation, showProp, showRoad, showPed, showMaizokin) {
     let h = '';
     if (hasNg) {
       h += '<h4>NGエリア（出店しない）</h4>';
@@ -850,29 +772,18 @@
     if (showRival) {
       h += (h?'<div class="sep"></div>':'') + '<h4>競合店</h4>';
       h += `<span class="dot" style="background:#222;border-color:#888"></span>他ブランド（大吉/バイセル/おたからや/なんぼや/いくらやのうち自社以外）<br>`;
+      h += `<span class="dot" style="background:${RIVAL_COLORS['リプセル']};border-color:#fff"></span>リプセル<br>`;
     }
     if (showRoad) {
       h += '<div class="sep"></div><h4>道路の通行量（24時間・台/日）</h4>';
       const lab = ['〜5千', '5千〜1万', '1万〜2万', '2万〜4万', '4万超'];
       ROAD_PAL.forEach((c, i) => { h += `<span class="line" style="background:${c};height:${ROAD_WEIGHTS[i]+1}px"></span>${lab[i]}<br>`; });
     }
-    if (showFlow) {
-      h += `<div class="sep"></div><h4>人流 滞在人口（${FLOW_LABELS[flowMetric]}）</h4>`;
-      const lab = ['〜100', '100〜500', '500〜2千', '2千〜1万', '1万超'];
-      FLOW_PAL.forEach((c, i) => { h += `<i style="background:${c};opacity:.75"></i>${lab[i]}<br>`; });
-    }
     if (showPed) {
       h += '<div class="sep"></div><h4>人流（通り別・推計）</h4>';
       const lab = ['〜50', '50〜150', '150〜400', '400〜1000', '1000超'];
       PED_PAL.forEach((c, i) => { h += `<span class="line" style="background:${c};height:${PED_WEIGHTS[i]+1}px"></span>人流指数 ${lab[i]}<br>`; });
       h += `<span style="color:#c0392b;font-size:10px">※推計値は1kmメッシュ人流を道路に割り振ったもので、実測ではありません（ズーム14以上で表示）</span><br>`;
-    }
-    if (showPedCounts) {
-      h += '<div class="sep"></div><h4>人流・実測（通行量調査）</h4>';
-      h += `<span class="dot" style="background:${PC_COLOR};border-color:#fff"></span>歩行者通行量調査の地点（円の大きさ=1時間あたり歩行者数）<br>`;
-      h += `<span class="dot" style="background:${PC_OLD_COLOR};border-color:#fff"></span>古い調査(2015以前)<br>`;
-      h += `<span class="dot" style="background:${PC_COLOR};border-color:${PC_COVID_RING};border-width:2px"></span>コロナ期(2020-21)<br>`;
-      h += `<span style="color:#888;font-size:10px">実測＝自治体の通行量調査（調査年・時間帯・定義がまちまち。一部は歩行者＋自転車の合算や概位置）</span><br>`;
     }
     if (showMaizokin) {
       const m = MZ_METRICS[mzMetric];
@@ -931,11 +842,8 @@
   let ownLayer = null, rivalLayer = null;             // 既存店 / 競合店
   let ownBrand = OWN_BRAND_DEFAULT;                   // 現在の自社ブランド
   let roadLayer = null, roadLoaded = false;           // 道路の通行量（遅延ロード）
-  let flowLayer = null, flowGeo = null, flowLoaded = false; // 人流メッシュ（遅延ロード）
-  let pedLayer = null, pedIndex = null, pedTiles = {}; // 人流(通り別・推計) タイル遅延ロード
-  let pcLayer = null, pcLoaded = false;               // 人流・実測(通行量調査) 遅延ロード
+  let pedLayer = null, pedIndex = null, pedTiles = {}; // 人流(通り別・推計) タイル遅延ロード（唯一の人流レイヤー）
   let mzLayer = null, mzIndex = null, mzTiles = {}, mzPoints = null; // 埋蔵金(町丁目) 遅延ロード
-  let flowMetric = 'wd_day';                          // 人流の表示指標
   let layerControl = null;
   let choroplethMode = 'pop';   // 'pop' | 'none'
 
@@ -1000,9 +908,7 @@
       stationLayer && map.hasLayer(stationLayer),
       propLayer && map.hasLayer(propLayer),
       roadLayer && map.hasLayer(roadLayer),
-      flowLayer && map.hasLayer(flowLayer),
       pedLayer && map.hasLayer(pedLayer),
-      pcLayer && map.hasLayer(pcLayer),
       mzLayer && map.hasLayer(mzLayer),
     );
   }
@@ -1854,7 +1760,7 @@
     bgEl.textContent = '追加データ読み込み中…'; bgEl.style.display = 'block';
     try {
       // 店舗データ（並行取得）
-      const [comp, buysell, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations] = await Promise.all([
+      const [comp, buysell, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations, repcele] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/competitors_buysell.json').then(r=>r.json()),   // 出店ブランド: バイセル
         fetch('data/lifeline_stores.json').then(r=>r.json()),
@@ -1864,6 +1770,7 @@
         fetch('data/townhalls.json').then(r=>r.json()),             // 市区町村の役所
         fetch('data/ikuraya_stores.json').then(r=>r.json()),        // 買取いくらや
         fetch('data/stations_ridership.json').then(r=>r.json()),    // 駅（1日乗降客数）
+        fetch('data/competitors_repcele.json').then(r=>r.json()).catch(()=>({stores:[]})), // 競合: リプセル
       ]);
 
       // ---- 機能1: 人口メッシュ点群をセット（半径集計が使えるように）----
@@ -1879,6 +1786,9 @@
         brandData[b] = comp.filter(s => s.brand === b && s.latitude && s.longitude)
           .map(s => ({ name: s.name, pref: s.prefecture, lat: s.latitude, lng: s.longitude, address: s.address }));
       });
+      // リプセル（競合・公式店舗一覧。紫マーカーで区別）
+      brandData['リプセル'] = (repcele.stores || []).filter(s => s.lat && s.lng)
+        .map(s => ({ name: s.name, pref: s.pref, lat: s.lat, lng: s.lng, address: s.address }));
 
       // ---- 生活動線（スーパー・複合施設）#DB2777 半透明・一回り小さめ ----
       // storesペイン(zIndex650)+SVGレンダラーで人口色塗りより必ず上＆空白透過
@@ -1963,9 +1873,7 @@
 
       // ---- 道路の通行量 / 人流（重いので遅延ロード：トグルON時に初めて取得・生成）----
       roadLayer = L.layerGroup();
-      flowLayer = L.layerGroup();
-      pedLayer = L.layerGroup();   // 人流(通り別・推計)。ズーム14以上で範囲内タイルを読み込む
-      pcLayer = L.layerGroup();    // 人流・実測(通行量調査)。トグルONで地点マーカーを読み込む
+      pedLayer = L.layerGroup();   // 人流(通り別・推計)。ズーム14以上で範囲内タイルを読み込む（唯一の人流レイヤー）
       mzLayer = L.layerGroup();    // 埋蔵金(推計・町丁目)。ズーム10以上で範囲内の都県を読み込む
 
       // レイヤーコントロールに追加（既存店/競合を先頭に）
@@ -1977,9 +1885,7 @@
       layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
       layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
       layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
-      layerControl.addOverlay(flowLayer,       `<span style="color:${FLOW_PAL[4]}">▧</span> 人流（滞在人口・平日/休日昼）`);
       layerControl.addOverlay(pedLayer,        `<span style="color:${PED_PAL[4]}">━</span> 人流（通り別・推計/ズーム14+）`);
-      layerControl.addOverlay(pcLayer,         `<span style="color:${PC_COLOR}">●</span> 人流・実測（通行量調査）`);
       layerControl.addOverlay(mzLayer,         `<span style="color:${MZ_PAL[3]}">■</span> 埋蔵金（推計・町丁目/ズーム10+）`);
 
       // 遅延ロード：ONにされた時だけ重いGeoJSONを取得して描画
@@ -1994,24 +1900,9 @@
         } catch(e) { roadLoaded = false; console.error('道路データ読込失敗', e); }
         bgEl.style.display = 'none';
       }
-      async function ensureFlow() {
-        if (flowLoaded) return;
-        flowLoaded = true;
-        bgEl.textContent = '人流データを読み込み中…'; bgEl.style.display = 'block';
-        try {
-          const d = await fetch('data/people_flow_1km.geojson').then(r=>r.json());
-          flowGeo = L.geoJSON(d, { pane:'flow', renderer: flowCanvas, style: flowStyle,
-                                   onEachFeature: (f,l)=>l.bindPopup(flowPopup(f), {maxWidth:220}) });
-          flowGeo.addTo(flowLayer);
-          const sel = document.getElementById('flow-metric'); if (sel) sel.style.display = '';
-        } catch(e) { flowLoaded = false; console.error('人流データ読込失敗', e); }
-        bgEl.style.display = 'none';
-      }
       map.on('overlayadd', e => {
         if (e.layer === roadLayer) ensureRoad();
-        else if (e.layer === flowLayer) ensureFlow();
         else if (e.layer === pedLayer) updatePedflow();
-        else if (e.layer === pcLayer) ensurePedCounts();
         else if (e.layer === mzLayer) {
           const sel = document.getElementById('mz-metric'); if (sel) sel.style.display = 'block';
           ensureMzPoints(); updateMaizokin(); refreshLegend();
@@ -2035,14 +1926,6 @@
       if (mzSel) mzSel.addEventListener('change', ev => {
         mzMetric = ev.target.value;
         restyleMaizokin();
-        refreshLegend();
-      });
-
-      // 人流の指標切替（平日昼/休日昼/深夜）
-      const flowSel = document.getElementById('flow-metric');
-      if (flowSel) flowSel.addEventListener('change', ev => {
-        flowMetric = ev.target.value;
-        if (flowGeo) flowGeo.setStyle(flowStyle);
         refreshLegend();
       });
 
