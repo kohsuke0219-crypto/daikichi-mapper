@@ -87,17 +87,16 @@ INIT = r"""
 HIDE_CSS = """
 .leaflet-control-container { display:none !important; }
 #choropleth-select, #own-brand, #flow-metric, #mz-metric, #bg-status { display:none !important; }
-/* 店舗マーカーを少し大きめに（買取大吉/おたからや/なんぼや/バイセル等） */
+/* 店舗マーカーを少し大きめに（買取大吉/おたからや/なんぼや/バイセル/リプセル等） */
 .leaflet-daikichi-pane .shape-pin { transform: scale(1.5); }
 .leaflet-stores-pane circle { r: 6; }
-/* 埋蔵金レイヤーの不透明度を少し下げて道路・駅名を読めるように */
-.leaflet-maizokin-pane { opacity: 0.82; }
 """
 
 SET_LAYERS = r"""
 () => {
-  const want = { on: ['既存店','競合店','埋蔵金'],
-                 off: ['人流（滞在','人流（通り別','人流・実測','道路の通行量','生活動線','女性向け生活','新規オープン','市区町村の役所','駅（1日'] };
+  // 撮影に写すもの: 既存店・競合(リプセル含む)・人流(緑線)。埋蔵金は表示しない。
+  const want = { on: ['既存店','競合店','人流（通り別'],
+                 off: ['埋蔵金','道路の通行量','生活動線','女性向け生活','新規オープン','市区町村の役所','駅（1日'] };
   const labels = [...document.querySelectorAll('.leaflet-control-layers label')];
   const setState = (needle, on) => {
     for (const lb of labels){ if (lb.textContent.includes(needle)){
@@ -107,7 +106,7 @@ SET_LAYERS = r"""
   };
   want.on.forEach(n => setState(n, true));
   want.off.forEach(n => setState(n, false));
-  // ベースのコロプレス(女性人口)は非表示にして埋蔵金の色を見やすく
+  // ベースのコロプレス(女性人口)は非表示にして商圏図をすっきりさせる
   const sel = document.getElementById('choropleth-select');
   if (sel && sel.value !== 'none'){ sel.value='none'; sel.dispatchEvent(new Event('change',{bubbles:true})); }
   return true;
@@ -181,32 +180,27 @@ def main():
                 _id = r[0]; c = centers[_id]
                 try:
                     pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
-                    # 埋蔵金/店舗タイルの範囲追随ロードを促す
+                    # 店舗マーカー・人流(緑線)タイルの範囲追随ロードを促す（埋蔵金は表示しない）
                     pg.evaluate(SET_LAYERS)
                     try: pg.wait_for_load_state("networkidle", timeout=8000)
                     except Exception: pass
-                    # 埋蔵金レイヤーのcanvasが描画されるまで待つ（初回/一時的な読込失敗の対策）。
-                    # 描画されなければ地図を微動させて再取得を促し、最大3回リトライ。
-                    PAINTED = """() => {
-                      const pane=document.querySelector('.leaflet-maizokin-pane');
+                    # 人流(緑線)タイルのcanvasが描画されるまで待つ（描画されなければ微動で再取得、最大3回）
+                    PED_PAINTED = """() => {
+                      const pane=document.querySelector('.leaflet-pedflow-pane');
                       if(!pane) return false;
                       const c=pane.querySelector('canvas'); if(!c||!c.width||!c.height) return false;
-                      const w=Math.min(c.width,300), h=Math.min(c.height,300);
-                      const d=c.getContext('2d').getImageData(0,0,w,h).data;
+                      const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
                       for(let i=3;i<d.length;i+=4){ if(d[i]!==0) return true; }
                       return false; }"""
-                    painted = False
                     for attempt in range(3):
                         try:
-                            pg.wait_for_function(PAINTED, timeout=12000); painted = True; break
+                            pg.wait_for_function(PED_PAINTED, timeout=10000); break
                         except Exception:
-                            # 微動→moveendで updateMaizokin を再実行（失敗タイルの再取得）
                             pg.evaluate("() => { window.__map.panBy([2,2],{animate:false}); window.__map.panBy([-2,-2],{animate:false}); return null; }")
                             pg.wait_for_timeout(1500)
-                    if not painted:
-                        print(f"    [警告] {_id}: 埋蔵金レイヤーが描画されませんでした")
+                    pg.wait_for_timeout(800)
                     pg.evaluate(marker_js(c['lat'], c['lng']))
-                    pg.wait_for_timeout(1800)
+                    pg.wait_for_timeout(1200)
                     pg.screenshot(path=str(OUTDIR / f"{_id}.png"))
                     saved.append(_id)
                     print(f"  saved {_id} @ {c['lat']},{c['lng']} ({c['basis']})")
