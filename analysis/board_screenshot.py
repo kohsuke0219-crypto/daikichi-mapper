@@ -184,27 +184,14 @@ def main():
                     pg.evaluate(SET_LAYERS)
                     try: pg.wait_for_load_state("networkidle", timeout=8000)
                     except Exception: pass
-                    # 人流(緑線)タイルのcanvasが描画されるまで待つ（描画されなければ微動で再取得、最大3回）
-                    PED_PAINTED = """() => {
-                      const pane=document.querySelector('.leaflet-pedflow-pane');
-                      if(!pane) return false;
-                      const c=pane.querySelector('canvas'); if(!c||!c.width||!c.height) return false;
-                      const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
-                      for(let i=3;i<d.length;i+=4){ if(d[i]!==0) return true; }
-                      return false; }"""
-                    for attempt in range(3):
-                        try:
-                            pg.wait_for_function(PED_PAINTED, timeout=10000); break
-                        except Exception:
-                            pg.evaluate("() => { window.__map.panBy([2,2],{animate:false}); window.__map.panBy([-2,-2],{animate:false}); return null; }")
-                            pg.wait_for_timeout(1500)
-                    pg.wait_for_timeout(800)
-                    # 撮影直前に人流(緑線)の描画を最終確認。未描画なら微動で再取得して待つ。
+                    # 人流(緑線)タイルは描画完了まで数秒かかるため固定待機（早期打ち切りで未描画になるのを防ぐ）
+                    pg.wait_for_timeout(6500)
                     PP = """() => { const pane=document.querySelector('.leaflet-pedflow-pane'); if(!pane) return 0; const c=pane.querySelector('canvas'); if(!c||!c.width) return 0; const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]!==0) n++; return n; }"""
-                    for _ in range(3):
+                    # 未描画なら中心を取り直して再ロード（最大2回）
+                    for _ in range(2):
                         if pg.evaluate(PP) > 0: break
-                        pg.evaluate("() => { window.__map.panBy([3,3],{animate:false}); window.__map.panBy([-3,-3],{animate:false}); return null; }")
-                        pg.wait_for_timeout(2500)
+                        pg.evaluate(f"() => {{ window.__map.setView([{c['lat']+0.0008},{c['lng']}], {ZOOM}); window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
+                        pg.wait_for_timeout(5000)
                     if pg.evaluate(PP) <= 0:
                         print(f"    [警告] {_id}: 人流(緑線)が描画されませんでした")
                     pg.evaluate(marker_js(c['lat'], c['lng']))
