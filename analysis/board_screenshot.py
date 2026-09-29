@@ -184,16 +184,20 @@ def main():
                     pg.evaluate(SET_LAYERS)
                     try: pg.wait_for_load_state("networkidle", timeout=8000)
                     except Exception: pass
-                    # 人流(緑線)タイルは描画完了まで数秒かかるため固定待機（早期打ち切りで未描画になるのを防ぐ）
-                    pg.wait_for_timeout(6500)
+                    # 人流(緑線)タイルは描画完了まで数秒かかる。最低3秒待ってから、描画量が
+                    # 一定(>1500px)に達するまで待機（遠方でロードが遅い区域の未描画対策）。
+                    pg.wait_for_timeout(3000)
                     PP = """() => { const pane=document.querySelector('.leaflet-pedflow-pane'); if(!pane) return 0; const c=pane.querySelector('canvas'); if(!c||!c.width) return 0; const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]!==0) n++; return n; }"""
-                    # 未描画なら中心を取り直して再ロード（最大2回）
-                    for _ in range(2):
-                        if pg.evaluate(PP) > 0: break
-                        pg.evaluate(f"() => {{ window.__map.setView([{c['lat']+0.0008},{c['lng']}], {ZOOM}); window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
-                        pg.wait_for_timeout(5000)
+                    try:
+                        pg.wait_for_function("(" + PP + ")() > 1500", timeout=12000)
+                    except Exception:
+                        # 未描画なら中心を取り直して再ロードしてもう一度待つ
+                        pg.evaluate(f"() => {{ window.__map.setView([{c['lat']+0.0009},{c['lng']}], {ZOOM}); window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
+                        try: pg.wait_for_function("(" + PP + ")() > 1500", timeout=10000)
+                        except Exception: pass
+                    pg.wait_for_timeout(1200)
                     if pg.evaluate(PP) <= 0:
-                        print(f"    [警告] {_id}: 人流(緑線)が描画されませんでした")
+                        print(f"    [警告] {_id}: 人流(緑線)が描画されませんでした（人流対象道路が少ない区域の可能性）")
                     pg.evaluate(marker_js(c['lat'], c['lng']))
                     pg.wait_for_timeout(1200)
                     pg.screenshot(path=str(OUTDIR / f"{_id}.png"))
