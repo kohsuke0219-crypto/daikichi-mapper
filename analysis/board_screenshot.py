@@ -182,10 +182,19 @@ def main():
                     pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
                     # 店舗マーカー・人流(緑線)タイルの範囲追随ロードを促す（埋蔵金は表示しない）
                     pg.evaluate(SET_LAYERS)
-                    # 人流(緑線)を当該ビューで確実に再描画させる。checkbox OFF→ON では
-                    # moveend/zoomend が発火せず updatePedflow が呼ばれないため、当該地点で
-                    # ズームを一度下げて戻す（zoomend を2回発火 → updatePedflow が当該2次
-                    # メッシュタイルを取得し、target zoom で canvas を全面再描画する）。
+                    # 人流(緑線)を当該ビューで確実に再描画させる。バッチでは前物件の canvas 残像＋
+                    # pedTiles キャッシュ残りで、当該ビューのタイル未フェッチ/未描画のまま安定判定が
+                    # 通り緑線ブランクで撮れることがある。そこで (1) 人流を一度 OFF→ON する
+                    # （overlayremove で pedLayer.clearLayers()+pedTiles={} が走りキャッシュと canvas を
+                    # 全消去、overlayadd で当該ビューの updatePedflow が再フェッチ）→ (2) ズームを一度
+                    # 下げて戻す（zoomend で updatePedflow 再発火＋target zoom で canvas 全面再描画）。
+                    pg.evaluate("""() => {
+                      const labels=[...document.querySelectorAll('.leaflet-control-layers label')];
+                      for(const lb of labels){ if(lb.textContent.includes('人流（通り別')){
+                        const cb=lb.querySelector('input[type=checkbox]');
+                        if(cb){ if(cb.checked){cb.click();} cb.click(); } return; } }
+                    }""")
+                    pg.wait_for_timeout(400)
                     pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM-2}); return null; }}")
                     pg.wait_for_timeout(600)
                     pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
