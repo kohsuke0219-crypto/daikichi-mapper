@@ -182,14 +182,13 @@ def main():
                     pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
                     # 店舗マーカー・人流(緑線)タイルの範囲追随ロードを促す（埋蔵金は表示しない）
                     pg.evaluate(SET_LAYERS)
-                    # 人流(緑線)を一度OFF→ONして当該ビューで再ロード（前物件のcanvas残像で
-                    # 安定判定が早期通過し未描画で撮るのを防ぐ）。
-                    pg.evaluate("""() => {
-                      const labels=[...document.querySelectorAll('.leaflet-control-layers label')];
-                      for(const lb of labels){ if(lb.textContent.includes('人流（通り別')){
-                        const cb=lb.querySelector('input[type=checkbox]');
-                        if(cb){ if(cb.checked){cb.click();} cb.click(); } return; } }
-                    }""")
+                    # 人流(緑線)を当該ビューで確実に再描画させる。checkbox OFF→ON では
+                    # moveend/zoomend が発火せず updatePedflow が呼ばれないため、当該地点で
+                    # ズームを一度下げて戻す（zoomend を2回発火 → updatePedflow が当該2次
+                    # メッシュタイルを取得し、target zoom で canvas を全面再描画する）。
+                    pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM-2}); return null; }}")
+                    pg.wait_for_timeout(600)
+                    pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
                     try: pg.wait_for_load_state("networkidle", timeout=8000)
                     except Exception: pass
                     # 人流(緑線)は描画完了まで数秒かかる。描画pxが「増えなくなる（安定）」まで
