@@ -19,7 +19,7 @@ OUTDIR = DOCS / "maizokin"
 PARAMS = BASE / "maizokin_params.json"      # メルカリ基準値（別途記録）
 INCOME = BASE / "maizokin_income.json"       # 市区町村別 課税対象所得/納税者（任意）
 STATIONS = DOCS / "stations_ridership.json"
-PREFS = {"11": "埼玉県", "13": "東京都", "14": "神奈川県"}
+PREFS = {"11": "埼玉県", "13": "東京都", "14": "神奈川県", "23": "愛知県"}
 
 AGE_BANDS = ["0_4","5_9","10_14","15_19","20_24","25_29","30_34","35_39","40_44",
              "45_49","50_54","55_59","60_64","65_69","70_74","75_79","80_84","85plus"]
@@ -111,6 +111,7 @@ def compute_pref(pref, params, income):
             if 14101<=n<=14118: return "14100"   # 横浜市
             if 14131<=n<=14137: return "14130"   # 川崎市
             if 14151<=n<=14153: return "14150"   # 相模原市
+            if 23101<=n<=23116: return "23100"   # 名古屋市（区別非公開→市計）
             return c
         code5 = df["KEY_CODE"].str[:5]
         fac = code5.map(lambda c: (bycity.get(to_city(c))/navg) if bycity.get(to_city(c)) else 1.0).astype(float)
@@ -158,7 +159,7 @@ def cmd_build():
         idx.append({"pref":p,"name":PREFS[p],"file":f"{p}.geojson","n":len(feats),
                     "bbox":[round(b[0],4),round(b[1],4),round(b[2],4),round(b[3],4)]})
         grand[PREFS[p]] = {"町丁目":len(feats),"総額億円":round(df["total_oku"].sum(),1),"買取向け億円":round(df["buyback_oku"].sum(),1)}
-        allrows.append(df[["KEY_CODE","pref_name","city","s_name","lat","lng","total_oku","buyback_oku","buyback_per_km2","pop65","fem50"]].copy())
+        allrows.append(df[["KEY_CODE","pref_name","city","s_name","lat","lng","total_oku","buyback_oku","buyback_per_km2","total_per_km2","pop65","fem50"]].copy())
         print(f"{PREFS[p]}: {len(feats)}町丁目 総額{df['total_oku'].sum():,.0f}億円 買取向け{df['buyback_oku'].sum():,.0f}億円", flush=True)
     meta = {"note":"推計値（メルカリ\"かくれ資産\"調査×2020国勢調査の年齢別人口）。実際の保有額ではありません。",
             "params_source": params["source"], "buyback_share_pct": params["buyback_share_pct"],
