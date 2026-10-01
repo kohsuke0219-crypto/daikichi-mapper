@@ -177,7 +177,8 @@ def main():
                 _id = r[0]; c = centers[_id]
                 pg = None; b = None
                 try:
-                    b = p.chromium.launch(headless=True)
+                    b = p.chromium.launch(headless=True, args=[
+                        "--disable-gpu", "--use-gl=swiftshader", "--disable-gpu-compositing"])
                     pg = b.new_page(viewport={"width":1280,"height":960})
                     pg.add_init_script(INIT)
                     errs=[]; pg.on("pageerror", lambda e: errs.append(str(e)))
