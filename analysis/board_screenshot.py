@@ -167,48 +167,59 @@ def main():
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
             PP = """() => { const pane=document.querySelector('.leaflet-pedflow-pane'); if(!pane) return 0; const c=pane.querySelector('canvas'); if(!c||!c.width) return 0; const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]!==0) n++; return n; }"""
-            # 物件ごとに真っさらなブラウザ（＋ページ）で撮影する。1つのブラウザ/ページを使い回すと、
-            # 前物件の人流(緑線)canvas残像・pedTiles キャッシュ・GPU合成状態が残り、当該ビューが
-            # ほぼ未描画(PP≈0)のまま安定判定を誤通過して緑線ブランクで撮れることがある（OFF→ON
-            # トグルやズームnudgeでの回避は非同期競合でかえって不安定だった）。毎回ブラウザごと
-            # 起動すれば、単体実行と同じクリーンな状態で SET_LAYERS→setView→updatePedflow が走り、
-            # 確実に当該ビューの緑線が描画される。
+            # 1つのブラウザ・1ページを使い回し、物件ごとに pg.goto でページを完全リロードして撮影する。
+            # ・1ページ使い回しで setView だけ連続すると前物件の canvas 残像・pedTiles キャッシュが残り、
+            #   当該ビューが未描画(PP≈0)のまま安定判定を誤通過して緑線ブランクで撮れることがある。
+            #   → 物件ごとに goto で作り直せば map/canvas が毎回クリーンになり再発しない。
+            # ・逆に物件ごとにブラウザごと起動（launch を量産）すると、GPU コンテキストの枯渇等で
+            #   バッチ中盤から canvas が未生成/部分描画になり、やはり緑線が欠ける（12件で多発）。
+            #   → GPU コンテキストは1ページ分だけ使い回すのが安定。
+            # さらに、描画済み(PP>0)でも headless Chromium が当該フレームを GPU 合成せず screenshot に
+            # 写らない/後続で canvas がクリアされることがあるため、PP 安定確認直後に canvas バッファ
+            # (toDataURL)を取り出し、marker 描画後の screenshot に Python 側で重ねて確実に写す
+            # （pedflow は pane z-index 615 で既存店/競合/赤ピン/円(<=600)より上＝最前面なので上重ねが正）。
+            b = p.chromium.launch(headless=True)
+            pg = b.new_page(viewport={"width":1280,"height":960})
+            pg.add_init_script(INIT)
+            errs=[]; pg.on("pageerror", lambda e: errs.append(str(e)))
             for r in rows:
                 _id = r[0]; c = centers[_id]
-                pg = None; b = None
                 try:
-                    b = p.chromium.launch(headless=True, args=[
-                        "--disable-gpu", "--use-gl=swiftshader", "--disable-gpu-compositing"])
-                    pg = b.new_page(viewport={"width":1280,"height":960})
-                    pg.add_init_script(INIT)
-                    errs=[]; pg.on("pageerror", lambda e: errs.append(str(e)))
-                    pg.goto(f"http://127.0.0.1:{PORT}/", wait_until="load", timeout=60000)
-                    pg.wait_for_function("window.__map && window.__map._loaded", timeout=30000)
-                    pg.add_style_tag(content=HIDE_CSS)
-                    # レイヤー状態を整え（既存店/競合/人流ON・埋蔵金ほかOFF）当該地点へ移動。
-                    pg.evaluate(SET_LAYERS)
-                    pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
-                    # 人流(緑線)は描画完了まで数秒かかる。描画pxが「0でなく、増えなくなる(安定)」まで待つ。
-                    pg.wait_for_timeout(2500)
-                    prev = -1; stable = 0
-                    for _ in range(20):
-                        cur = pg.evaluate(PP)
-                        if cur > 0 and abs(cur - prev) <= 500:
-                            stable += 1
-                            if stable >= 2: break
-                        else:
-                            stable = 0
-                        prev = cur
-                        pg.wait_for_timeout(1000)
-                    # 人流(緑線)の canvas は、(a) 描画済み(PP>0)でも headless Chromium が当該フレームを
-                    # GPU合成せず screenshot に写らない、(b) marker 追加や後続処理で live canvas が一旦
-                    # クリアされる、という2現象がバッチで間欠的に起きる。そこで PP>0 を確認できた直後に
-                    # canvas バッファ(toDataURL)を確保しておき、marker を描いて screenshot した後に Python 側で
-                    # その緑線を重ねて確実に写す。pedflow は pane z-index 615 で既存店/競合/赤ピン/円
-                    # (いずれも <=600)より上＝最前面のため、screenshot の上へ重ねる順序が正しい。
-                    ped_png = pg.evaluate("""()=>{const p=document.querySelector('.leaflet-pedflow-pane');const c=p&&p.querySelector('canvas');if(!c||!c.width)return null;const r=c.getBoundingClientRect();return {data:c.toDataURL('image/png'), x:Math.round(r.x), y:Math.round(r.y)};}""")
-                    if not (ped_png and ped_png.get("data")):
-                        print(f"    [警告] {_id}: 人流(緑線)が描画されませんでした（人流対象道路が少ない区域の可能性）")
+                    # headless の描画は間欠的に失敗し、当該ビューの人流 canvas がほぼ空(PP≈0)で
+                    # 撮れることがある（どの物件で失敗するかは実行ごとにばらつく）。goto からの
+                    # リロードをやり直すとほぼ回復するため、PP(全描画px)が極端に低い間は最大3回
+                    # 丸ごとリトライする。しきい値 FAIL_PP は「描画完全失敗(数百px以下)」と
+                    # 「過疎地域でも実在する人流(数千px以上)」を分けるおおよその値。
+                    FAIL_PP = 4000
+                    ped_png = None; last_pp = 0
+                    for attempt in range(3):
+                        pg.goto(f"http://127.0.0.1:{PORT}/", wait_until="load", timeout=60000)
+                        pg.wait_for_function("window.__map && window.__map._loaded", timeout=30000)
+                        pg.add_style_tag(content=HIDE_CSS)
+                        # レイヤー状態を整え（既存店/競合/人流ON・埋蔵金ほかOFF）当該地点へ移動。
+                        pg.evaluate(SET_LAYERS)
+                        pg.evaluate(f"() => {{ window.__map.setView([{c['lat']},{c['lng']}], {ZOOM}); return null; }}")
+                        # 人流(緑線)は描画完了まで数秒かかる。描画pxが「0でなく、増えなくなる(安定)」まで待つ。
+                        pg.wait_for_timeout(2500)
+                        prev = -1; stable = 0
+                        for _ in range(20):
+                            cur = pg.evaluate(PP)
+                            if cur > 0 and abs(cur - prev) <= 500:
+                                stable += 1
+                                if stable >= 2: break
+                            else:
+                                stable = 0
+                            prev = cur
+                            pg.wait_for_timeout(1000)
+                        last_pp = pg.evaluate(PP)
+                        ped_png = pg.evaluate("""()=>{const p=document.querySelector('.leaflet-pedflow-pane');const c=p&&p.querySelector('canvas');if(!c||!c.width)return null;const r=c.getBoundingClientRect();return {data:c.toDataURL('image/png'), x:Math.round(r.x), y:Math.round(r.y)};}""")
+                        if last_pp >= FAIL_PP:
+                            break   # 十分描画された
+                        # 描画がほぼ空＝失敗。リトライ（最終試行なら諦めて現状で撮る）。
+                        if attempt < 2:
+                            print(f"    [再試行] {_id}: 人流描画px={last_pp} が低いためリロード再撮影 ({attempt+1}/2)")
+                    if last_pp < FAIL_PP:
+                        print(f"    [警告] {_id}: 人流(緑線)描画px={last_pp}（過疎地域または描画不可）")
                     pg.evaluate(marker_js(c['lat'], c['lng']))
                     pg.wait_for_timeout(800)
                     shot = pg.screenshot()
@@ -225,13 +236,10 @@ def main():
                 except Exception as e:
                     failed.append((_id, str(e)[:80]))
                     print(f"  [失敗] {_id}: {e}")
-                finally:
-                    if pg:
-                        try: pg.close()
-                        except Exception: pass
-                    if b:
-                        try: b.close()
-                        except Exception: pass
+            try: pg.close()
+            except Exception: pass
+            try: b.close()
+            except Exception: pass
     finally:
         httpd.shutdown()
     print(f"\n保存 {len(saved)}枚 / 失敗 {len(failed)}枚")
