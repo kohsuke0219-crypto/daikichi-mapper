@@ -70,20 +70,37 @@ def collect(pg, url):
     host = ""
     try: host = _re.sub(r"^https?://([^/]+)/.*$", r"\1", url)
     except Exception: pass
-    # <img> で十分大きいもの（naturalサイズ）
-    imgs = pg.evaluate("""()=>[...document.querySelectorAll('img')].map(i=>({src:i.currentSrc||i.src, alt:(i.alt||i.title||''), w:i.naturalWidth, h:i.naturalHeight}))""")
-    # サイト別の実写真パターンを優先
+    # <img> で十分大きいもの（naturalサイズ）。
+    # bad=True は「この物件以外」の写真を載せるコンテナ（i-tenpoの「他の物件」欄・街レポ等）配下の画像。
+    # これらを拾うと別物件の写真が混ざるため除外する（指示-20261014-1520 の指摘対応）。
+    imgs = pg.evaluate(r"""()=>{
+      const BAD=['p-propertyother','mati_img','c-blogsquare','p-propertydetail__area',
+                 'p-propertydetail__related','p-propertydetail__recommend','p-recommend',
+                 'related','recommend','osusume','other'];
+      const isBad=(el)=>{for(let d=0;d<9&&el;d++){
+        const c=((el.className&&typeof el.className==='string')?el.className:'').toLowerCase();
+        const id=(el.id||'').toLowerCase();
+        if(BAD.some(k=>c.includes(k)||id.includes(k))) return true;
+        el=el.parentElement;} return false;};
+      return [...document.querySelectorAll('img')].map(i=>({
+        src:i.currentSrc||i.src, alt:(i.alt||i.title||''),
+        w:i.naturalWidth, h:i.naturalHeight, bad:isBad(i)}));
+    }""")
+    # サイト別の実写真パターンを優先（他物件欄・街レポ配下は除外）
     for x in imgs:
+        if x.get("bad"): continue
         s = x["src"] or ""
         if "img.i-tenpo.com/loader/tenpo/get" in s and x["w"] >= 500 and x["h"] >= 350:
             add(s, x["alt"])
     if eid:
         for x in imgs:
+            if x.get("bad"): continue
             s = x["src"] or ""
             if "thumbnail.temposmart.jp" in s and f"/estates/{eid}/" in s and x["w"] >= 300:
                 add(s, x["alt"])
-    # 汎用: 大きい写真
+    # 汎用: 大きい写真（他物件欄・街レポ配下は除外）
     for x in imgs:
+        if x.get("bad"): continue
         if x["w"] >= 640 and x["h"] >= 420:
             add(x["src"], x["alt"])
     return eid, seen
