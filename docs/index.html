@@ -355,7 +355,9 @@
     + `</div>`;
 
   // 機能3: ポップアップ内「お気に入り登録」ボタン（既存候補地点をそのまま登録）
-  const favLinkHtml = (lat, lng) =>
+  // 2026-10-18 お気に入り地点は画面から外した（ボタンは出さない。共有の仕組みは物件で使うので残す）
+  const favLinkHtml = (lat, lng) => '';
+  const favLinkHtml_unused = (lat, lng) =>
     `<div style="margin-top:5px">`
     + `<button onclick="favAddFromPoint(${lat},${lng})" `
     + `style="background:${FAV_COLOR};color:#fff;border:none;border-radius:4px;`
@@ -1550,7 +1552,6 @@
       +     '<div class="tp-modes">'
       +       '<label><input type="radio" name="clickmode" value="none" checked> 通常（操作）</label>'
       +       '<label><input type="radio" name="clickmode" value="radius"> 半径集計</label>'
-      +       '<label><input type="radio" name="clickmode" value="favorite"> お気に入り追加</label>'
       +       '<label><input type="radio" name="clickmode" value="property"> 物件追加</label>'
       +       '<label><input type="radio" name="clickmode" value="ng"> NGエリア指定</label>'
       +     '</div>'
@@ -1573,9 +1574,9 @@
       + '</div>'
       // ===== セクション3: お気に入り =====
       + '<div class="tp-section">'
-      +   '<div class="tp-sec-header" data-sec="fav"><span>★ お気に入り (<span id="fav-count">0</span>)</span><span class="tp-toggle">▶</span></div>'
+      +   '<div class="tp-sec-header" data-sec="fav"><span>⚙ 共有設定（複数端末）<span id="fav-count" style="display:none">0</span></span><span class="tp-toggle">▶</span></div>'
       +   '<div class="tp-sec-body collapsed" id="sec-fav">'
-      +     '<div id="fav-list"><span style="color:#999">登録なし</span></div>'
+      +     '<div id="fav-list" style="display:none"></div>'
       +     '<div id="fav-share-status" style="font-size:10px;margin-top:5px;color:#888">⚪ この端末のみ（共有未設定）</div>'
       +     '<details style="font-size:11px;margin-top:3px">'
       +       '<summary style="cursor:pointer;color:#6D28D9">⚙ 共有設定（複数端末/複数人）</summary>'
@@ -1662,7 +1663,7 @@
   loadFavorites();
   loadProperties();
   loadNg();
-  favLayer = L.layerGroup([]).addTo(map);
+  favLayer = L.layerGroup([]);   // お気に入り地点は表示しない（2026-10-18）
   propLayer = L.layerGroup([]).addTo(map);
   renderFavorites();
   renderProperties();
@@ -1739,7 +1740,6 @@
     ).addTo(map);
 
     // 機能3: お気に入り／物件レイヤーをトグル対象に追加
-    layerControl.addOverlay(favLayer, `<span style="color:${FAV_COLOR}">★</span> お気に入り地点`);
     layerControl.addOverlay(propLayer, `🏠 物件`);
 
     // ---- コロプレス切替セレクタのイベント ----
@@ -1763,11 +1763,11 @@
       const [comp, buysell, lifeline, newOpen, popPts, womenLL, townhalls, ikuraya, stations, repcele] = await Promise.all([
         fetch('data/competitors_all.json').then(r=>r.json()),
         fetch('data/competitors_buysell.json').then(r=>r.json()),   // 出店ブランド: バイセル
-        fetch('data/lifeline_stores.json').then(r=>r.json()),
-        fetch('data/new_openings.json').then(r=>r.json()),
+        Promise.resolve([]),   // 生活動線：画面から外した（2026-10-18）
+        Promise.resolve([]),   // 新規オープン予定：画面から外した（2026-10-18）
         fetch('data/pop_points.json').then(r=>r.json()),            // 機能1: 人口メッシュ点群
-        fetch('data/women_lifeline_stores.json').then(r=>r.json()), // 機能2: 女性向け生活動線
-        fetch('data/townhalls.json').then(r=>r.json()),             // 市区町村の役所
+        Promise.resolve([]),   // 女性向け生活動線：画面から外した（2026-10-18）
+        Promise.resolve([]),   // 市区町村の役所：画面から外した（2026-10-18）
         fetch('data/ikuraya_stores.json').then(r=>r.json()),        // 買取いくらや
         fetch('data/stations_ridership.json').then(r=>r.json()),    // 駅（1日乗降客数）
         fetch('data/competitors_repcele.json').then(r=>r.json()).catch(()=>({stores:[]})), // 競合: リプセル
@@ -1879,10 +1879,6 @@
       // レイヤーコントロールに追加（既存店/競合を先頭に）
       layerControl.addOverlay(ownLayer,        `<span style="color:${ownColor(ownBrand)}">◆</span> 既存店（${ownBrand}）`);
       layerControl.addOverlay(rivalLayer,      '<span style="color:#222">●</span> 競合店（他ブランド）');
-      layerControl.addOverlay(lifelineLayer,   `<span style="color:${LIFELINE_COLOR}">■</span> 生活動線（スーパー・複合施設）`);
-      layerControl.addOverlay(womenLifelineLayer, `<span style="color:${WOMEN_LIFELINE_COLOR}">▲</span> 女性向け生活動線施設（カーブス/LAVA/カルド/ユザワヤ/トーカイ）`);
-      layerControl.addOverlay(newOpeningLayer, `<span style="color:${NEWOPEN_COLOR}">●</span> 新規オープン予定`);
-      layerControl.addOverlay(townhallLayer,   `🏛 市区町村の役所`);
       layerControl.addOverlay(stationLayer,    `🚉 駅（1日乗降客数）`);
       layerControl.addOverlay(roadLayer,       `<span style="color:${ROAD_PAL[4]}">━</span> 道路の通行量（自動車）`);
       layerControl.addOverlay(pedLayer,        `<span style="color:${PED_PAL[4]}">━</span> 人流（通り別・推計/ズーム14+）`);
