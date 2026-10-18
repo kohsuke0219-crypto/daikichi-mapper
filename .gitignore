@@ -44,11 +44,29 @@ Thumbs.db
 htmlcov/
 
 # フェーズ10 中間データ（大容量・再生成可能）
-analysis/geo_data/       # 生ZIPファイル（MLIT ダウンロード）
+# 生データ（MLIT 等のダウンロード）。※geojson は地図の素材として保存するので対象外
+analysis/geo_data/*.zip
+analysis/geo_data/*.parquet
+analysis/geo_data/*.osm.pbf
 analysis/land_use_compact.csv
 analysis/residential_ratio.csv
 analysis/effective_distance.csv
 analysis/score_v2.csv
+analysis/score_v3.csv
+
+# 調査用の使い捨てスクリプト・確認用の画像（先頭が「_」）
+# ※残したいものは git add -f で追加する
+analysis/_*.py
+analysis/_*.png
+population/_*.py
+
+# PC だけの設定・ログ
+*.log
+logs/
+board_folder.txt
+
+# population/ の geojson はデータキャッシュ
+population/*.geojson
 
 analysis/geo_data/roads_*.json
 analysis/geo_data/stations_*.json
