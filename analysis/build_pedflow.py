@@ -22,6 +22,8 @@ STATIONS = DOCS / "stations_ridership.json"
 
 BBOX = (138.60, 35.00, 140.35, 36.30)   # 東京・神奈川・埼玉を包む矩形
 TARGET_PREF = {"東京都", "神奈川県", "埼玉県", "神奈川"}
+# compute_components の最終絞り込みで使う県名（正規化後）。--pref で上書き可。
+PREF_FILTER = {"東京都", "神奈川県", "埼玉県"}
 # 歩行者が通る道の格の重み（motorway/trunk除外。容量対策で residential/footway/unclassified も除外）
 CLASS_W = {
     "primary": 1.0, "primary_link": 0.7, "secondary": 0.9, "secondary_link": 0.6,
@@ -43,7 +45,7 @@ def load_calib():
     return a, b, c
 
 
-def stage_a():
+def stage_a_lines():
     cls = "','".join(CLASS_W.keys())
     print("[A] lines 読込(bbox+where)…", flush=True)
     lines = gpd.read_file(PBF, layer="lines", bbox=BBOX,
@@ -51,12 +53,21 @@ def stage_a():
     lines = lines[["osm_id", "name", "highway", "geometry"]]
     lines.to_parquet(ROADS_PQ)
     print(f"    roads: {len(lines)}  -> {ROADS_PQ.name}", flush=True)
+
+
+def stage_a_points():
     print("[A] points 読込(bbox+where)…", flush=True)
     pts = gpd.read_file(PBF, layer="points", bbox=BBOX,
                         where="other_tags LIKE '%\"shop\"=>%' OR other_tags LIKE '%\"amenity\"=>%'")
     pts = pts[["osm_id", "other_tags", "geometry"]].copy()
     pts.to_parquet(POIS_PQ)
     print(f"    pois: {len(pts)}  -> {POIS_PQ.name}", flush=True)
+
+
+def stage_a():
+    # 重い pbf 読込を lines→points の順に実行（分割実行は a_lines / a_points）
+    stage_a_lines()
+    stage_a_points()
     print("[A] 完了", flush=True)
 
 
@@ -91,9 +102,9 @@ def compute_components():
     j = j[~j.index.duplicated(keep="first")]
     prefn = {"神奈川": "神奈川県"}
     j["pref"] = j["pref"].map(lambda x: prefn.get(x, x))
-    roads = roads.loc[j["pref"].isin({"東京都", "神奈川県", "埼玉県"}).values].copy()
+    roads = roads.loc[j["pref"].isin(PREF_FILTER).values].copy()
     roads["lng"] = mid.loc[roads.index].x; roads["lat"] = mid.loc[roads.index].y
-    print(f"    3府県内 道路区間: {len(roads)}", flush=True)
+    print(f"    対象県内 道路区間: {len(roads)}  (対象県={sorted(PREF_FILTER)})", flush=True)
 
     roads_m = roads.to_crs(METRIC)
     rmx = roads_m.geometry.interpolate(0.5, normalized=True)
@@ -140,7 +151,7 @@ def apply_idx(roads, A, B, C):
     return roads
 
 
-def stage_b():
+def stage_b(append=False):
     roads = compute_components()
     A, B, C = load_calib()
     print(f"    重み係数 (A,B,C)=({A},{B},{C})", flush=True)
@@ -149,7 +160,20 @@ def stage_b():
 
     # 2次メッシュ別 geojson 出力（座標5桁・簡略化）
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    for f in OUTDIR.glob("*.geojson"): f.unlink()
+    existing_index = []
+    if append:
+        # 既存タイルは消さない。index.json を読み、生成する県のタイル番号が既存と衝突したら止める。
+        idxp = OUTDIR / "index.json"
+        if idxp.exists():
+            existing_index = json.loads(idxp.read_text(encoding="utf-8")).get("tiles", [])
+        existing_codes = {t["code"] for t in existing_index} | {f.stem for f in OUTDIR.glob("*.geojson")}
+        new_codes = {str(m6v) for m6v in roads["m6"].unique()}
+        clash = sorted(existing_codes & new_codes)
+        if clash:
+            print(f"[B][追加] 既存タイルと番号が衝突: {clash} → 何も書かずに中止", flush=True)
+            sys.exit(2)
+    else:
+        for f in OUTDIR.glob("*.geojson"): f.unlink()
     roads = roads.to_crs(4326)
     roads["geometry"] = roads.geometry.simplify(0.00003, preserve_topology=False)
     tiles = []
@@ -171,10 +195,15 @@ def stage_b():
         # タイルbbox
         b = grp.total_bounds
         tiles.append({"code": m6v, "bbox": [round(b[0],4), round(b[1],4), round(b[2],4), round(b[3],4)], "n": len(feats)})
-    (OUTDIR / "index.json").write_text(json.dumps({"tiles": tiles}, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+    out_tiles = (existing_index + tiles) if append else tiles
+    (OUTDIR / "index.json").write_text(json.dumps({"tiles": out_tiles}, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     tot = sum(t["n"] for t in tiles)
     sz = sum(f.stat().st_size for f in OUTDIR.glob("*.geojson"))
-    print(f"[B] タイル{len(tiles)}枚 / 区間{tot} / 合計{sz//1024}KB", flush=True)
+    if append:
+        new_sz = sum((OUTDIR / f"{t['code']}.geojson").stat().st_size for t in tiles)
+        print(f"[B][追加] 新規タイル{len(tiles)}枚 / 区間{tot} / 新規分{new_sz//1024}KB / index合計{len(out_tiles)}枚 / 全体{sz//1024}KB", flush=True)
+    else:
+        print(f"[B] タイル{len(tiles)}枚 / 区間{tot} / 合計{sz//1024}KB", flush=True)
 
 
 def _idx_full(roads, A, B, C):
@@ -247,8 +276,34 @@ def calib():
         print(f"[calib] 有意な改善なし(+0.05未満)→係数は既定(1.0,0.5,1.0)のまま", flush=True)
 
 
+def _parse_overrides(argv):
+    """--pbf/--bbox/--pref/--roads/--pois を読み、該当グローバルを上書きする。
+    追加モードは --append。引数なしなら従来どおり（上書きなし）。"""
+    global PBF, BBOX, TARGET_PREF, PREF_FILTER, ROADS_PQ, POIS_PQ
+    append = "--append" in argv
+    def val(flag):
+        return argv[argv.index(flag) + 1] if flag in argv and argv.index(flag) + 1 < len(argv) else None
+    v = val("--pbf")
+    if v: PBF = Path(v)
+    v = val("--bbox")
+    if v:
+        BBOX = tuple(float(x) for x in v.split(","))
+    v = val("--pref")
+    if v:
+        prefs = {p for p in v.split(",") if p}
+        TARGET_PREF = set(prefs); PREF_FILTER = set(prefs)
+    v = val("--roads")
+    if v: ROADS_PQ = Path(v)
+    v = val("--pois")
+    if v: POIS_PQ = Path(v)
+    return append
+
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "ab"
+    append = _parse_overrides(sys.argv[2:]) if len(sys.argv) > 2 else False
     if mode in ("a", "ab"): stage_a()
-    if mode in ("b", "ab"): stage_b()
+    if mode == "a_lines": stage_a_lines()
+    if mode == "a_points": stage_a_points()
+    if mode in ("b", "ab"): stage_b(append=append)
     if mode == "calib": calib()
